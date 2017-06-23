@@ -46,7 +46,6 @@ class Devastate extends Command {
         const removals = this.calculateRemovals(state, devastation.region);
         _.each(
             removals, (removalData, factionId) => {
-                const player = state.playersByFaction[factionId];
                 RemovePieces.perform(
                     state, {
                         region: devastation.region,

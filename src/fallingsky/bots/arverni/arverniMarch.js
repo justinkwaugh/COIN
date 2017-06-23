@@ -148,9 +148,6 @@ class ArverniMarch {
             return false;
         }
 
-        let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaSpreadMarch(marches) && !this.wasBritanniaControlMarch(leaderMarch);
-        let didSpecial = canDoSpecial && ArverniDevastate.devastate(state, modifiers);// || ArverniEntreat.entreat(state, new CommandModifier());
-
         const alreadyMarchedById = {};
         if(this.doSpreadMarches(state, modifiers, spreadMarches, alreadyMarchedById)) {
             effective = true;
@@ -164,10 +161,8 @@ class ArverniMarch {
             return false;
         }
 
-        if (canDoSpecial && !didSpecial) {
-            didSpecial = ArverniDevastate.devastate(state, modifiers);// || ArverniEntreat.entreat(state, new CommandModifier());
-        }
-
+        let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaSpreadMarch(marches) && !this.wasBritanniaControlMarch(leaderMarch);
+        const didSpecial = canDoSpecial && ArverniDevastate.devastate(state, modifiers);// || ArverniEntreat.entreat(state, new CommandModifier());
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 
@@ -230,7 +225,7 @@ class ArverniMarch {
             state, {
                 sourceRegion: march.region,
                 destRegionId: march.controlDestination.id,
-                pieces: _(warbands).take(march.numControlWarbands).concat([leader]).value()
+                pieces: _(warbands).take(march.numControlWarbands - march.harassmentLosses).concat([leader]).value()
             });
         return true;
 
@@ -305,6 +300,7 @@ class ArverniMarch {
         }
 
         // Consider the results of the spreading marches
+        const spreadDestinationsById = _(spreadMarches).map('spreadDestinations').flatten().keyBy(_.identity).value();
         const alreadyMarchedWarbands = (leaderMarch.numSpreadWarbands || 0);
         const leaderRegionControlMargin = leaderMarch.region.controllingMarginByFaction()[FactionIDs.ARVERNI] - alreadyMarchedWarbands;
         const availableWarbands = leaderMarch.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length - (alreadyMarchedWarbands + 1); // Leave one behind
@@ -325,7 +321,8 @@ class ArverniMarch {
             (destination) => {
                 // See if we can take control from Romans or Aedui even after harassment
                 const numAfterHarassment = numMarching - destinationPathsById[destination.id].bestPath.harassmentLosses;
-                const canTakeControl = destination.controllingMarginByFaction()[FactionIDs.ARVERNI] + numAfterHarassment > 0;
+                const spreadWarbands = spreadDestinationsById[destination.id] ? 1 : 0;
+                const canTakeControl = destination.controllingMarginByFaction()[FactionIDs.ARVERNI] + spreadWarbands + numAfterHarassment > 0;
                 const isEnemyControlled = destination.controllingFactionId() === FactionIDs.AEDUI || destination.controllingFactionId() === FactionIDs.ROMANS;
                 return canTakeControl && isEnemyControlled;
             }).map(
@@ -333,7 +330,7 @@ class ArverniMarch {
                 // Now figure out the priority based on harassment and adjacent regions with arverni present
                 const numAdjacentRegionsWithArverni = _.reduce(
                     destination.adjacent, (sum, adjacent) => {
-                        if (adjacent.getPiecesForFaction(FactionIDs.ARVERNI).length > 0) {
+                        if (adjacent.getPiecesForFaction(FactionIDs.ARVERNI).length > 0 || spreadDestinationsById[adjacent.id]) {
                             return sum + 1;
                         }
                         return sum;

@@ -1,7 +1,10 @@
 import _ from '../../lib/lodash';
 import Command from './command';
 import FactionIDs from '../config/factionIds';
+import RegionIDs from '../config/regionIds';
+import RegionGroups from '../config/regionGroups';
 import MarchResults from './marchResults';
+import Map from '../util/map';
 
 class March extends Command {
     static doTest(state, args) {
@@ -11,7 +14,7 @@ class March extends Command {
 
     static generateResultsForRegions(state, faction, regions) {
         return _(regions).map(
-            function (region) {
+            (region) => {
                 const isArverni = faction.id === FactionIDs.ARVERNI;
                 const isRomans = faction.id === FactionIDs.ROMANS;
                 const isGermanic = faction.id === FactionIDs.GERMANIC_TRIBES;
@@ -37,18 +40,52 @@ class March extends Command {
                         });
 
                 if (hasVercingetorix || (isRomans && !hasCaesar)) {
-                    secondRegions = _(firstRegions).map(adjacentRegion => adjacentRegion.adjacent).flatten().uniq().value();
+                    secondRegions = _(firstRegions).map(
+                        adjacentRegion => adjacentRegion.adjacent).flatten().uniq().value();
                 }
 
                 if (hasCaesar) {
-                    thirdRegions = _(secondRegions).map(adjacentRegion => adjacentRegion.adjacent).flatten().uniq().value();
+                    thirdRegions = _(secondRegions).map(
+                        adjacentRegion => adjacentRegion.adjacent).flatten().uniq().value();
                 }
 
                 let destinations = _.concat(firstRegions, secondRegions, thirdRegions);
-                destinations = _(destinations).reject(destination=>destination.id === region.id).filter(destination => destination.inPlay()).uniq().value();
+                destinations = _(destinations).reject(destination => destination.id === region.id).filter(
+                    destination => destination.inPlay()).uniq().value();
 
-                // Need to handle rhenus / devastated / britannia
-                // (probably just need to find full set of paths from origin to each destination and then disqualify)
+                const marchLimit = hasCaesar ? 3 : hasVercingetorix ? 2 : 1;
+                destinations = _(destinations).filter((destination) => {
+                    const paths = _(Map.findPathsToRegion(state, region.id, destination.id, marchLimit)).reject(
+                        (path) => {
+                            if (path.length < 3) {
+                                return false;
+                            }
+
+                            // Britannia
+                            let subPath = path.slice(0, path.length - 1);
+                            if (_.indexOf(subPath, RegionIDs.BRITANNIA) >= 0) {
+                                return true;
+                            }
+
+                            // Devastated
+                            subPath = path.slice(1, path.length - 1);
+                            if (_.find(subPath, id => state.regionsById[id].devastated())) {
+                                return true;
+                            }
+
+                            // Rhenus
+                            if (_.find(_.range(1, path.length - 1), (index) => {
+                                    const from = path[index - 1];
+                                    const to = path[index];
+                                    return this.crossesRhenus(state, from, to);
+
+                                })) {
+                                return true;
+                            }
+
+                        }).value();
+                    return paths.length > 0;
+                }).value();
 
                 let cost = region.devastated() ? 2 : 1;
                 if (isRomans) {
@@ -70,6 +107,16 @@ class March extends Command {
                     });
             }).compact().value();
     }
+
+
+    static crossesRhenus(state, fromId, toId) {
+        const fromRegion = state.regionsById[fromId];
+        const toRegion = state.regionsById[toId];
+
+        return (fromRegion.group === RegionGroups.GERMANIA || toRegion.group === RegionGroups.GERMANIA) &&
+           !(fromRegion.group === RegionGroups.GERMANIA && toRegion.group === RegionGroups.GERMANIA);
+    }
+
 }
 
 export default March;

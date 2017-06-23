@@ -38,6 +38,12 @@ class CommandModifiers {
     getCommandSpecificModifier( modifierId ) {
         return this.commandSpecific[modifierId];
     }
+
+    asTest() {
+        const testVersion = _.cloneDeep(this);
+        testVersion.test = true;
+        return testVersion;
+    }
 }
 
 export default CommandModifiers;

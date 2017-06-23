@@ -7,6 +7,9 @@ class ArverniDevastate {
         let effective = false;
 
         const effectiveDevastations = this.getEffectiveDevastations(state, modifiers);
+        if(modifiers.test) {
+            return effectiveDevastations;
+        }
         _.each(effectiveDevastations, (devastation) => {
             Devastate.execute(state, {
                 devastation
