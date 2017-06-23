@@ -3,7 +3,7 @@ import FactionIDs from '../../config/factionIds';
 import Rally from '../../commands/rally';
 import ArverniMarch from './arverniMarch';
 import ArverniDevastate from './arverniDevastate';
-// import BelgaeEnlist from './belgaeEnlist';
+import ArverniEntreat from './arverniEntreat';
 import FactionActions from '../../../common/factionActions';
 
 
@@ -21,7 +21,7 @@ class ArverniRally {
         }
 
         Rally.execute(state, {faction: state.arverni, regionResults: executableRallyRegions});
-        const usedSpecialAbility = modifiers.canDoSpecial() && ArverniDevastate.devastate(state, modifiers);// || BelgaeEnlist.enlist(state, modifiers));
+        const usedSpecialAbility = modifiers.canDoSpecial() && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

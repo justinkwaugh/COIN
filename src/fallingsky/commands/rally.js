@@ -40,7 +40,7 @@ class Rally extends Command {
                 let warbandsAdded = false;
 
                 if (regionResult.addCitadel && faction.availableCitadels().length > 0) {
-                    const tribeForCity = _(regionResult.region.alliedCitiesForFaction()).shuffle.first();
+                    const tribeForCity = regionResult.region.getAlliedCityForFaction();
                     PlaceCitadel.perform(state, {faction: faction, region: regionResult.region, tribe: tribeForCity});
                     citadelAdded = true;
                 }
@@ -99,7 +99,7 @@ class Rally extends Command {
                 let citadelAdded = false;
                 let numWarbandsAdded = 0;
 
-                const hasAllyInCity = region.alliedCitiesForFaction(faction.id).length > 0;
+                const hasAllyInCity = region.getAlliedCityForFaction(faction.id);
                 if (hasAllyInCity && faction.availableCitadels().length > 0) {
                     citadelAdded = true;
                 }

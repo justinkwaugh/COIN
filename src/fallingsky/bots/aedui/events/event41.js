@@ -49,7 +49,7 @@ class Event41 {
         if(aeduiFaction.availableCitadels().length > 0) {
             const alliesToUpgrade = _(avericumAdjacentById).map(
                 function (region) {
-                    return region.alliedCitiesForFaction(FactionIDs.AEDUI);
+                    return region.getAlliedCityForFaction(FactionIDs.AEDUI);
                 }).flatten().compact().value();
 
             if(alliesToUpgrade.length > 0) {

@@ -3,7 +3,7 @@ import FactionIDs from '../../config/factionIds';
 import RevealPieces from '../../actions/revealPieces';
 import Raid from '../../commands/raid';
 import ArverniDevastate from './arverniDevastate';
-// import BelgaeEnlist from './belgaeEnlist';
+import ArverniEntreat from './arverniEntreat';
 import {CapabilityIDs} from '../../config/capabilities';
 import FactionActions from '../../../common/factionActions';
 import EnemyFactionPriority from './enemyFactionPriority';
@@ -42,7 +42,7 @@ class ArverniRaid {
                     });
             });
 
-        const usedSpecialAbility = modifiers.canDoSpecial() && ArverniDevastate.devastate(state, modifiers);// || BelgaeEnlist.enlist(state, modifiers));
+        const usedSpecialAbility = modifiers.canDoSpecial() && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

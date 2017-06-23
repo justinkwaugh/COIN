@@ -4,6 +4,7 @@ import RegionGroups from '../../config/regionGroups';
 import RegionIDs from '../../config/regionIds';
 import March from '../../commands/march';
 import ArverniDevastate from './arverniDevastate';
+import ArverniEntreat from './arverniEntreat';
 import MovePieces from '../../actions/movePieces';
 import RemovePieces from '../../actions/removePieces';
 import HidePieces from '../../actions/hidePieces';
@@ -49,7 +50,7 @@ class ArverniMarch {
 
         const marches = _.concat([leaderMarch], remainingMarches);
         let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaMarch(marches);
-        let didSpecial = canDoSpecial && ArverniDevastate.devastate(state, modifiers);// || ArverniEntreat.entreat(state, new CommandModifier());
+        let didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
 
         console.log('*** Arverni Marching to Escape Threat ***');
         _.each(
@@ -82,7 +83,7 @@ class ArverniMarch {
         }
 
         if (canDoSpecial && !didSpecial) {
-            didSpecial = ArverniDevastate.devastate(state, modifiers);// || ArverniEntreat.entreat(state, new CommandModifier());
+            didSpecial = ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers);
         }
 
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
@@ -162,7 +163,7 @@ class ArverniMarch {
         }
 
         let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaSpreadMarch(marches) && !this.wasBritanniaControlMarch(leaderMarch);
-        const didSpecial = canDoSpecial && ArverniDevastate.devastate(state, modifiers);// || ArverniEntreat.entreat(state, new CommandModifier());
+        const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

@@ -141,10 +141,10 @@ class FallingSkyRegion extends Region {
         }).value();
     }
 
-    alliedCitiesForFaction(factionId) {
-        return _(this.tribes).filter(function(tribe) {
-            return tribe.isAllied() && tribe.isCity && tribe.alliedFactionId === factionId;
-        }).value();
+    getAlliedCityForFaction(factionId) {
+        return _(this.tribes).find(function(tribe) {
+            return tribe.isAllied() && tribe.isCity && tribe.alliedFactionId() === factionId;
+        });
     }
 
     numAlliesAndCitadelsForFaction(factionId) {
@@ -167,6 +167,10 @@ class FallingSkyRegion extends Region {
 
     getWarbandsOrAuxiliaForFaction(factionId) {
         return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia'));
+    }
+
+    getAlliesForFaction(factionId) {
+        return _.filter(this.piecesByFaction()[factionId], { type : 'alliedtribe' });
     }
 
     getHiddenWarbandsOrAuxiliaForFaction(factionId) {

@@ -3,6 +3,7 @@ import FactionIDs from '../../config/factionIds';
 import Battle from '../../commands/battle';
 import EnemyFactionPriority from './enemyFactionPriority';
 import ArverniDevastate from './arverniDevastate';
+import ArverniEntreat from './arverniEntreat';
 import ArverniMarch from './arverniMarch';
 import CommandModifier from '../../commands/commandModifiers';
 import FactionActions from '../../../common/factionActions';
@@ -31,7 +32,7 @@ class ArverniBattle {
         const willAmbush = modifiers.canDoSpecial() && this.needAmbush(prioritizedBattles[0]);
         let didSpecial = willAmbush;
         if (!didSpecial && modifiers.canDoSpecial()) {
-            didSpecial = ArverniDevastate.devastate(state, modifiers);// || ArverniEntreat.entreat(state, new CommandModifier());
+            didSpecial = ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers);
         }
 
         _.each(
