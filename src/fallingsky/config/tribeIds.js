@@ -1,0 +1,35 @@
+const TribeIDs = {
+    AEDUI: 'Aedui',
+    ARVERNI: 'Arverni',
+    ATREBATES: 'Atrebates',
+    AULERCI: 'Aulerci',
+    BELLOVACI: 'Bellovaci',
+    BITURIGES: 'Bituriges',
+    CADURCI: 'Cadurci',
+    CARNUTES: 'Carnutes',
+    CATUVELLAUNI: 'Catuvellauni',
+    EBURONES: 'Eburones',
+    HELVETII: 'Helvetii',
+    HELVII: 'Helvii',
+    LINGONES: 'Lingones',
+    MANDUBII: 'Mandubii',
+    MENAPII: 'Menapii',
+    MORINI: 'Morini',
+    NAMNETES: 'Namnetes',
+    NERVII: 'Nervii',
+    PICTONES: 'Pictones',
+    REMI: 'Remi',
+    SANTONES: 'Santones',
+    SENONES: 'Senones',
+    SEQUANI: 'Sequani',
+    SUEBI_NORTH: 'SuebiNorth',
+    SUEBI_SOUTH: 'SuebiSouth',
+    SUGAMBRI: 'Sugambri',
+    TREVERI: 'Treveri',
+    UBII: 'Ubii',
+    VENETI: 'Veneti',
+    VOLCAE: 'Volcae'
+};
+
+
+export default TribeIDs;
