@@ -24,19 +24,19 @@ class Event26 {
                 });
 
             if (enemyPiece) {
-                RemovePieces.perform(
+                RemovePieces.execute(
                     state, {
                         factionId: enemyPiece.factionId,
-                        region: arverniRegion,
+                        regionId: arverniRegion.id,
                         pieces: [enemyPiece]
                     });
             }
 
             if (aedui.hasAvailableCitadel()) {
-                PlaceCitadel.perform(state, {faction: aedui, region: arverniRegion, tribe: gergovia}, true);
+                PlaceCitadel.execute(state, {factionId: aedui.id, regionId: arverniRegion.id, tribeId: gergovia.id}, true);
             }
             else if (aedui.hasAvailableAlliedTribe()) {
-                PlaceAlliedTribe.run(state, {factionId: aedui.id, regionId: arverniRegion.id, tribeId: gergovia.id}, true);
+                PlaceAlliedTribe.execute(state, {factionId: aedui.id, regionId: arverniRegion.id, tribeId: gergovia.id}, true);
             }
             return true;
         }

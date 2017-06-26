@@ -23,7 +23,7 @@ class GermanicRaid {
                 }, 0);
 
             const resourcesGained = _.min([2, numHiddenWarbands, stealableResources]);
-            RevealPieces.perform(state, {faction: germanicFaction, region: raidResult.region, count: resourcesGained});
+            RevealPieces.execute(state, {factionId: germanicFaction.id, regionId: raidResult.region.id, count: resourcesGained});
 
             let numResourcesToSteal = resourcesGained;
 

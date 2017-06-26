@@ -90,7 +90,7 @@ class AeduiSuborn {
                 tribe = _.sample(subdued);
             }
 
-            PlaceAlliedTribe.run(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, tribeId: tribe.id});
+            PlaceAlliedTribe.execute(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, tribeId: tribe.id});
             aeduiFaction.removeResources(2);
             piecesHandled += 1;
         }
@@ -111,11 +111,15 @@ class AeduiSuborn {
             if (!alliedTribe) {
                 alliedTribe = _.sample(alliedTribes);
             }
-
-            RemovePieces.perform(
+            console.log('Suborn allied tribe');
+            subornResult.region.logState();
+            if(!alliedTribe) {
+                debugger;
+            }
+            RemovePieces.execute(
                 state, {
                     factionId: alliedTribe.factionId,
-                    region: subornResult.region,
+                    regionId: subornResult.region.id,
                     pieces: [alliedTribe]
                 });
             if(!modifiers.free) {
@@ -126,7 +130,7 @@ class AeduiSuborn {
 
         const numWarbandsToAdd = _.min([(modifiers.free ? 999 : aeduiFaction.resources()), aeduiFaction.availableWarbands().length, 3 - piecesHandled]);
         if (numWarbandsToAdd) {
-            PlaceWarbands.perform(state, {faction: aeduiFaction, region: subornResult.region, count: numWarbandsToAdd});
+            PlaceWarbands.execute(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, count: numWarbandsToAdd});
             if(!modifiers.free) {
                 aeduiFaction.removeResources(numWarbandsToAdd);
             }
@@ -159,10 +163,10 @@ class AeduiSuborn {
 
                     const numPiecesToRemove = _.min([(modifiers.free ? 999 : aeduiFaction.resources()), pieces.length, 3 - piecesHandled]);
                     if (numPiecesToRemove) {
-                        RemovePieces.perform(
+                        RemovePieces.execute(
                             state, {
                                 factionId: factionId,
-                                region: subornResult.region,
+                                regionId: subornResult.region.id,
                                 pieces: _.take(pieces, numPiecesToRemove)
                             });
                         if(!modifiers.free) {

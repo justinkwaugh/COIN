@@ -27,14 +27,15 @@ describe("Hide Pieces", function () {
 
     it('hides all pieces in a region', function () {
         const aedui = state.regionsById[RegionIDs.AEDUI];
-        PlaceWarbands.run(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI, count: 5});
-        RevealPieces.run(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI});
+        PlaceWarbands.execute(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI, count: 5});
+        RevealPieces.execute(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI});
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);
-        HidePieces.run(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI});
+        HidePieces.execute(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI});
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(5);
         state.history.undo(state);
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);
     });
+
 
 
 });

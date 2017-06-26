@@ -35,7 +35,7 @@ class GermanicRally {
 
         while (germanicFaction.availableAlliedTribes() && allyRallies.length > 0) {
             const nextRally = allyRallies.shift();
-            PlaceAlliedTribe.run(
+            PlaceAlliedTribe.execute(
                 state, {
                     factionId: germanicFaction.id,
                     regionId: nextRally.region.id,
@@ -64,10 +64,10 @@ class GermanicRally {
         const germanicFaction = state.factionsById[FactionIDs.GERMANIC_TRIBES];
         _.each(
             warbandResults, function (result) {
-                PlaceWarbands.perform(
+                PlaceWarbands.execute(
                     state, {
-                        faction: germanicFaction,
-                        region: result.region,
+                        factionId: germanicFaction.id,
+                        regionId: result.region.id,
                         count: Math.min(result.canAddNumWarbands, germanicFaction.availableWarbands().length)
                     });
 

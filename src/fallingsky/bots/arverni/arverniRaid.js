@@ -20,10 +20,10 @@ class ArverniRaid {
             effectiveRaidRegions, function (raidResult) {
                 console.log('*** ' + state.arverni.name + ' Raiding in region ' + raidResult.region.name);
 
-                RevealPieces.perform(
+                RevealPieces.execute(
                     state, {
-                        faction: state.arverni,
-                        region: raidResult.region,
+                        factionId: state.arverni.id,
+                        regionId: raidResult.region.id,
                         count: raidResult.resourcesGained
                     });
                 state.arverni.addResources(raidResult.resourcesGained);

@@ -49,15 +49,15 @@ class Entreat extends Command {
 
         if(entreat.allyToReplace) {
             const tribeId = entreat.allyToReplace.tribeId;
-            RemovePieces.perform(
+            RemovePieces.execute(
                     state, {
-                        region: entreat.region,
+                        regionId: entreat.region.id,
                         factionId: entreat.allyToReplace.factionId,
                         pieces: [entreat.allyToReplace]
                     });
 
             if(arverni.availableAlliedTribes().length > 0) {
-                PlaceAlliedTribe.run(
+                PlaceAlliedTribe.execute(
                     state, {
                         regionId: entreat.region.id,
                         factionId: arverni.id,
@@ -67,18 +67,18 @@ class Entreat extends Command {
         }
 
         if(entreat.mobileToReplace) {
-            RemovePieces.perform(
+            RemovePieces.execute(
                     state, {
-                        region: entreat.region,
+                        regionId: entreat.region.id,
                         factionId: entreat.mobileToReplace.factionId,
                         pieces: [entreat.mobileToReplace]
                     });
 
             if(arverni.availableWarbands().length > 0) {
-                PlaceWarbands.perform(
+                PlaceWarbands.execute(
                     state, {
-                        region: entreat.region,
-                        faction: arverni,
+                        regionId: entreat.region.id,
+                        factionId: arverni.id,
                         count: 1
                     });
             }

@@ -31,7 +31,7 @@ class Bot extends Player {
                     numPieces: pieces.length
                 }
             }).sortBy('numPieces').groupBy('numPieces').map(_.shuffle).flatten().map('region').reverse().first();
-            PlaceLeader.perform(state, { faction, region });
+            PlaceLeader.execute(state, { factionId: faction.id, regionId: region.id });
         }
     }
 
@@ -251,15 +251,17 @@ class Bot extends Player {
                 }
             });
 
-        attackResults.removed = pieces.removed;
+        attackResults.removed = pieces.removed || [];
         attackResults.remaining.push.apply(attackResults.remaining, pieces.saved);
 
-        RemovePieces.perform(
-            state, {
-                region: region,
-                factionId: this.factionId,
-                pieces: pieces.removed
-            });
+        if(attackResults.removed.length > 0) {
+            RemovePieces.execute(
+                state, {
+                    regionId: region.id,
+                    factionId: this.factionId,
+                    pieces: pieces.removed
+                });
+        }
 
         return allowRolls;
     }
@@ -292,7 +294,7 @@ class Bot extends Player {
             const sourceFriendlyPieces = region.piecesByFaction()[this.factionId];
             const targetFriendlyPieces = retreatRegion.piecesByFaction()[this.factionId];
             if (targetFriendlyPieces.length > sourceFriendlyPieces.length) {
-                MovePieces.run(
+                MovePieces.execute(
                     state, {
                         sourceRegionId: region.id,
                         destRegionId: retreatRegion.id,
@@ -309,7 +311,7 @@ class Bot extends Player {
 
         const targetRegion = this.findRetreatRegion(state, region, agreeingFactionId);
         if (targetRegion) {
-            MovePieces.run(
+            MovePieces.execute(
                 state, {
                     sourceRegionId: region.id,
                     destRegionId: targetRegion.id,
@@ -317,9 +319,9 @@ class Bot extends Player {
                 });
         }
         else {
-            RemovePieces.perform(
+            RemovePieces.execute(
                 state, {
-                    region: region,
+                    regionId: region.id,
                     factionId: this.factionId,
                     pieces: pieces
                 });

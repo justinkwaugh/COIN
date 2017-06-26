@@ -28,7 +28,7 @@ describe("Place Allied Tribe", function () {
         const aeduiRegion = state.regionsById[RegionIDs.AEDUI];
         const aeduiTribe = state.tribesById[TribeIDs.AEDUI];
         expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(0);
-        PlaceAlliedTribe.run(state, {
+        PlaceAlliedTribe.execute(state, {
             factionId: FactionIDs.AEDUI,
             regionId: RegionIDs.AEDUI,
             tribeId: TribeIDs.AEDUI

@@ -124,9 +124,7 @@ class Battle extends Command {
         const noRetreatOrderedDefendingPieces = defendingPlayer.orderPiecesForRemoval(state, defendingPieces, false);
         const noRetreatDefenderResults = this.calculateAttackResults(noRetreatOrderedDefendingPieces, noRetreatDefenderLosses);
 
-        const attackerLosses = Math.min(Math.floor(this.calculateUnmodifiedLosses(noRetreatDefenderResults.remaining, true)), attackingPieces.length);
-        const orderedAttackingPieces = attackingPlayer.orderPiecesForRemoval(state, attackingPieces, false);
-        const counterattackResults = this.calculateAttackResults(orderedAttackingPieces, attackerLosses);
+        const worstCaseAttackerLosses = Math.min(Math.floor(this.calculateUnmodifiedLosses(noRetreatDefenderResults.remaining, true)), attackingPieces.length);
 
         let defenderResults = noRetreatDefenderResults;
         let retreatDeclared = false;
@@ -136,26 +134,32 @@ class Battle extends Command {
             const retreatOrderedDefendingPieces = defendingPlayer.orderPiecesForRemoval(state, defendingPieces, true);
             const retreatDefenderResults = this.calculateAttackResults(retreatOrderedDefendingPieces, retreatDefenderLosses);
 
-            retreatDeclared = state.playersByFaction[defendingFaction.id].willRetreat(state, region, attackingFaction, attackerLosses, noRetreatDefenderResults, retreatDefenderResults);
+            retreatDeclared = state.playersByFaction[defendingFaction.id].willRetreat(state, region, attackingFaction, worstCaseAttackerLosses, noRetreatDefenderResults, retreatDefenderResults);
             if (retreatDeclared) {
                 console.log(args.defendingFaction.name + ' is retreating!');
                 defenderResults = retreatDefenderResults;
             }
         }
 
-        const counterattackPossible = state.playersByFaction[defendingFaction.id].takeLosses(state, region, attackingFaction, defenderResults, ambush);
+        const counterattackPossible = state.playersByFaction[defendingFaction.id].takeLosses(state, region, attackingFaction, defenderResults, ambush) && _.find(defenderResults.remaining, {isMobile : true});
 
         if (retreatDeclared) {
             state.playersByFaction[defendingFaction.id].retreatFromBattle(state, region, attackingFaction, defenderResults);
         }
 
         if (counterattackPossible && !retreatDeclared) {
-            state.playersByFaction[attackingFaction.id].takeLosses(state, region, defendingFaction, counterattackResults, false);
+            const attackerLosses = Math.min(Math.floor(this.calculateUnmodifiedLosses(defenderResults.remaining, true)), attackingPieces.length);
+            if(attackerLosses > 0) {
+                const orderedAttackingPieces = attackingPlayer.orderPiecesForRemoval(state, attackingPieces, false);
+                const counterattackResults = this.calculateAttackResults(orderedAttackingPieces, attackerLosses);
+                state.playersByFaction[attackingFaction.id].takeLosses(state, region, defendingFaction,
+                                                                       counterattackResults, false);
+            }
         }
 
         if (!retreatDeclared) {
-            RevealPieces.perform(state, {faction: attackingFaction, region: region});
-            RevealPieces.perform(state, {faction: defendingFaction, region: region});
+            RevealPieces.execute(state, {factionId: attackingFaction.id, regionId: region.id});
+            RevealPieces.execute(state, {factionId: defendingFaction.id, regionId: region.id});
         }
 
         if (ambush && state.hasShadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id)) {
@@ -165,10 +169,10 @@ class Battle extends Command {
                 });
             if (citadelOrFort) {
                 console.log('*** Attacker is using Ballistae ***');
-                RemovePieces.perform(state,
+                RemovePieces.execute(state,
                     {
-                        faction: defendingFaction,
-                        region: region,
+                        factionId: defendingFaction.id,
+                        regionId: region.id,
                         pieces: [citadelOrFort]
                     });
             }

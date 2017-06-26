@@ -21,7 +21,7 @@ class DisperseTribe extends Action {
         faction.removeDispersalToken();
         tribe.disperse();
 
-        console.log('Dispersing ' + tribe.name);
+        console.log('Dispersing ' + tribe.name + '');
     }
 
     doUndo(state) {
@@ -34,20 +34,6 @@ class DisperseTribe extends Action {
         tribe.undisperse();
     }
 
-    static canExecute(state, args) {
-        const faction = args.faction;
-        const tribe = args.tribe;
-
-        return faction.hasAvailableDispersalTokens() && tribe.isSubdued();
-    }
-
-    static execute(state, args) {
-        const faction = args.faction;
-        const tribe = args.tribe;
-
-        faction.removeDispersalToken();
-        tribe.disperse();
-    }
 }
 
 export default DisperseTribe

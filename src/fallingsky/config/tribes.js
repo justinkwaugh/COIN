@@ -123,7 +123,7 @@ Definitions[TribeIDs.NERVII] = {
 Definitions[TribeIDs.PICTONES] = {
     id: TribeIDs.PICTONES,
     regionId: RegionIDs.PICTONES,
-    name: 'Remi'
+    name: 'Pictones'
 };
 
 Definitions[TribeIDs.REMI] = {

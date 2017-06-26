@@ -36,10 +36,10 @@ class Event45 {
             const regionEntries = _(nextGroup).sampleSize(Math.min(nextGroup.length, numRegionsRemaining)).value();
             _.each(regionEntries, function (regionEntry) {
                 const piecesToRemove = _.take(regionEntry.warbands, 2);
-                RemovePieces.perform(state, { faction: arverniFaction, region: regionEntry.region, pieces: piecesToRemove });
+                RemovePieces.execute(state, { factionId: arverniFaction.id, regionId: regionEntry.region.id, pieces: piecesToRemove });
                 const numWarbandsToPlace = Math.min(aeduiFaction.availableWarbands().length, piecesToRemove.length);
                 if(numWarbandsToPlace > 0) {
-                    PlaceWarbands.perform(state, { faction: aeduiFaction, region: regionEntry.region, count: numWarbandsToPlace });
+                    PlaceWarbands.execute(state, { factionId: aeduiFaction.id, regionId: regionEntry.region.id, count: numWarbandsToPlace });
                 }
                 effective = true;
             });

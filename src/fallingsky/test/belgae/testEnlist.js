@@ -118,7 +118,7 @@ class TestEnlist {
         // Should not march in place
         BelgaeEnlist.enlist(state, new CommandModifier());
 
-        RevealPieces.perform(state, {faction: germanic, region: sugambriRegion, count: 3});
+        RevealPieces.execute(state, {factionId: germanic.id, regionId: sugambriRegion.id, count: 3});
 
         console.log('*** Should march in place ***');
         // Should march in place

@@ -254,13 +254,13 @@ class Romans extends FallingSkyFaction {
         const leaderInProvincia = _.find(provincia.piecesByFaction[FactionIDs.ROMANS], {type:'leader'});
         if(leaderInProvincia && this.availableAuxilia().length > 0) {
             if(this.senateApprovalState() === SenateApprovalStates.UPROAR) {
-                PlaceAuxilia.perform(state, { faction: this, region: provincia, count: Math.min(3, this.availableAuxilia().length)});
+                PlaceAuxilia.execute(state, { factionId: this.id, regionId: provincia.id, count: Math.min(3, this.availableAuxilia().length)});
             }
             else if(this.senateApprovalState() === SenateApprovalStates.INTRIGUE) {
-                PlaceAuxilia.perform(state, { faction: this, region: provincia, count: Math.min(4, this.availableAuxilia().length)});
+                PlaceAuxilia.execute(state, { factionId: this.id, regionId: provincia.id, count: Math.min(4, this.availableAuxilia().length)});
             }
             else if(this.senateApprovalState() === SenateApprovalStates.ADULATION) {
-                PlaceAuxilia.perform(state, { faction: this, region: provincia, count: Math.min(5, this.availableAuxilia().length)});
+                PlaceAuxilia.execute(state, { factionId: this.id, regionId: provincia.id, count: Math.min(5, this.availableAuxilia().length)});
             }
         }
     }

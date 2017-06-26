@@ -28,14 +28,14 @@ describe("Place Citadel", function () {
         const aeduiRegion = state.regionsById[RegionIDs.AEDUI];
         const aeduiTribe = state.tribesById[TribeIDs.AEDUI];
         expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(0);
-        PlaceAlliedTribe.run(state, {
+        PlaceAlliedTribe.execute(state, {
             factionId: FactionIDs.AEDUI,
             regionId: RegionIDs.AEDUI,
             tribeId: TribeIDs.AEDUI
         });
         expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(1);
         expect(aeduiTribe.alliedFactionId()).to.equal(FactionIDs.AEDUI);
-        PlaceCitadel.run(state, {
+        PlaceCitadel.execute(state, {
             factionId: FactionIDs.AEDUI,
             regionId: RegionIDs.AEDUI,
             tribeId: TribeIDs.AEDUI

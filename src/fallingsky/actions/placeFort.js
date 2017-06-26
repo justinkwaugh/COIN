@@ -12,8 +12,8 @@ class PlaceFort extends Action {
         const faction = state.factionsById[this.factionId];
         const region = state.regionsById[this.regionId];
 
-        if(!region.inPlay() || !faction.hasAvailableForts() || !region.hasFort()) {
-            throw 'Invalid PlaceAlliedTribe Action';
+        if(!region.inPlay() || !faction.hasAvailableForts() || region.hasFort()) {
+            throw 'Invalid PlaceFort Action';
         }
 
         region.addPiece(faction.removeFort());
@@ -24,20 +24,6 @@ class PlaceFort extends Action {
         throw 'Unable to undo PlaceFort Action';
     }
 
-    static canExecute(state, args) {
-        const faction = args.faction;
-        const region = args.region;
-
-        return region.inPlay() && faction.hasAvailableForts() && !region.hasFort();
-    }
-
-    static execute(state, args) {
-        const faction = args.faction;
-        const region = args.region;
-
-        region.addPiece(faction.removeFort());
-        console.log('Placing ' + faction.name + ' Fort in ' + region.name);
-    }
 }
 
 export default PlaceFort;

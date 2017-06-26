@@ -89,7 +89,7 @@ class BelgaeMarch {
                     }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
 
                 const piecesToMove = march.region.getMobilePiecesForFaction(FactionIDs.BELGAE);
-                MovePieces.run(
+                MovePieces.execute(
                     state, {
                         sourceRegionId: march.region.id,
                         destRegionId: destination.region.id,
@@ -153,7 +153,7 @@ class BelgaeMarch {
 
         const warbands = _.filter(marchData.region.getMobilePiecesForFaction(FactionIDs.BELGAE), {type: "warband"});
 
-        HidePieces.run(
+        HidePieces.execute(
             state, {
                 factionId: belgae.id,
                 regionId: marchData.region.id
@@ -161,7 +161,7 @@ class BelgaeMarch {
 
         const numPiecesToMove = marchData.destination.group === RegionGroups.BELGICA ? marchData.numMoveableWarbands : marchData.numNeededForControl;
         const piecesToMove = _.take(warbands, numPiecesToMove);
-        MovePieces.run(
+        MovePieces.execute(
             state, {
                 sourceRegionId: marchData.region.id,
                 destRegionId: marchData.destination.id,
@@ -262,7 +262,7 @@ class BelgaeMarch {
 
         if (destinationData) {
             console.log('*** Belgae leader marches to join pieces in region ' + destinationData.destination.name + ' ***');
-            MovePieces.run(
+            MovePieces.execute(
                 state, {
                     sourceRegionId: leaderMarch.region.id,
                     destRegionId: destinationData.destination.id,

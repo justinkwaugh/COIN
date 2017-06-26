@@ -51,10 +51,10 @@ class Event22 {
         const priorityGroup = groupedRegions[_.first(sortedPriorities)];
         const chosen = _.sample(priorityGroup);
 
-        RemovePieces.perform(
+        RemovePieces.execute(
             state, {
-                region: chosen.region,
-                faction: chosen.faction,
+                regionId: chosen.region.id,
+                factionId: chosen.faction.id,
                 pieces: chosen.pieces
             });
 

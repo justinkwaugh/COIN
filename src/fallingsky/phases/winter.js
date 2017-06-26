@@ -82,12 +82,12 @@ class Winter {
         const romans = state.factionsById[FactionIDs.ROMANS];
         romans.returnLegionsFromFallen({spring : true});
         _.each(state.tribes, function(tribe) {
-            UndisperseTribe.perform(state, { faction: romans, tribe: tribe });
+            UndisperseTribe.execute(state, { factionId: romans.id, tribeId: tribe.id });
         });
         _.each(state.regions, function(region) {
             region.devastated(false);
             _.each(state.factions, function(faction) {
-                HidePieces.run(state, {factionId: faction.id, regionId: region.id});
+                HidePieces.execute(state, {factionId: faction.id, regionId: region.id});
             });
         });
         state.sequenceOfPlay.resetEligibility();

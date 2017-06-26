@@ -35,26 +35,26 @@ describe("Arverni march", function () {
         arverni.setResources(20);
 
         const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
-        PlaceLeader.perform(state, {faction: arverni, region: carnutesRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: carnutesRegion, count: 8});
-        PlaceWarbands.perform(state, {faction: aedui, region: carnutesRegion, count: 5});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: carnutesRegion.id, count: 5});
 
         const venetiRegion = state.regionsById[RegionIDs.VENETI];
-        PlaceWarbands.perform(state, {faction: arverni, region: venetiRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: venetiRegion.id, count: 1});
 
         const pictonesRegion = state.regionsById[RegionIDs.PICTONES];
-        PlaceWarbands.perform(state, {faction: arverni, region: pictonesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: pictonesRegion.id, count: 1});
 
         const treveriRegion = state.regionsById[RegionIDs.TREVERI];
-        PlaceWarbands.perform(state, {faction: aedui, region: treveriRegion, count: 2});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: treveriRegion.id, count: 2});
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-        PlaceWarbands.perform(state, {faction: aedui, region: mandubiiRegion, count: 6});
-        PlaceWarbands.perform(state, {faction: belgae, region: mandubiiRegion, count: 4});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 6});
+        PlaceWarbands.execute(state, {factionId: belgae.id, regionId: mandubiiRegion.id, count: 4});
 
         const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
-        PlaceWarbands.perform(state, {faction: belgae, region: atrebatesRegion, count: 4});
-        PlaceWarbands.perform(state, {faction: aedui, region: atrebatesRegion, count: 4});
+        PlaceWarbands.execute(state, {factionId: belgae.id, regionId: atrebatesRegion.id, count: 4});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: atrebatesRegion.id, count: 4});
 
         const command = ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         command.should.equal(FactionActions.COMMAND);
@@ -68,25 +68,25 @@ describe("Arverni march", function () {
         arverni.setResources(20);
 
         const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
-        PlaceLeader.perform(state, {faction: arverni, region: carnutesRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: carnutesRegion, count: 8});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
 
         const venetiRegion = state.regionsById[RegionIDs.VENETI];
-        PlaceWarbands.perform(state, {faction: arverni, region: venetiRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: venetiRegion.id, count: 1});
 
         const pictonesRegion = state.regionsById[RegionIDs.PICTONES];
-        PlaceWarbands.perform(state, {faction: arverni, region: pictonesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: pictonesRegion.id, count: 1});
 
         const treveriRegion = state.regionsById[RegionIDs.TREVERI];
-        PlaceWarbands.perform(state, {faction: aedui, region: treveriRegion, count: 2});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: treveriRegion.id, count: 2});
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-        PlaceWarbands.perform(state, {faction: aedui, region: mandubiiRegion, count: 6});
-        PlaceWarbands.perform(state, {faction: belgae, region: mandubiiRegion, count: 4});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 6});
+        PlaceWarbands.execute(state, {factionId: belgae.id, regionId: mandubiiRegion.id, count: 4});
 
         const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
-        PlaceWarbands.perform(state, {faction: belgae, region: atrebatesRegion, count: 4});
-        PlaceWarbands.perform(state, {faction: aedui, region: atrebatesRegion, count: 4});
+        PlaceWarbands.execute(state, {factionId: belgae.id, regionId: atrebatesRegion.id, count: 4});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: atrebatesRegion.id, count: 4});
 
         ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         expect(arverni.availableWarbands().length).to.equal(26);
@@ -100,17 +100,17 @@ describe("Arverni march", function () {
         arverni.setResources(20);
 
         const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
-        PlaceLeader.perform(state, {faction: arverni, region: carnutesRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: carnutesRegion, count: 8});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
 
         const venetiRegion = state.regionsById[RegionIDs.VENETI];
-        PlaceWarbands.perform(state, {faction: arverni, region: venetiRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: venetiRegion.id, count: 1});
 
         const pictonesRegion = state.regionsById[RegionIDs.PICTONES];
-        PlaceWarbands.perform(state, {faction: arverni, region: pictonesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: pictonesRegion.id, count: 1});
 
         const treveriRegion = state.regionsById[RegionIDs.TREVERI];
-        PlaceAuxilia.perform(state, {faction: romans, region: treveriRegion, count: 2});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: treveriRegion.id, count: 2});
 
         ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         expect(arverni.availableWarbands().length).to.equal(25);
@@ -123,18 +123,18 @@ describe("Arverni march", function () {
         arverni.setResources(20);
 
         const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
-        PlaceLeader.perform(state, {faction: arverni, region: carnutesRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: carnutesRegion, count: 8});
-        PlaceWarbands.perform(state, {faction: aedui, region: carnutesRegion, count: 6});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: carnutesRegion.id, count: 6});
 
         const venetiRegion = state.regionsById[RegionIDs.VENETI];
-        PlaceWarbands.perform(state, {faction: arverni, region: venetiRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: venetiRegion.id, count: 1});
 
         const pictonesRegion = state.regionsById[RegionIDs.PICTONES];
-        PlaceWarbands.perform(state, {faction: arverni, region: pictonesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: pictonesRegion.id, count: 1});
 
         const treveriRegion = state.regionsById[RegionIDs.TREVERI];
-        PlaceWarbands.perform(state, {faction: aedui, region: treveriRegion, count: 2});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: treveriRegion.id, count: 2});
 
         ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         expect(arverni.availableWarbands().length).to.equal(25);
@@ -147,30 +147,30 @@ describe("Arverni march", function () {
         arverni.setResources(20);
 
         const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
-        PlaceLeader.perform(state, {faction: arverni, region: carnutesRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: carnutesRegion, count: 8});
-        PlaceWarbands.perform(state, {faction: aedui, region: carnutesRegion, count: 6});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: carnutesRegion.id, count: 6});
 
         const venetiRegion = state.regionsById[RegionIDs.VENETI];
-        PlaceWarbands.perform(state, {faction: arverni, region: venetiRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: venetiRegion.id, count: 1});
 
         const pictonesRegion = state.regionsById[RegionIDs.PICTONES];
-        PlaceWarbands.perform(state, {faction: arverni, region: pictonesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: pictonesRegion.id, count: 1});
 
         const nerviiRegion = state.regionsById[RegionIDs.NERVII];
-        PlaceWarbands.perform(state, {faction: aedui, region: nerviiRegion, count: 2});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: nerviiRegion.id, count: 2});
 
         const sequaniRegion = state.regionsById[RegionIDs.SEQUANI];
-        PlaceWarbands.perform(state, {faction: aedui, region: sequaniRegion, count: 2});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: sequaniRegion.id, count: 2});
 
         const arverniRegion = state.regionsById[RegionIDs.ARVERNI];
-        PlaceWarbands.perform(state, {faction: arverni, region: arverniRegion, count: 3});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: arverniRegion.id, count: 3});
 
         const moriniRegion = state.regionsById[RegionIDs.MORINI];
-        PlaceWarbands.perform(state, {faction: arverni, region: moriniRegion, count: 3});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: moriniRegion.id, count: 3});
 
         const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
-        PlaceWarbands.perform(state, {faction: germanic, region: atrebatesRegion, count: 4});
+        PlaceWarbands.execute(state, {factionId: germanic.id, regionId: atrebatesRegion.id, count: 4});
 
         ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         expect(arverni.availableWarbands().length).to.equal(19);
@@ -184,27 +184,27 @@ describe("Arverni march", function () {
         arverni.setResources(20);
 
         const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
-        PlaceLeader.perform(state, {faction: arverni, region: carnutesRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: carnutesRegion, count: 8});
-        PlaceWarbands.perform(state, {faction: aedui, region: carnutesRegion, count: 6});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: carnutesRegion.id, count: 6});
 
         const venetiRegion = state.regionsById[RegionIDs.VENETI];
-        PlaceWarbands.perform(state, {faction: arverni, region: venetiRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: venetiRegion.id, count: 1});
 
         const pictonesRegion = state.regionsById[RegionIDs.PICTONES];
-        PlaceWarbands.perform(state, {faction: arverni, region: pictonesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: pictonesRegion.id, count: 1});
 
         const treveriRegion = state.regionsById[RegionIDs.TREVERI];
-        PlaceWarbands.perform(state, {faction: aedui, region: treveriRegion, count: 2});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: treveriRegion.id, count: 2});
 
         const sequaniRegion = state.regionsById[RegionIDs.SEQUANI];
-        PlaceWarbands.perform(state, {faction: aedui, region: sequaniRegion, count: 2});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: sequaniRegion.id, count: 2});
 
         const arverniRegion = state.regionsById[RegionIDs.ARVERNI];
-        PlaceWarbands.perform(state, {faction: arverni, region: arverniRegion, count: 3});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: arverniRegion.id, count: 3});
 
         const moriniRegion = state.regionsById[RegionIDs.MORINI];
-        PlaceWarbands.perform(state, {faction: arverni, region: moriniRegion, count: 3});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: moriniRegion.id, count: 3});
 
         ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         expect(arverni.availableWarbands().length).to.equal(19);
@@ -225,11 +225,11 @@ describe("Arverni march", function () {
     it('cannot march 2 across rhenus', function() {
         arverni.setResources(20);
         const sugambriRegion = state.regionsById[RegionIDs.SUGAMBRI];
-        PlaceLeader.perform(state, {faction: arverni, region: sugambriRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: sugambriRegion, count: 8});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: sugambriRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: sugambriRegion.id, count: 8});
 
         const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
-        PlaceWarbands.perform(state, {faction: aedui, region: atrebatesRegion, count: 4});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: atrebatesRegion.id, count: 4});
 
         ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         expect(arverni.availableWarbands().length).to.equal(27);
@@ -252,11 +252,11 @@ describe("Arverni march", function () {
     it('cannot march 2 from britannia', function() {
         arverni.setResources(20);
         const britanniaRegion = state.regionsById[RegionIDs.BRITANNIA];
-        PlaceLeader.perform(state, {faction: arverni, region: britanniaRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: britanniaRegion, count: 8});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: britanniaRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: britanniaRegion.id, count: 8});
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-        PlaceWarbands.perform(state, {faction: aedui, region: mandubiiRegion, count: 4});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 4});
 
         ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         expect(arverni.availableWarbands().length).to.equal(27);
@@ -276,11 +276,11 @@ describe("Arverni march", function () {
     it('cannot march 2 across devastated', function() {
         arverni.setResources(20);
         const venetiRegion = state.regionsById[RegionIDs.VENETI];
-        PlaceLeader.perform(state, {faction: arverni, region: venetiRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: venetiRegion, count: 8});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: venetiRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: venetiRegion.id, count: 8});
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-        PlaceWarbands.perform(state, {faction: aedui, region: mandubiiRegion, count: 4});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 4});
 
         const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
         atrebatesRegion.devastated(true);

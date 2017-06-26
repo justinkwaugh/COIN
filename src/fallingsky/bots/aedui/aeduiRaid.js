@@ -12,7 +12,7 @@ class AeduiRaid {
         _.each(executableRaidRegions, function (raidResult) {
                 console.log('*** ' + aeduiFaction.name + ' Raiding in region ' + raidResult.region.name);
 
-                RevealPieces.perform(currentState, {faction: aeduiFaction, region: raidResult.region, count: raidResult.resourcesGained});
+                RevealPieces.execute(currentState, {factionId: aeduiFaction.id, regionId: raidResult.region.id, count: raidResult.resourcesGained});
                 aeduiFaction.addResources(raidResult.resourcesGained);
 
                 let numResourcesToSteal = raidResult.resourcesGained;

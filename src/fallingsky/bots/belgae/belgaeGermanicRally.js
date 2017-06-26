@@ -13,7 +13,7 @@ class BelgaeGermanicRally {
             console.log('*** Belgae Enlisted Germanic Rally ***');
             const germanicFaction = state.factionsById[FactionIDs.GERMANIC_TRIBES];
             if (effectiveRally.allyAdded) {
-                PlaceAlliedTribe.run(
+                PlaceAlliedTribe.execute(
                     state, {
                         factionId: germanicFaction.id,
                         regionId: effectiveRally.region.id,
@@ -21,10 +21,10 @@ class BelgaeGermanicRally {
                     });
             }
             if (effectiveRally.numWarbandsAdded > 0) {
-                PlaceWarbands.perform(
+                PlaceWarbands.execute(
                     state, {
-                        faction: germanicFaction,
-                        region: effectiveRally.region,
+                        factionId: germanicFaction.id,
+                        regionId: effectiveRally.region.id,
                         count: Math.min(effectiveRally.numWarbandsAdded, germanicFaction.availableWarbands().length)
                     });
             }
@@ -67,10 +67,10 @@ class BelgaeGermanicRally {
         const germanicFaction = state.factionsById[FactionIDs.GERMANIC_TRIBES];
         _.each(
             warbandResults, function (result) {
-                PlaceWarbands.perform(
+                PlaceWarbands.execute(
                     state, {
-                        faction: germanicFaction,
-                        region: result.region,
+                        factionId: germanicFaction.id,
+                        regionId: result.region.id,
                         count: Math.min(result.numWarbandsAdded, germanicFaction.availableWarbands().length)
                     });
 

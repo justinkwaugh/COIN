@@ -111,7 +111,7 @@ class AeduiBot extends Bot {
             let moved = false;
             _.each(adjacentLocations, (location) => {
                 if(location.factionId === this.factionId || state.playersByFaction[location.factionId].willAgreeToQuarters(this.factionId)) {
-                    MovePieces.run(state, {sourceRegionId: relocation.region.id, destRegionId: location.destination.id, pieces: relocation.pieces});
+                    MovePieces.execute(state, {sourceRegionId: relocation.region.id, destRegionId: location.destination.id, pieces: relocation.pieces});
                     moved = true;
                     return false;
                 }
@@ -123,7 +123,7 @@ class AeduiBot extends Bot {
                 });
 
                 if(piecesToRemove.length > 0) {
-                    RemovePieces.perform(state, { factionId: this.factionId, region: relocation.region, pieces: piecesToRemove});
+                    RemovePieces.execute(state, { factionId: this.factionId, regionId: relocation.region.id, pieces: piecesToRemove});
                 }
             }
         });

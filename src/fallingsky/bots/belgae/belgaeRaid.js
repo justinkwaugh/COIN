@@ -20,10 +20,10 @@ class BelgaeRaid {
             effectiveRaidRegions, function (raidResult) {
                 console.log('*** ' + state.belgae.name + ' Raiding in region ' + raidResult.region.name);
 
-                RevealPieces.perform(
+                RevealPieces.execute(
                     state, {
-                        faction: state.belgae,
-                        region: raidResult.region,
+                        factionId: state.belgae.id,
+                        regionId: raidResult.region.id,
                         count: raidResult.resourcesGained
                     });
                 state.belgae.addResources(raidResult.resourcesGained);

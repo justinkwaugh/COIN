@@ -35,24 +35,24 @@ describe("Arverni entreat", function () {
         arverni.setResources(20);
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-        PlaceLeader.perform(state, {faction: arverni, region: mandubiiRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: mandubiiRegion, count: 8});
-        PlaceAlliedTribe.perform(state, {faction: aedui, region: mandubiiRegion, tribeId: TribeIDs.MANDUBII});
-        PlaceAlliedTribe.perform(state, {faction: aedui, region: mandubiiRegion, tribeId: TribeIDs.LINGONES});
-        PlaceAlliedTribe.perform(state, {faction: belgae, region: mandubiiRegion, tribeId: TribeIDs.SENONES});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, count: 8});
+        PlaceAlliedTribe.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
+        PlaceAlliedTribe.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.LINGONES});
+        PlaceAlliedTribe.execute(state, {factionId: belgae.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.SENONES});
 
         const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
-        PlaceWarbands.perform(state, {faction: arverni, region: atrebatesRegion, count: 3});
-        PlaceAlliedTribe.perform(state, {faction: belgae, region: atrebatesRegion, tribeId: TribeIDs.ATREBATES});
-        PlaceAlliedTribe.perform(state, {faction: germanic, region: atrebatesRegion, tribeId: TribeIDs.BELLOVACI});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: atrebatesRegion.id, count: 3});
+        PlaceAlliedTribe.execute(state, {factionId: belgae.id, regionId: atrebatesRegion.id, tribeId: TribeIDs.ATREBATES});
+        PlaceAlliedTribe.execute(state, {factionId: germanic.id, regionId: atrebatesRegion.id, tribeId: TribeIDs.BELLOVACI});
 
         const treveriRegion = state.regionsById[RegionIDs.TREVERI];
-        PlaceWarbands.perform(state, {faction: arverni, region: treveriRegion, count: 3});
-        PlaceAlliedTribe.perform(state, {faction: germanic, region: treveriRegion, tribeId: TribeIDs.TREVERI});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: treveriRegion.id, count: 3});
+        PlaceAlliedTribe.execute(state, {factionId: germanic.id, regionId: treveriRegion.id, tribeId: TribeIDs.TREVERI});
 
         const biturigesRegion = state.regionsById[RegionIDs.BITURIGES];
-        PlaceWarbands.perform(state, {faction: arverni, region: biturigesRegion, count: 3});
-        PlaceAlliedTribe.perform(state, {faction: romans, region: biturigesRegion, tribeId: TribeIDs.BITURIGES});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: biturigesRegion.id, count: 3});
+        PlaceAlliedTribe.execute(state, {factionId: romans.id, regionId: biturigesRegion.id, tribeId: TribeIDs.BITURIGES});
 
         expect(ArverniEntreat.entreat(state, new CommandModifier())).to.equal(true);
 
@@ -71,15 +71,15 @@ describe("Arverni entreat", function () {
         arverni.setResources(20);
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-        PlaceLeader.perform(state, {faction: arverni, region: mandubiiRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: mandubiiRegion, count: 8});
-        PlaceAlliedTribe.perform(state, {faction: aedui, region: mandubiiRegion, tribeId: TribeIDs.MANDUBII});
-        PlaceWarbands.perform(state, {faction: aedui, region: mandubiiRegion, count: 3});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, count: 8});
+        PlaceAlliedTribe.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 3});
 
         const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
-        PlaceWarbands.perform(state, {faction: arverni, region: atrebatesRegion, count: 2});
-        PlaceAlliedTribe.perform(state, {faction: belgae, region: atrebatesRegion, tribeId: TribeIDs.ATREBATES});
-        PlaceWarbands.perform(state, {faction: aedui, region: atrebatesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: atrebatesRegion.id, count: 2});
+        PlaceAlliedTribe.execute(state, {factionId: belgae.id, regionId: atrebatesRegion.id, tribeId: TribeIDs.ATREBATES});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: atrebatesRegion.id, count: 1});
 
         expect(ArverniEntreat.entreat(state, new CommandModifier())).to.equal(true);
 
@@ -98,21 +98,21 @@ describe("Arverni entreat", function () {
         arverni.setResources(20);
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-        PlaceLeader.perform(state, {faction: arverni, region: mandubiiRegion});
-        PlaceWarbands.perform(state, {faction: arverni, region: mandubiiRegion, count: 1});
-        PlaceWarbands.perform(state, {faction: aedui, region: mandubiiRegion, count: 1});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, count: 1});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 1});
 
         const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
-        PlaceWarbands.perform(state, {faction: arverni, region: atrebatesRegion, count: 1});
-        PlaceAuxilia.perform(state, {faction: romans, region: atrebatesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: atrebatesRegion.id, count: 1});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: atrebatesRegion.id, count: 1});
 
         const aeduiRegion = state.regionsById[RegionIDs.AEDUI];
-        PlaceWarbands.perform(state, {faction: arverni, region: aeduiRegion, count: 1});
-        PlaceWarbands.perform(state, {faction: belgae, region: aeduiRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: aeduiRegion.id, count: 1});
+        PlaceWarbands.execute(state, {factionId: belgae.id, regionId: aeduiRegion.id, count: 1});
 
         const biturigesRegion = state.regionsById[RegionIDs.BITURIGES];
-        PlaceWarbands.perform(state, {faction: arverni, region: biturigesRegion, count: 1});
-        PlaceWarbands.perform(state, {faction: germanic, region: biturigesRegion, count: 1});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: biturigesRegion.id, count: 1});
+        PlaceWarbands.execute(state, {factionId: germanic.id, regionId: biturigesRegion.id, count: 1});
 
         expect(ArverniEntreat.entreat(state, new CommandModifier())).to.equal(true);
 

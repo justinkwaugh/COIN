@@ -14,7 +14,7 @@ class BelgaeGermanicRaid {
         if(effectiveRaid) {
             console.log('*** Belgae Enlisted Germanic Raid ***');
             const enemyFactionOrder = this.getEnemyFactionOrder(state);
-            RevealPieces.perform(state, {faction: germanicFaction, region: effectiveRaid.region, count: effectiveRaid.resourcesGained});
+            RevealPieces.execute(state, {factionId: germanicFaction.id, regionId: effectiveRaid.region.id, count: effectiveRaid.resourcesGained});
 
             let numResourcesToSteal = effectiveRaid.resourcesGained;
             _.each(enemyFactionOrder, function(faction) {

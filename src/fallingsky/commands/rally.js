@@ -41,7 +41,7 @@ class Rally extends Command {
 
                 if (regionResult.addCitadel && faction.availableCitadels().length > 0) {
                     const tribeForCity = regionResult.region.getAlliedCityForFaction(faction.id);
-                    PlaceCitadel.perform(state, {faction: faction, region: regionResult.region, tribe: tribeForCity});
+                    PlaceCitadel.execute(state, {factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForCity.id});
                     citadelAdded = true;
                 }
 
@@ -50,16 +50,16 @@ class Rally extends Command {
                         tribe => tribe.isCity ? 'a' : 'b').groupBy(
                         tribe => tribe.isCity ? 'a' : 'b').map(_.shuffle).flatten().first();
 
-                    PlaceAlliedTribe.run(state, {factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForAlly.id});
+                    PlaceAlliedTribe.execute(state, {factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForAlly.id});
                     allyAdded = true;
                 }
 
                 if ((!citadelAdded && !allyAdded) || hasVercingetorix || isGermanic) {
                     if (regionResult.addNumWarbands > 0 && faction.availableWarbands().length > 0) {
-                        PlaceWarbands.perform(
+                        PlaceWarbands.execute(
                             state, {
-                                faction: faction,
-                                region: regionResult.region,
+                                factionId: faction.id,
+                                regionId: regionResult.region.id,
                                 count: Math.min(regionResult.addNumWarbands, faction.availableWarbands().length)
                             });
                         warbandsAdded = true;

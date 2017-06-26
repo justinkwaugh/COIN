@@ -21,7 +21,7 @@ class Event40 {
         const numAlliesToPlace = Math.min(aeduiFaction.availableAlliedTribes().length, regionsCanPlaceAlly.length);
         _.each(_.sampleSize(regionsCanPlaceAlly, numAlliesToPlace), function(region) {
             const subduedTribes = region.subduedTribesForFaction(FactionIDs.AEDUI);
-            PlaceAlliedTribe.run(state, {factionId: aeduiFaction.id, regionId: region.id, tribeId: _.sample(subduedTribes).id});
+            PlaceAlliedTribe.execute(state, {factionId: aeduiFaction.id, regionId: region.id, tribeId: _.sample(subduedTribes).id});
             delete cisalpinaAdjacentById[region.id];
             effective = true;
         });
@@ -30,7 +30,7 @@ class Event40 {
         const numRegionsForWarbands = Math.ceil(warbandsRemaining.length / 3);
         _.each(_.sampleSize(cisalpinaAdjacentById, numRegionsForWarbands), function(region) {
             const numWarbandsToPlace = Math.min(warbandsRemaining, 3);
-            PlaceWarbands.perform(state, {faction: aeduiFaction, region: region, count: numWarbandsToPlace});
+            PlaceWarbands.execute(state, {factionId: aeduiFaction.id, regionId: region.id, count: numWarbandsToPlace});
             delete cisalpinaAdjacentById[region.id];
             warbandsRemaining -= numWarbandsToPlace;
             effective = true;
@@ -44,7 +44,7 @@ class Event40 {
         const numRegionsForAuxilia = Math.ceil(auxiliaRemaining.length / 3);
         _.each(_.sampleSize(cisalpinaAdjacentById, numRegionsForAuxilia), function(region) {
             const numAuxiliaToPlace = Math.min(auxiliaRemaining, 3);
-            PlaceAuxilia.perform(state, {faction: romanFaction, region: region, count: numAuxiliaToPlace});
+            PlaceAuxilia.execute(state, {factionId: romanFaction.id, regionId: region.id, count: numAuxiliaToPlace});
             delete cisalpinaAdjacentById[region.id];
             auxiliaRemaining -= numAuxiliaToPlace;
             effective = true;

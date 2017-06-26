@@ -39,7 +39,7 @@ class GermanicBot extends Bot {
             }
         }).compact().each(function(relocation) {
             const germaniaRegion = state.regionsById[_.sample([RegionIDs.SUGAMBRI, RegionIDs.UBII])];
-            MovePieces.run(state, {startRegionId: relocation.region.id, destRegionId: germaniaRegion.id, pieces: relocation.pieces});
+            MovePieces.execute(state, {startRegionId: relocation.region.id, destRegionId: germaniaRegion.id, pieces: relocation.pieces});
         });
     }
 }

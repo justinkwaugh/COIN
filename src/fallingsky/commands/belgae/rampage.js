@@ -45,7 +45,7 @@ class Rampage extends Command {
 
         console.log('*** Belgae Rampaging in ' + rampage.region.name);
 
-        RevealPieces.perform(state, {factionId: FactionIDs.BELGAE, region: rampage.region, count: rampage.count});
+        RevealPieces.execute(state, {factionId: FactionIDs.BELGAE, regionId: rampage.region.id, count: rampage.count});
         enemyPlayer.retreatPieces(state, rampage.region, piecesToRetreatOrRemove, rampage.agreeingFactionId);
     }
 

@@ -28,13 +28,13 @@ class GermanicMarch {
             const marchingWarbands = this.getMarchingWarbands(nextMarch.region);
             const destination = this.findHighestPriorityDestination(nextMarch.destinations, factionOrderById,  marchingWarbands.length);
             if (!modifiers.winter) {
-                HidePieces.run(
+                HidePieces.execute(
                     state, {
                         factionId: germanicFaction.id,
                         regionId: nextMarch.region.id,
                     });
             }
-            MovePieces.run(
+            MovePieces.execute(
                 state, {
                     sourceRegionId: nextMarch.region.id,
                     destRegionId: destination.id,
@@ -53,7 +53,7 @@ class GermanicMarch {
         _.each(state.regions, function(region) {
             const mobilePieces = region.getMobilePiecesForFaction(FactionIDs.GERMANIC_TRIBES);
             if(mobilePieces.length) {
-                HidePieces.run(
+                HidePieces.execute(
                     state, {
                         factionId: faction.id,
                         regionId: region.id

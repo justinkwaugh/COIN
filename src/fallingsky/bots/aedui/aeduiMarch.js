@@ -29,7 +29,7 @@ class AeduiMarch {
             }
             const expansionPieces = effectiveMarch.expansionMarchStartRegion.piecesByFaction()[FactionIDs.AEDUI];
             const expansionWarbands = _.filter(expansionPieces, {type: 'warband'});
-            HidePieces.run(
+            HidePieces.execute(
                 currentState, {
                     factionId: faction.id,
                     regionId: effectiveMarch.expansionMarchStartRegion.id
@@ -38,7 +38,7 @@ class AeduiMarch {
             _.each(
                 effectiveMarch.expansionMarchRegions, function (destinationRegion) {
                     const pieceToMove = expansionWarbands.shift();
-                    MovePieces.run(
+                    MovePieces.execute(
                         currentState, {
                             sourceRegionId: effectiveMarch.expansionMarchStartRegion.id,
                             destRegionId: destinationRegion.id,
@@ -58,14 +58,14 @@ class AeduiMarch {
             const numWarbandsNeeded = Math.abs(effectiveMarch.controlMarchRegion.controllingMarginByFaction()[FactionIDs.AEDUI]) + 1;
             const controlWarbands = _.take(warbands, numWarbandsNeeded);
             if (!regionsMarched[effectiveMarch.controlMarchStart.id]) {
-                HidePieces.run(
+                HidePieces.execute(
                     currentState, {
                         factionId: faction.id,
                         regionId: effectiveMarch.controlMarchStart.id
                     })
             }
 
-            MovePieces.run(
+            MovePieces.execute(
                 currentState, {
                     sourceRegionId: effectiveMarch.controlMarchStart.id,
                     destRegionId: effectiveMarch.controlMarchRegion.id,

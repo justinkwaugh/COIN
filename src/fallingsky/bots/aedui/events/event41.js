@@ -26,7 +26,7 @@ class Event41 {
                 });
 
             _.each(_.sampleSize(groupedTribes.city || [], numAlliesToPlace), function(tribe) {
-                PlaceAlliedTribe.run(state, {factionId: aeduiFaction.id, regionId: tribe.regionId, tribeId: tribe.id});
+                PlaceAlliedTribe.execute(state, {factionId: aeduiFaction.id, regionId: tribe.regionId, tribeId: tribe.id});
                 numAlliesToPlace -= 1;
 
                 if(numAlliesToPlace < 1) {
@@ -35,7 +35,7 @@ class Event41 {
             });
 
             _.each(_.sampleSize(groupedTribes.notcity || [], numAlliesToPlace), function(tribe) {
-                PlaceAlliedTribe.run(state, {factionId: aeduiFaction.id, regionId: tribe.regionId, tribeId: tribe.id});
+                PlaceAlliedTribe.execute(state, {factionId: aeduiFaction.id, regionId: tribe.regionId, tribeId: tribe.id});
                 numAlliesToPlace -= 1;
 
                 if(numAlliesToPlace < 1) {
@@ -54,7 +54,7 @@ class Event41 {
 
             if(alliesToUpgrade.length > 0) {
                 const tribe = _.sample(alliesToUpgrade);
-                PlaceCitadel.perform(state, {faction: aeduiFaction, regionId: tribe.regionId, tribe: tribe});
+                PlaceCitadel.execute(state, {factionId: aeduiFaction.id, regionId: tribe.regionId, tribeId: tribe.id});
                 effective = true;
             }
         }

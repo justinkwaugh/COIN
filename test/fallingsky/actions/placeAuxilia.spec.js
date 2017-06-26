@@ -28,7 +28,7 @@ describe("Place Auxilia", function () {
         const aeduiRegion = state.regionsById[RegionIDs.AEDUI];
         expect(aeduiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
         expect(aeduiRegion.getHiddenPiecesForFaction(FactionIDs.ROMANS).length).to.equal(0);
-        PlaceAuxilia.run(state, {
+        PlaceAuxilia.execute(state, {
             factionId: FactionIDs.ROMANS,
             regionId: RegionIDs.AEDUI,
             count: 5

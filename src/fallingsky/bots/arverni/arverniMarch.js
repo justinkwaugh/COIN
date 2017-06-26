@@ -63,13 +63,13 @@ class ArverniMarch {
                     arverni.removeResources(leaderMarch.march.cost);
                 }
 
-                HidePieces.run(
+                HidePieces.execute(
                     state, {
                         factionId: arverni.id,
                         regionId: march.region.id
                     });
 
-                MovePieces.run(
+                MovePieces.execute(
                     state, {
                         sourceRegionId: march.region.id,
                         destRegionId: march.targetDestination.id,
@@ -189,7 +189,7 @@ class ArverniMarch {
                 const warbands = march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI);
                 _.each(
                     march.spreadDestinations, (id) => {
-                        MovePieces.run(
+                        MovePieces.execute(
                             state, {
                                 sourceRegionId: march.region.id,
                                 destRegionId: id,
@@ -218,14 +218,14 @@ class ArverniMarch {
         const warbands = march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI);
         const leader = march.region.getLeaderForFaction(FactionIDs.ARVERNI);
         if (march.harassmentLosses) {
-            RemovePieces.perform(
+            RemovePieces.execute(
                 state, {
-                    faction: arverni,
-                    region: march.region,
+                    factionId: arverni.id,
+                    regionId: march.region.id,
                     pieces: warbands.splice(0, march.harassmentLosses)
                 });
         }
-        MovePieces.run(
+        MovePieces.execute(
             state, {
                 sourceRegionId: march.region.id,
                 destRegionId: march.controlDestination.id,
@@ -248,7 +248,7 @@ class ArverniMarch {
                 arverni.removeResources(march.cost);
             }
 
-            HidePieces.run(
+            HidePieces.execute(
                 state, {
                     factionId: arverni.id,
                     regionId: march.region.id

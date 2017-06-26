@@ -24,7 +24,7 @@ class Event56 {
             }).compact().first();
 
         if (ambiorixEntry) {
-            RemovePieces.perform(state, {factionId: FactionIDs.BELGAE, region: ambiorixEntry.region, pieces: [ambiorixEntry.ambiorix]});
+            RemovePieces.execute(state, {factionId: FactionIDs.BELGAE, regionId: ambiorixEntry.region.id, pieces: [ambiorixEntry.ambiorix]});
             return true;
         }
 
