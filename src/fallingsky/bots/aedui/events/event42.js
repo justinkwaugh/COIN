@@ -17,11 +17,11 @@ class Event42 {
         const adjacentRegions = _(romanControlledRegions).map('adjacent').flatten().uniqBy('id').differenceBy(romanControlledRegions, 'id').values();
 
         const arverniAndBelgaeAlliesUnderRomanControl = _(romanControlledRegions).map('tribes').flatten().filter(function(tribe) {
-            return tribe.isAllied() && (tribe.alliedFactionId === FactionIDs.ARVERNI || tribe.alliedFactionId === FactionIDs.BELGAE);
+            return tribe.isAllied() && (tribe.alliedFactionId() === FactionIDs.ARVERNI || tribe.alliedFactionId() === FactionIDs.BELGAE);
         }).value();
 
         const arverniAndBelgaeAlliesAdjacentToRomanControl = _(adjacentRegions).map('tribes').flatten().filter(function(tribe) {
-            return tribe.isAllied() && (tribe.alliedFactionId === FactionIDs.ARVERNI || tribe.alliedFactionId === FactionIDs.BELGAE);
+            return tribe.isAllied() && (tribe.alliedFactionId() === FactionIDs.ARVERNI || tribe.alliedFactionId() === FactionIDs.BELGAE);
         }).value();
 
         throw 'Not yet implemented';

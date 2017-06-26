@@ -26,7 +26,7 @@ class Event28 {
                 }).compact().sampleSize(aedui.availableAlliedTribes().length).value();
 
             _.each(subduedCitiesNotRomanControlled, function(city) {
-                PlaceAlliedTribe.perform(state, { faction: aedui, regionId: city.regionId, tribe: city});
+                PlaceAlliedTribe.run(state, { factionId: aedui.id, regionId: city.regionId, tribeId: city.id});
             });
             effective = true;
         }

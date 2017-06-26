@@ -63,16 +63,16 @@ class ArverniMarch {
                     arverni.removeResources(leaderMarch.march.cost);
                 }
 
-                HidePieces.perform(
+                HidePieces.run(
                     state, {
-                        faction: arverni,
-                        region: march.region
+                        factionId: arverni.id,
+                        regionId: march.region.id
                     });
 
-                MovePieces.perform(
+                MovePieces.run(
                     state, {
-                        sourceRegion: march.region,
-                        destRegion: march.targetDestination,
+                        sourceRegionId: march.region.id,
+                        destRegionId: march.targetDestination.id,
                         pieces: march.march.mobilePieces
                     });
                 effective = true;
@@ -91,6 +91,9 @@ class ArverniMarch {
 
     static getLeaderMarch(marchResults) {
         const leaderMarch = _(marchResults).find(march => march.region.getLeaderForFaction(FactionIDs.ARVERNI));
+        if(!leaderMarch) {
+            debugger;
+        }
         const leaderAdjacentRegionIds = _(leaderMarch.region.adjacent).map('id').value();
         const targetDestination = _(leaderMarch.destinations).filter(destination => _.indexOf(leaderAdjacentRegionIds, destination.id) >= 0).map(
             (region) => {
@@ -186,9 +189,9 @@ class ArverniMarch {
                 const warbands = march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI);
                 _.each(
                     march.spreadDestinations, (id) => {
-                        MovePieces.perform(
+                        MovePieces.run(
                             state, {
-                                sourceRegion: march.region,
+                                sourceRegionId: march.region.id,
                                 destRegionId: id,
                                 pieces: [warbands.pop()]
                             });
@@ -222,9 +225,9 @@ class ArverniMarch {
                     pieces: warbands.splice(0, march.harassmentLosses)
                 });
         }
-        MovePieces.perform(
+        MovePieces.run(
             state, {
-                sourceRegion: march.region,
+                sourceRegionId: march.region.id,
                 destRegionId: march.controlDestination.id,
                 pieces: _(warbands).take(march.numControlWarbands - march.harassmentLosses).concat([leader]).value()
             });
@@ -245,10 +248,10 @@ class ArverniMarch {
                 arverni.removeResources(march.cost);
             }
 
-            HidePieces.perform(
+            HidePieces.run(
                 state, {
-                    faction: arverni,
-                    region: march.region
+                    factionId: arverni.id,
+                    regionId: march.region.id
                 });
         }
     }
@@ -414,7 +417,78 @@ class ArverniMarch {
     }
 
     static massMarch(state, modifiers) {
+        let effective = false;
 
+        const marchResults = March.test(state, {factionId: FactionIDs.ARVERNI});
+        const leaderMarch = _(marchResults).find(march => march.region.getLeaderForFaction(FactionIDs.ARVERNI));
+        if (!leaderMarch) {
+            return false;
+        }
+
+        const legionControlMarch = this.getLegionControlMarch(state, modifiers, leaderMarch, marchResults);
+        if(legionControlMarch) {
+            effective = this.doControlMarch(state, modifiers, legionControlMarch, {});
+        }
+
+        if(!effective) {
+            return false;
+        }
+
+        let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaControlMarch(legionControlMarch);
+        const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
+        return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
+    }
+
+    static getLegionControlMarch(state, modifiers, leaderMarch, marchResults) {
+
+        const availableWarbands = leaderMarch.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length;
+        const numMarching = availableWarbands + 1;
+
+        const destinationPathsById = _.keyBy(this.getDestinationPaths(state, numMarching, leaderMarch.region, leaderMarch.destinations), 'id');
+        const destinationToControl = _(leaderMarch.destinations).filter(destination => destinationPathsById[destination.id]).filter(
+            (destination) => {
+                // Can't already be controlled by Arverni
+                if(destination.controllingFactionId() === FactionIDs.ARVERNI) {
+                    return false;
+                }
+
+                // Has to have a legion
+                const romanMobilePieces = destination.getMobilePiecesForFaction(FactionIDs.ROMANS);
+                const hasLegion = _.find(romanMobilePieces, { type : 'legion' });
+                if(!hasLegion) {
+                    return false;
+                }
+
+                // We need more than 2x the number of roman mobile pieces
+                const numAfterHarassment = numMarching - destinationPathsById[destination.id].bestPath.harassmentLosses;
+                const numAfterMarch = destination.getMobilePiecesForFaction(FactionIDs.ARVERNI).length + numAfterHarassment;
+                const hasCaesar = _.find(romanMobilePieces, piece => piece.type === 'leader' && !piece.isSuccessor());
+                if(hasCaesar && (numAfterMarch <= romanMobilePieces*2)) {
+                    return false;
+                }
+
+                // Finally we need to control
+                const canTakeControl = destination.controllingMarginByFaction()[FactionIDs.ARVERNI] + numAfterHarassment > 0;
+                return canTakeControl;
+            }).map(
+            (destination) => {
+                // Now figure out the priority based on harassment
+                const numHarassmentLosses = destinationPathsById[destination.id].bestPath.harassmentLosses;
+                return {
+                    destination,
+                    numHarassmentLosses
+                }
+            }).sortBy('numHarassmentLosses').groupBy('numHarassmentLosses').map(_.shuffle).flatten().first();
+
+        if (!destinationToControl) {
+            return;
+        }
+
+        leaderMarch.numControlWarbands = availableWarbands.length;
+        leaderMarch.controlDestination = destinationToControl.destination;
+        leaderMarch.harassmentLosses = destinationToControl.numHarassmentLosses;
+
+        return leaderMarch;
     }
 
 }

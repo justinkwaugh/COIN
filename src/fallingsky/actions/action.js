@@ -2,6 +2,29 @@ import _ from '../../lib/lodash';
 
 class Action {
 
+    constructor(args) {
+
+    }
+
+    isValid() {
+        return true;
+    }
+
+    static run(state, args) {
+        const action = new this(args);
+        action.doExecute(state);
+        state.history.addAction(action);
+    }
+
+    doUndo() {
+
+    }
+
+
+    doExecute() {
+
+    }
+
     static canExecute(args) {
         return true;
     }
@@ -51,6 +74,8 @@ class Action {
         });
         return resolvedArgs;
     }
+
+
 }
 
 export default Action;

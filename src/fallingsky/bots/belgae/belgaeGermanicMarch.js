@@ -19,20 +19,19 @@ class BelgaeGermanicMarch {
 
         if (effectiveMarch) {
             console.log('*** Belgae Enlisted Germanic March ***');
-            HidePieces.perform(
+            HidePieces.run(
                 state, {
                     factionId: FactionIDs.GERMANIC_TRIBES,
-                    region: effectiveMarch.region,
-                    pieces: effectiveMarch.region.getMobilePiecesForFaction(FactionIDs.GERMANIC_TRIBES)
+                    regionId: effectiveMarch.region.id
                 });
 
             const marchingWarbands = this.getMarchingWarbands(effectiveMarch.region);
             const destination = effectiveMarch.destination;
             if (destination) {
-                MovePieces.perform(
+                MovePieces.run(
                     state, {
-                        sourceRegion: effectiveMarch.region,
-                        destRegion: destination,
+                        sourceRegionId: effectiveMarch.region.id,
+                        destRegionId: destination.id,
                         pieces: marchingWarbands
                     });
             }
@@ -68,13 +67,12 @@ class BelgaeGermanicMarch {
     static hideAllWarbands(state, faction) {
         _.each(
             state.regions, function (region) {
-                const mobilePieces = _(region.piecesByFaction()[FactionIDs.GERMANIC_TRIBES]).filter({isMobile: true}).value();
+                const mobilePieces = region.getMobilePiecesForFaction(FactionIDs.GERMANIC_TRIBES);
                 if (mobilePieces.length) {
-                    HidePieces.perform(
+                    HidePieces.run(
                         state, {
-                            faction: faction,
-                            region: region,
-                            pieces: mobilePieces
+                            factionId: faction.id,
+                            regionId: region.id
                         });
                 }
             })

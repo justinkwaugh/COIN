@@ -21,7 +21,7 @@ class Event40 {
         const numAlliesToPlace = Math.min(aeduiFaction.availableAlliedTribes().length, regionsCanPlaceAlly.length);
         _.each(_.sampleSize(regionsCanPlaceAlly, numAlliesToPlace), function(region) {
             const subduedTribes = region.subduedTribesForFaction(FactionIDs.AEDUI);
-            PlaceAlliedTribe.perform(state, {faction: aeduiFaction, region: region, tribe: _.sample(subduedTribes)});
+            PlaceAlliedTribe.run(state, {factionId: aeduiFaction.id, regionId: region.id, tribeId: _.sample(subduedTribes).id});
             delete cisalpinaAdjacentById[region.id];
             effective = true;
         });

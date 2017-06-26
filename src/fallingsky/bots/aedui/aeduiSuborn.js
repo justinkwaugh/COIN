@@ -90,7 +90,7 @@ class AeduiSuborn {
                 tribe = _.sample(subdued);
             }
 
-            PlaceAlliedTribe.perform(state, {faction: aeduiFaction, region: subornResult.region, tribe: tribe});
+            PlaceAlliedTribe.run(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, tribeId: tribe.id});
             aeduiFaction.removeResources(2);
             piecesHandled += 1;
         }

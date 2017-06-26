@@ -89,10 +89,10 @@ class BelgaeMarch {
                     }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
 
                 const piecesToMove = march.region.getMobilePiecesForFaction(FactionIDs.BELGAE);
-                MovePieces.perform(
+                MovePieces.run(
                     state, {
-                        sourceRegion: march.region,
-                        destRegion: destination.region,
+                        sourceRegionId: march.region.id,
+                        destRegionId: destination.region.id,
                         pieces: piecesToMove
                     });
                 if(destination.region.id === RegionIDs.BRITANNIA || march.region.id === RegionIDs.BRITANNIA) {
@@ -153,19 +153,18 @@ class BelgaeMarch {
 
         const warbands = _.filter(marchData.region.getMobilePiecesForFaction(FactionIDs.BELGAE), {type: "warband"});
 
-        HidePieces.perform(
+        HidePieces.run(
             state, {
-                faction: belgae,
-                region: marchData.region,
-                pieces: warbands
+                factionId: belgae.id,
+                regionId: marchData.region.id
             });
 
         const numPiecesToMove = marchData.destination.group === RegionGroups.BELGICA ? marchData.numMoveableWarbands : marchData.numNeededForControl;
         const piecesToMove = _.take(warbands, numPiecesToMove);
-        MovePieces.perform(
+        MovePieces.run(
             state, {
-                sourceRegion: marchData.region,
-                destRegion: marchData.destination,
+                sourceRegionId: marchData.region.id,
+                destRegionId: marchData.destination.id,
                 pieces: piecesToMove
             });
     }
@@ -263,10 +262,10 @@ class BelgaeMarch {
 
         if (destinationData) {
             console.log('*** Belgae leader marches to join pieces in region ' + destinationData.destination.name + ' ***');
-            MovePieces.perform(
+            MovePieces.run(
                 state, {
-                    sourceRegion: leaderMarch.region,
-                    destRegion: destinationData.destination,
+                    sourceRegionId: leaderMarch.region.id,
+                    destRegionId: destinationData.destination.id,
                     pieces: [leader]
                 });
         }

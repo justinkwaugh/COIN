@@ -28,17 +28,16 @@ class GermanicMarch {
             const marchingWarbands = this.getMarchingWarbands(nextMarch.region);
             const destination = this.findHighestPriorityDestination(nextMarch.destinations, factionOrderById,  marchingWarbands.length);
             if (!modifiers.winter) {
-                HidePieces.perform(
+                HidePieces.run(
                     state, {
-                        faction: germanicFaction,
-                        region: nextMarch.region,
-                        pieces: marchingWarbands
+                        factionId: germanicFaction.id,
+                        regionId: nextMarch.region.id,
                     });
             }
-            MovePieces.perform(
+            MovePieces.run(
                 state, {
-                    sourceRegion: nextMarch.region,
-                    destRegion: destination,
+                    sourceRegionId: nextMarch.region.id,
+                    destRegionId: destination.id,
                     pieces: marchingWarbands
                 });
             effective = true;
@@ -52,20 +51,19 @@ class GermanicMarch {
 
     static hideAllWarbands(state, faction) {
         _.each(state.regions, function(region) {
-            const mobilePieces = _(region.piecesByFaction()[FactionIDs.GERMANIC_TRIBES]).filter({isMobile: true}).value();
+            const mobilePieces = region.getMobilePiecesForFaction(FactionIDs.GERMANIC_TRIBES);
             if(mobilePieces.length) {
-                HidePieces.perform(
+                HidePieces.run(
                     state, {
-                        faction: faction,
-                        region: region,
-                        pieces: mobilePieces
+                        factionId: faction.id,
+                        regionId: region.id
                     });
             }
         })
     }
 
     static getMarchingWarbands(region) {
-        const mobilePieces = _(region.piecesByFaction()[FactionIDs.GERMANIC_TRIBES]).filter({isMobile: true}).sortBy(function(piece) {
+        const mobilePieces = _(region.getMobilePiecesForFaction(FactionIDs.GERMANIC_TRIBES)).sortBy(function(piece) {
             if (piece.scouted()) {
                 return 'a';
             }

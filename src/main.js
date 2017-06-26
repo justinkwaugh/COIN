@@ -3,16 +3,16 @@ import TheGreatRevolt from './fallingsky/scenarios/theGreatRevolt';
 import TestMarch from './fallingsky/test/arverni/testMarch';
 
 // while(true) {
-//     const game = new Game({scenario: TheGreatRevolt});
-//     game.start();
-//
-//     while (!game.ended) {
-//         game.nextTurn();
-//     }
-//
-//     game.state.logState();
+    const game = new Game({scenario: TheGreatRevolt});
+    game.start();
+
+    while (!game.ended) {
+        game.nextTurn();
+    }
+
+    game.state.logState();
 // }
-TestMarch.run();
+// TestMarch.run();
 //TestRampage.run();
 // TestBattle.run();
 // import _ from './lib/lodash';

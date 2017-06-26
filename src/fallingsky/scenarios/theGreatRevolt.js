@@ -41,7 +41,7 @@ class TheGreatRevolt extends Scenario {
         PlaceWarbands.perform(state, { faction: belgae, region: moriniRegion, count: 4});
 
         const nerviiRegion = state.regionsById[RegionIDs.NERVII];
-        DisperseTribe.perform(state, { faction: romans, tribeId : TribeIDs.EBURONES });
+        DisperseTribe.run(state, { factionId: romans.id, tribeId : TribeIDs.EBURONES });
         PlaceFort.perform(state, { faction: romans, region: nerviiRegion});
         PlaceAuxilia.perform(state, { faction: romans, region: nerviiRegion, count: 2});
         PlaceWarbands.perform(state, { faction: belgae, region: nerviiRegion, count: 1});

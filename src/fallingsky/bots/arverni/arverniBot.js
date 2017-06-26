@@ -37,11 +37,11 @@ class ArverniBot extends Bot {
         if (!commandAction && state.arverni.resources() < 4 && modifiers.isCommandAllowed(CommandIDs.RAID)) {
             commandAction = ArverniRaid.raid(state, modifiers) || FactionActions.PASS;
         }
-        //
-        // if(!commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
-        //     commandAction = ArverniMarch.march(state, modifiers);
-        // }
-        //
+
+        if(!commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
+            commandAction = ArverniMarch.march(state, modifiers, 'mass');
+        }
+
         if (!commandAction && modifiers.isCommandAllowed(CommandIDs.RAID)) {
             commandAction = ArverniRaid.raid(state, modifiers);
         }

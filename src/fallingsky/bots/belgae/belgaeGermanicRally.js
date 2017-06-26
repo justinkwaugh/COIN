@@ -13,11 +13,11 @@ class BelgaeGermanicRally {
             console.log('*** Belgae Enlisted Germanic Rally ***');
             const germanicFaction = state.factionsById[FactionIDs.GERMANIC_TRIBES];
             if (effectiveRally.allyAdded) {
-                PlaceAlliedTribe.perform(
+                PlaceAlliedTribe.run(
                     state, {
-                        faction: germanicFaction,
-                        region: effectiveRally.region,
-                        tribe: this.getAllyDestinationTribe(effectiveRally.region)
+                        factionId: germanicFaction.id,
+                        regionId: effectiveRally.region.id,
+                        tribeId: this.getAllyDestinationTribe(effectiveRally.region).id
                     });
             }
             if (effectiveRally.numWarbandsAdded > 0) {

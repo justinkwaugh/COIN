@@ -87,7 +87,7 @@ class Winter {
         _.each(state.regions, function(region) {
             region.devastated(false);
             _.each(state.factions, function(faction) {
-                HidePieces.perform(state, {faction, region});
+                HidePieces.run(state, {factionId: faction.id, regionId: region.id});
             });
         });
         state.sequenceOfPlay.resetEligibility();

@@ -57,10 +57,10 @@ class Entreat extends Command {
                     });
 
             if(arverni.availableAlliedTribes().length > 0) {
-                PlaceAlliedTribe.perform(
+                PlaceAlliedTribe.run(
                     state, {
-                        region: entreat.region,
-                        faction: arverni,
+                        regionId: entreat.region.id,
+                        factionId: arverni.id,
                         tribeId: tribeId
                     });
             }

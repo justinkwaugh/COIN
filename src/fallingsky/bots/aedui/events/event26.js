@@ -36,7 +36,7 @@ class Event26 {
                 PlaceCitadel.perform(state, {faction: aedui, region: arverniRegion, tribe: gergovia}, true);
             }
             else if (aedui.hasAvailableAlliedTribe()) {
-                PlaceAlliedTribe.perform(state, {faction: aedui, region: arverniRegion, tribe: gergovia}, true);
+                PlaceAlliedTribe.run(state, {factionId: aedui.id, regionId: arverniRegion.id, tribeId: gergovia.id}, true);
             }
             return true;
         }

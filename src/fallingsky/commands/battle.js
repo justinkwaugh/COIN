@@ -165,7 +165,7 @@ class Battle extends Command {
                 });
             if (citadelOrFort) {
                 console.log('*** Attacker is using Ballistae ***');
-                RemovePieces.perform(
+                RemovePieces.perform(state,
                     {
                         faction: defendingFaction,
                         region: region,

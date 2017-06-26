@@ -292,10 +292,10 @@ class Bot extends Player {
             const sourceFriendlyPieces = region.piecesByFaction()[this.factionId];
             const targetFriendlyPieces = retreatRegion.piecesByFaction()[this.factionId];
             if (targetFriendlyPieces.length > sourceFriendlyPieces.length) {
-                MovePieces.perform(
+                MovePieces.run(
                     state, {
-                        sourceRegion: region,
-                        destRegion: retreatRegion,
+                        sourceRegionId: region.id,
+                        destRegionId: retreatRegion.id,
                         pieces: groupedPieces.leader
                     });
             }
@@ -309,10 +309,10 @@ class Bot extends Player {
 
         const targetRegion = this.findRetreatRegion(state, region, agreeingFactionId);
         if (targetRegion) {
-            MovePieces.perform(
+            MovePieces.run(
                 state, {
-                    sourceRegion: region,
-                    destRegion: targetRegion,
+                    sourceRegionId: region.id,
+                    destRegionId: targetRegion.id,
                     pieces: pieces
                 });
         }

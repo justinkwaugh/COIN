@@ -20,11 +20,14 @@ class ArverniBattle {
         const battlegrounds = this.findBattlegrounds(state, modifiers, importantBattleRegions);
         const prioritizedBattles = this.prioritizeBattles(state, battlegrounds);
 
+        const arverni = state.arverni;
         if (prioritizedBattles.length === 0 || this.isVercingetorixInDangerWithoutBattle(state, importantBattleRegions, battlegrounds)) {
-            return ArverniMarch.march(state, modifiers, 'threat');
+            if(!arverni.hasAvailableLeader()) {
+                return ArverniMarch.march(state, modifiers, 'threat');
+            }
+            return false;
         }
 
-        const arverni = state.arverni;
         if (arverni.resources() < (prioritizedBattles[0].region.devastated() ? 2 : 1)) {
             return false;
         }

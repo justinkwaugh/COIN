@@ -35,11 +35,11 @@ class GermanicRally {
 
         while (germanicFaction.availableAlliedTribes() && allyRallies.length > 0) {
             const nextRally = allyRallies.shift();
-            PlaceAlliedTribe.perform(
+            PlaceAlliedTribe.run(
                 state, {
-                    faction: germanicFaction,
-                    region: nextRally.region,
-                    tribe: this.getAllyDestinationTribe(nextRally.region)
+                    factionId: germanicFaction.id,
+                    regionId: nextRally.region.id,
+                    tribeId: this.getAllyDestinationTribe(nextRally.region).id
                 });
         }
     }

@@ -29,20 +29,19 @@ class AeduiMarch {
             }
             const expansionPieces = effectiveMarch.expansionMarchStartRegion.piecesByFaction()[FactionIDs.AEDUI];
             const expansionWarbands = _.filter(expansionPieces, {type: 'warband'});
-            HidePieces.perform(
+            HidePieces.run(
                 currentState, {
-                    faction: faction,
-                    region: effectiveMarch.expansionMarchStartRegion,
-                    pieces: expansionWarbands
+                    factionId: faction.id,
+                    regionId: effectiveMarch.expansionMarchStartRegion.id
                 });
 
             _.each(
                 effectiveMarch.expansionMarchRegions, function (destinationRegion) {
                     const pieceToMove = expansionWarbands.shift();
-                    MovePieces.perform(
+                    MovePieces.run(
                         currentState, {
-                            sourceRegion: effectiveMarch.expansionMarchStartRegion,
-                            destRegion: destinationRegion,
+                            sourceRegionId: effectiveMarch.expansionMarchStartRegion.id,
+                            destRegionId: destinationRegion.id,
                             pieces: [pieceToMove]
                         });
                 });
@@ -59,18 +58,17 @@ class AeduiMarch {
             const numWarbandsNeeded = Math.abs(effectiveMarch.controlMarchRegion.controllingMarginByFaction()[FactionIDs.AEDUI]) + 1;
             const controlWarbands = _.take(warbands, numWarbandsNeeded);
             if (!regionsMarched[effectiveMarch.controlMarchStart.id]) {
-                HidePieces.perform(
+                HidePieces.run(
                     currentState, {
-                        faction: faction,
-                        region: effectiveMarch.controlMarchStart,
-                        pieces: warbands
+                        factionId: faction.id,
+                        regionId: effectiveMarch.controlMarchStart.id
                     })
             }
 
-            MovePieces.perform(
+            MovePieces.run(
                 currentState, {
-                    sourceRegion: effectiveMarch.controlMarchStart,
-                    destRegion: effectiveMarch.controlMarchRegion,
+                    sourceRegionId: effectiveMarch.controlMarchStart.id,
+                    destRegionId: effectiveMarch.controlMarchRegion.id,
                     pieces: controlWarbands
                 });
 
