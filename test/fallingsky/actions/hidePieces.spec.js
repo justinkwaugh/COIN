@@ -32,7 +32,7 @@ describe("Hide Pieces", function () {
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);
         HidePieces.execute(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI});
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(5);
-        state.history.undo(state);
+        state.actionHistory.undo(state);
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);
     });
 

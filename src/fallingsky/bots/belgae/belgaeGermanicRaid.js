@@ -1,6 +1,7 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import RevealPieces from '../../actions/revealPieces';
+import RemoveResources from '../../actions/removeResources';
 import Raid from '../../commands/raid';
 
 class BelgaeGermanicRaid {
@@ -19,7 +20,8 @@ class BelgaeGermanicRaid {
             let numResourcesToSteal = effectiveRaid.resourcesGained;
             _.each(enemyFactionOrder, function(faction) {
                 const stolen = Math.min(numResourcesToSteal, faction.resources());
-                faction.removeResources(stolen);
+                RemoveResources.execute(state, { factionId: faction.id, count: stolen});
+
                 numResourcesToSteal -= stolen;
 
                 if (numResourcesToSteal <= 0) {

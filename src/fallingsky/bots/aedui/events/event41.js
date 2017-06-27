@@ -3,6 +3,7 @@ import FactionIDs from '../../../config/factionIds';
 import RegionIDs from '../../../config/regionIds';
 import PlaceAlliedTribe from '../../../actions/placeAlliedTribe';
 import PlaceCitadel from '../../../actions/placeCitadel';
+import AddResources from '../../../actions/addResources';
 
 class Event41 {
     static handleEvent(state) {
@@ -64,7 +65,7 @@ class Event41 {
         }, 0);
 
         if(numResourcesToGain > 0 && aeduiFaction.resources() < 45) {
-            aeduiFaction.addResources(numResourcesToGain);
+            AddResources.execute(state, { factionId: FactionIDs.AEDUI, count: numResourcesToGain});
             effective = true;
         }
 

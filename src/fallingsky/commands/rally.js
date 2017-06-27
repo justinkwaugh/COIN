@@ -7,6 +7,7 @@ import RallyRegionResults from './rallyRegionResults';
 
 import PlaceAlliedTribe from '../actions/placeAlliedTribe';
 import PlaceCitadel  from '../actions/placeCitadel';
+import RemoveResources  from '../actions/removeResources';
 import PlaceWarbands  from '../actions/placeWarbands';
 import {CapabilityIDs} from '../config/capabilities';
 
@@ -39,9 +40,11 @@ class Rally extends Command {
                 let allyAdded = false;
                 let warbandsAdded = false;
 
+                const actions = [];
+
                 if (regionResult.addCitadel && faction.availableCitadels().length > 0) {
                     const tribeForCity = regionResult.region.getAlliedCityForFaction(faction.id);
-                    PlaceCitadel.execute(state, {factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForCity.id});
+                    actions.push(new PlaceCitadel({factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForCity.id}));
                     citadelAdded = true;
                 }
 
@@ -50,25 +53,24 @@ class Rally extends Command {
                         tribe => tribe.isCity ? 'a' : 'b').groupBy(
                         tribe => tribe.isCity ? 'a' : 'b').map(_.shuffle).flatten().first();
 
-                    PlaceAlliedTribe.execute(state, {factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForAlly.id});
+                    actions.push(new PlaceAlliedTribe({factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForAlly.id}));
                     allyAdded = true;
                 }
 
                 if ((!citadelAdded && !allyAdded) || hasVercingetorix || isGermanic) {
                     if (regionResult.addNumWarbands > 0 && faction.availableWarbands().length > 0) {
-                        PlaceWarbands.execute(
-                            state, {
+                        actions.push(new PlaceWarbands({
                                 factionId: faction.id,
                                 regionId: regionResult.region.id,
                                 count: Math.min(regionResult.addNumWarbands, faction.availableWarbands().length)
-                            });
+                            }));
                         warbandsAdded = true;
                     }
-
                 }
 
                 if (citadelAdded || allyAdded || warbandsAdded) {
-                    faction.removeResources(regionResult.cost);
+                    RemoveResources.execute(state, { factionId: faction.id, count: regionResult.cost});
+                    _.each(actions, action=>action.execute(state));
                 }
             });
     }

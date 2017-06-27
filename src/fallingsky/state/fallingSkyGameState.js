@@ -1,6 +1,7 @@
 import _ from '../../lib/lodash';
 import ko from '../../lib/knockout';
-import History from '../../common/history';
+import ActionHistory from '../../common/actionHistory';
+import TurnHistory from '../../common/turnHistory';
 import GameState from '../../common/gameState';
 import Factions from '../config/factions';
 import FactionIDs from '../config/factionIds';
@@ -49,7 +50,8 @@ class FallingSkyGameState extends GameState {
                            FactionIDs.BELGAE]
             });
 
-        this.history = new History();
+        this.turnHistory = new TurnHistory();
+        this.actionHistory = new ActionHistory();
         this.capabilitiesById = ko.observable({});
 
         this.deck = ko.observableArray();

@@ -60,6 +60,20 @@ class HidePieces extends Action {
             }
         });
     }
+
+    instructions(state) {
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        const instructions = [];
+        if(this.numHiddenFromScouted > 0) {
+            instructions.push(
+                'Remove scouted marker from ' + this.numHiddenFromScouted + 'x ' + faction.name + ' pieces in ' + region.name);
+        }
+        if(this.numHiddenFromRevealed > 0 ) {
+            instructions.push('Hide ' + this.numHiddenFromRevealed + 'x ' + faction.name + ' pieces in ' + region.name);
+        }
+        return instructions;
+    }
 }
 
 export default HidePieces;

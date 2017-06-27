@@ -34,6 +34,11 @@ class DisperseTribe extends Action {
         tribe.undisperse();
     }
 
+    instructions(state) {
+        const tribe = state.tribesById[this.tribeId];
+        return ['Place dispersed marker on ' + tribe.name];
+    }
+
 }
 
 export default DisperseTribe

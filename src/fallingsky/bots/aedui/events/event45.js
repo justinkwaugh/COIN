@@ -1,6 +1,8 @@
 import _ from '../../../../lib/lodash';
 import FactionIDs from '../../../config/factionIds';
 import RemovePieces from '../../../actions/removePieces';
+import AddResources from '../../../actions/addResources';
+import RemoveResources from '../../../actions/removeResources';
 import PlaceWarbands from '../../../actions/placeWarbands';
 
 class Event45 {
@@ -48,8 +50,8 @@ class Event45 {
 
         if (arverniFaction.resources() > 0) {
             const numToTransfer = Math.min(arverniFaction.resources(), 4);
-            arverniFaction.removeResources(numToTransfer);
-            aeduiFaction.addResources(numToTransfer);
+            RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: numToTransfer});
+            AddResources.execute(state, { factionId: FactionIDs.AEDUI, count: numToTransfer});
             effective = true;
         }
         return effective;

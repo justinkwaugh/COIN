@@ -51,6 +51,13 @@ class RevealPieces extends Action {
             });
     }
 
+    instructions(state) {
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        if(this.count) {
+            return ['Reveal ' + this.count + 'x ' + faction.name + ' pieces in ' + region.name];
+        }
+    }
 }
 
 export default RevealPieces;

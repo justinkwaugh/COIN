@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import Entreat from '../../commands/arverni/entreat';
+import RemoveResources from '../../actions/removeResources';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionIDs from '../../config/factionIds';
 
@@ -18,7 +19,7 @@ class ArverniEntreat {
             if(!modifiers.free && arverni.resources() < entreat.cost) {
                 return false;
             }
-            arverni.removeResources(entreat.cost);
+            RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: entreat.cost});
             Entreat.execute(state, {
                 entreat
             });

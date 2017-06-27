@@ -1,6 +1,8 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import RevealPieces from '../../actions/revealPieces';
+import RemoveResources from '../../actions/removeResources';
+import AddResources from '../../actions/addResources';
 import Raid from '../../commands/raid';
 import AeduiTrade from './aeduiTrade';
 import AeduiSuborn from './aeduiSuborn';
@@ -13,19 +15,20 @@ class AeduiRaid {
                 console.log('*** ' + aeduiFaction.name + ' Raiding in region ' + raidResult.region.name);
 
                 RevealPieces.execute(currentState, {factionId: aeduiFaction.id, regionId: raidResult.region.id, count: raidResult.resourcesGained});
-                aeduiFaction.addResources(raidResult.resourcesGained);
 
                 let numResourcesToSteal = raidResult.resourcesGained;
                 if (_.indexOf(raidResult.raidableFactions, FactionIDs.ARVERNI) >= 0) {
                     const arverni = currentState.factionsById[FactionIDs.ARVERNI];
                     let stolenFromArverni = Math.min(numResourcesToSteal, arverni.resources());
-                    arverni.removeResources(stolenFromArverni);
+                    RemoveResources.execute(currentState, { factionId: FactionIDs.ARVERNI, count: stolenFromArverni});
                     numResourcesToSteal -= stolenFromArverni;
                 }
                 else if (_.indexOf(raidResult.raidableFactions, FactionIDs.BELGAE) >= 0) {
                     const belgae = currentState.factionsById[FactionIDs.BELGAE];
-                    belgae.removeResources(numResourcesToSteal);
+                    let stolenFromBelgae = Math.min(numResourcesToSteal, belgae.resources());
+                    RemoveResources.execute(currentState, { factionId: FactionIDs.BELGAE, count: stolenFromBelgae});
                 }
+                AddResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: raidResult.resourcesGained});
             });
 
         const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(currentState, modifiers, bot) || AeduiSuborn.suborn(currentState, modifiers));

@@ -38,6 +38,12 @@ class PlaceWarbands extends Action {
         faction.returnWarbands(warbands);
     }
 
+    instructions(state) {
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        const count = this.count;
+        return ['Place ' + count + 'x ' + faction.name + ' Warbands in ' + region.name];
+    }
 }
 
 export default PlaceWarbands;

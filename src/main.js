@@ -1,16 +1,18 @@
 import Game from './fallingsky/game.js';
 import TheGreatRevolt from './fallingsky/scenarios/theGreatRevolt';
+import ko from './lib/knockout';
 import TestMarch from './fallingsky/test/arverni/testMarch';
 
 // while(true) {
     const game = new Game({scenario: TheGreatRevolt});
-    game.start();
+    $('test');
+    ko.applyBindings(game);
+    // game.start();
+    //
+    // while (!game.ended()) {
+    //     game.nextTurn();
+    // }
 
-    while (!game.ended) {
-        game.nextTurn();
-    }
-
-    game.state.logState();
 // }
 // TestMarch.run();
 //TestRampage.run();

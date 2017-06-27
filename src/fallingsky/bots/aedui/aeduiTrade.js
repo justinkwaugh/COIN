@@ -1,6 +1,7 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import Trade from '../../commands/aedui/trade';
+import AddResources from '../../actions/addResources';
 
 class AeduiTrade {
 
@@ -45,7 +46,8 @@ class AeduiTrade {
             return false;
         }
         console.log('*** Aedui Trading ***');
-        aeduiFaction.addResources(resourcesToBeGained);
+        AddResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: resourcesToBeGained});
+
         return true;
     }
 }

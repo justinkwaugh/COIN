@@ -6,6 +6,7 @@ import ArverniDevastate from './arverniDevastate';
 import ArverniEntreat from './arverniEntreat';
 import ArverniMarch from './arverniMarch';
 import CommandModifier from '../../commands/commandModifiers';
+import RemoveResources from '../../actions/removeResources';
 import FactionActions from '../../../common/factionActions';
 
 class ArverniBattle {
@@ -51,7 +52,7 @@ class ArverniBattle {
                         defendingFaction: battle.defendingFaction,
                         ambush: willAmbush
                     });
-                arverni.removeResources(cost);
+                RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: cost});
             });
 
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;

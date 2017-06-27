@@ -67,6 +67,14 @@ class RemovePieces extends Action {
         throw 'Unable to undo RemovePieces Action';
     }
 
+    instructions(state) {
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        const pieces = this.pieces;
+
+        return _.concat(['Remove the following ' + faction.name + ' pieces from region ' + region.name],Logging.getPiecesList(pieces));
+    }
+
 }
 
 export default RemovePieces;

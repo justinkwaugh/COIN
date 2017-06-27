@@ -1,7 +1,8 @@
 var path = require('path');
+var webpack = require('webpack');
 
 module.exports = {
-    entry: './src/main.js',
+    entry: ['bootstrap-loader', './src/main.js'],
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist')
@@ -13,12 +14,12 @@ module.exports = {
             'Access-Control-Allow-Origin': '*'
         }
     },
-    resolve: {
-        modules: [
-            path.resolve('./src'),
-            path.resolve('./node_modules')
-        ]
-    },
+    // resolve: {
+    //     modules: [
+    //         path.resolve('./src'),
+    //         path.resolve('./node_modules')
+    //     ]
+    // },
     module: {
         loaders: [{
             test: /\.js$/,
@@ -28,7 +29,15 @@ module.exports = {
             ],
             exclude: /node_modules/,
             loader: 'babel-loader'
-        }]
-    }
+        },{test: /\.(woff2?|svg)$/, loader: 'url-loader?limit=10000'},
+            {test: /\.(ttf|eot)$/, loader: 'file-loader'}
+        ]
+    },
+    plugins: [
+        new webpack.ProvidePlugin({
+            $: 'jquery',
+            jQuery: 'jquery'
+        })
+    ]
 
 };

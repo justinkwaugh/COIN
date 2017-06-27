@@ -36,7 +36,7 @@ describe("Place Warbands", function () {
         expect(aedui.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(5);
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(5);
 
-        state.history.undo(state);
+        state.actionHistory.undo(state);
 
         expect(aedui.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(0);
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);

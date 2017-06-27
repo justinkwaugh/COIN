@@ -32,6 +32,12 @@ class PlaceLegions extends Action {
         throw 'Unable to undo PlaceLegions Action';
     }
 
+    instructions(state) {
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        const count = this.count;
+        return ['Place ' + count + 'x ' + faction.name + ' Legions in ' + region.name];
+    }
 }
 
 export default PlaceLegions;

@@ -63,6 +63,7 @@ class FallingSkyFaction extends Faction {
         }
         this.resources(resourcesAfterAdd);
         console.log(this.name + ' is adding ' + (resourcesAfterAdd - resourcesBeforeAdd) + ' resources.  Now at ' + resourcesAfterAdd);
+        return resourcesAfterAdd - resourcesBeforeAdd;
     }
 
     removeResources(count) {
@@ -73,6 +74,7 @@ class FallingSkyFaction extends Faction {
         }
         this.resources(resourcesAfterRemove);
         console.log(this.name + ' is removing ' + (resourcesBeforeRemove - resourcesAfterRemove) + ' resources.  Now at ' + resourcesAfterRemove);
+        return resourcesBeforeRemove - resourcesAfterRemove;
     }
 
     hasAvailableLeader() {

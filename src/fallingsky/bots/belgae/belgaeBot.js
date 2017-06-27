@@ -48,7 +48,9 @@ class BelgaeBot extends Bot {
             commandAction = BelgaeRaid.raid(state, modifiers);
         }
 
-        state.sequenceOfPlay.recordFactionAction(FactionIDs.BELGAE, commandAction || FactionActions.PASS);
+        commandAction = commandAction || FactionActions.PASS;
+        state.sequenceOfPlay.recordFactionAction(FactionIDs.BELGAE, commandAction);
+        return commandAction;
     }
 
     shouldPassForNextCard(state) {

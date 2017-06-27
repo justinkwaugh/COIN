@@ -6,7 +6,7 @@ class Citadel extends FactionPiece {
         definition.type = 'citadel';
         super(definition);
 
-        this.tribeId = ko.observable();
+        this.tribeId = null;
     }
 }
 

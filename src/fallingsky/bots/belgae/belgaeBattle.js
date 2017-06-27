@@ -6,6 +6,7 @@ import BelgaeRampage from './belgaeRampage';
 import BelgaeEnlist from './belgaeEnlist';
 import BelgaeMarch from './belgaeMarch';
 import CommandModifier from '../../commands/commandModifiers';
+import RemoveResources from '../../actions/removeResources';
 import FactionActions from '../../../common/factionActions';
 
 class BelgaeBattle {
@@ -62,7 +63,7 @@ class BelgaeBattle {
                         ambush: willAmbush,
                         enlistGermans: battle.canEnlistGermans
                     });
-                belgae.removeResources(cost);
+                RemoveResources.execute(state, { factionId: FactionIDs.BELGAE, count: cost});
             });
 
         if (modifiers.canDoSpecial() && !didSpecial) {

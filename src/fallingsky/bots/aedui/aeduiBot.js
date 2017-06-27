@@ -24,19 +24,18 @@ class AeduiBot extends Bot {
     takeTurn(state) {
         const aeduiFaction = state.factionsById[this.factionId];
 
+        let action = null;
         if (this.shouldPassForNextCard(state)) {
-            state.sequenceOfPlay.recordFactionAction(FactionIDs.AEDUI, FactionActions.PASS);
-            return;
+            action = FactionActions.PASS;
         }
-
-        if (this.canPlayEvent(state) && AeduiEvent.handleEvent(state)) {
-            state.sequenceOfPlay.recordFactionAction(FactionIDs.AEDUI, FactionActions.EVENT);
-            return;
+        else if (this.canPlayEvent(state) && AeduiEvent.handleEvent(state)) {
+            action = FactionActions.EVENT;
         }
-
-        const action = this.executeCommand(state, new CommandModifiers(), aeduiFaction);
+        else {
+            action = this.executeCommand(state, new CommandModifiers(), aeduiFaction);
+        }
         state.sequenceOfPlay.recordFactionAction(FactionIDs.AEDUI, action);
-
+        return action;
     }
 
     executeCommand(state, modifiers) {

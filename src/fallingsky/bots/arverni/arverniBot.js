@@ -46,7 +46,9 @@ class ArverniBot extends Bot {
             commandAction = ArverniRaid.raid(state, modifiers);
         }
 
-        state.sequenceOfPlay.recordFactionAction(FactionIDs.ARVERNI, commandAction || FactionActions.PASS);
+        commandAction = commandAction || FactionActions.PASS;
+        state.sequenceOfPlay.recordFactionAction(FactionIDs.ARVERNI, commandAction);
+        return commandAction;
     }
 
 }

@@ -8,8 +8,12 @@ class Action {
 
     static execute(state, args) {
         const action = new this(args);
-        action.doExecute(state);
-        state.history.addAction(action);
+        action.execute(state);
+    }
+
+    execute(state) {
+        this.doExecute(state);
+        state.actionHistory.addAction(this);
     }
 
     doUndo() {
@@ -19,6 +23,10 @@ class Action {
 
     doExecute() {
 
+    }
+
+    instructions(state) {
+        return [];
     }
 
 }

@@ -5,6 +5,7 @@ import AeduiTrade from './aeduiTrade';
 import AeduiSuborn from './aeduiSuborn';
 import MovePieces from '../../actions/movePieces';
 import HidePieces from '../../actions/hidePieces';
+import RemoveResources from '../../actions/removeResources';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
 
@@ -25,7 +26,7 @@ class AeduiMarch {
         if (effectiveMarch.expansionMarchRegions.length > 0) {
             console.log('*** Aedui march to expand ***');
             if (!modifiers.free) {
-                faction.removeResources(effectiveMarch.expansionMarchCost);
+                RemoveResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: effectiveMarch.expansionMarchCost});
             }
             const expansionPieces = effectiveMarch.expansionMarchStartRegion.piecesByFaction()[FactionIDs.AEDUI];
             const expansionWarbands = _.filter(expansionPieces, {type: 'warband'});
@@ -51,7 +52,7 @@ class AeduiMarch {
         if (effectiveMarch.controlMarchRegion) {
             console.log('*** Aedui march to control ***');
             if (!modifiers.free) {
-                faction.removeResources(effectiveMarch.controlMarchCost);
+                RemoveResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: effectiveMarch.controlMarchCost});
             }
             const controlPieces = effectiveMarch.controlMarchStart.piecesByFaction()[FactionIDs.AEDUI];
             const warbands = _(controlPieces).filter({type: 'warband'}).value();

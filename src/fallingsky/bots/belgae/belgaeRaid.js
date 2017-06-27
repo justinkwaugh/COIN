@@ -1,6 +1,8 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import RevealPieces from '../../actions/revealPieces';
+import RemoveResources from '../../actions/removeResources';
+import AddResources from '../../actions/addResources';
 import Raid from '../../commands/raid';
 import BelgaeRampage from './belgaeRampage';
 import BelgaeEnlist from './belgaeEnlist';
@@ -26,7 +28,6 @@ class BelgaeRaid {
                         regionId: raidResult.region.id,
                         count: raidResult.resourcesGained
                     });
-                state.belgae.addResources(raidResult.resourcesGained);
 
                 let numResourcesToSteal = raidResult.resourcesGained;
                 _(raidResult.raidableFactions).sortBy(factionId => EnemyFactionPriority[factionId]).each(
@@ -36,13 +37,15 @@ class BelgaeRaid {
                         }
                         const faction = state.factionsById[factionId];
                         const stolen = Math.min(numResourcesToSteal, faction.resources());
-                        faction.removeResources(stolen);
+                        RemoveResources.execute(state, { factionId: faction.id, count: stolen});
                         numResourcesToSteal -= stolen;
 
                         if (numResourcesToSteal === 0) {
                             return false;
                         }
                     });
+
+                AddResources.execute(state, { factionId: FactionIDs.BELGAE, count: raidResult.resourcesGained});
             });
 
         const usedSpecialAbility = modifiers.canDoSpecial() && (BelgaeRampage.rampage(state, modifiers) || BelgaeEnlist.enlist(state, modifiers));

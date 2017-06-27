@@ -3,6 +3,7 @@ import FactionIDs from '../../config/factionIds';
 import Suborn from '../../commands/aedui/suborn';
 import PlaceAlliedTribe from '../../actions/placeAlliedTribe';
 import RemovePieces from '../../actions/removePieces';
+import RemoveResources from '../../actions/removeResources';
 import PlaceWarbands from '../../actions/placeWarbands';
 import EnemyFactionPriority from './enemyFactionPriority';
 import {CapabilityIDs} from '../../config/capabilities';
@@ -91,7 +92,7 @@ class AeduiSuborn {
             }
 
             PlaceAlliedTribe.execute(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, tribeId: tribe.id});
-            aeduiFaction.removeResources(2);
+            RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: 2});
             piecesHandled += 1;
         }
         else if ((aeduiFaction.resources() >= 2 || modifiers.free) && subornResult.alliedFactions.length > 0) {
@@ -123,7 +124,7 @@ class AeduiSuborn {
                     pieces: [alliedTribe]
                 });
             if(!modifiers.free) {
-                aeduiFaction.removeResources(2);
+                RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: 2});
             }
             piecesHandled += 1;
         }
@@ -132,7 +133,7 @@ class AeduiSuborn {
         if (numWarbandsToAdd) {
             PlaceWarbands.execute(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, count: numWarbandsToAdd});
             if(!modifiers.free) {
-                aeduiFaction.removeResources(numWarbandsToAdd);
+                RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: numWarbandsToAdd});
             }
             piecesHandled += numWarbandsToAdd;
         }
@@ -170,7 +171,7 @@ class AeduiSuborn {
                                 pieces: _.take(pieces, numPiecesToRemove)
                             });
                         if(!modifiers.free) {
-                            aeduiFaction.removeResources(numPiecesToRemove);
+                            RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: numPiecesToRemove});
                         }
                         piecesHandled += numPiecesToRemove;
                     }

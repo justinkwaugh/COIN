@@ -1,9 +1,9 @@
 const FactionActions = {
-    EVENT: 'event',
-    COMMAND: 'command',
-    COMMAND_AND_SPECIAL: 'command-and-special',
-    LIMITED_COMMAND: 'limited-command',
-    PASS: 'pass'
+    EVENT: 'Event',
+    COMMAND: 'Command',
+    COMMAND_AND_SPECIAL: 'Command and Special',
+    LIMITED_COMMAND: 'Limited Command',
+    PASS: 'Pass'
 };
 
 export default FactionActions;

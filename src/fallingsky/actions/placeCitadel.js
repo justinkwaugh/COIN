@@ -32,6 +32,12 @@ class PlaceCitadel extends Action {
         throw 'Unable to undo PlaceCitadel Action';
     }
 
+    instructions(state) {
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        const tribe = state.tribesById[this.tribeId];
+        return ['Place ' + faction.name + ' Citadel in ' + tribe.name + ' in region ' + region.name];
+    }
 }
 
 export default PlaceCitadel;

@@ -7,6 +7,7 @@ import ArverniDevastate from './arverniDevastate';
 import ArverniEntreat from './arverniEntreat';
 import MovePieces from '../../actions/movePieces';
 import RemovePieces from '../../actions/removePieces';
+import RemoveResources from '../../actions/removeResources';
 import HidePieces from '../../actions/hidePieces';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
@@ -60,7 +61,7 @@ class ArverniMarch {
                 }
 
                 if (!modifiers.free) {
-                    arverni.removeResources(leaderMarch.march.cost);
+                    RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: leaderMarch.march.cost});
                 }
 
                 HidePieces.execute(
@@ -245,7 +246,7 @@ class ArverniMarch {
             }
 
             if (!modifiers.free) {
-                arverni.removeResources(march.cost);
+                RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: march.cost});
             }
 
             HidePieces.execute(

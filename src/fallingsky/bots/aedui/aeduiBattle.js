@@ -4,6 +4,7 @@ import Battle from '../../commands/battle';
 import AeduiTrade from './aeduiTrade';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
+import RemoveResources from '../../actions/removeResources';
 
 class AeduiBattle {
 
@@ -38,7 +39,7 @@ class AeduiBattle {
                         ambush: willAmbush
                     });
                 if (!modifiers.free) {
-                    aeduiFaction.removeResources(battle.region.devastated() ? 2 : 1);
+                    RemoveResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: battle.region.devastated() ? 2 : 1});
                 }
 
                 if (modifiers.limited) {

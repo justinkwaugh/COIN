@@ -4,6 +4,7 @@ import RegionIDs from '../../../config/regionIds';
 import PlaceAlliedTribe from '../../../actions/placeAlliedTribe';
 import PlaceWarbands from '../../../actions/placeWarbands';
 import PlaceAuxilia from '../../../actions/placeAuxilia';
+import AddResources from '../../../actions/addResources';
 
 class Event40 {
     static handleEvent(state) {
@@ -55,7 +56,7 @@ class Event40 {
         });
 
         if(aeduiFaction.resources() < 45) {
-            aeduiFaction.addResources(4);
+            AddResources.execute(state, { factionId: FactionIDs.AEDUI, count: 4});
             effective = true;
         }
 

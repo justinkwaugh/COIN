@@ -9,6 +9,7 @@ class RomanBot extends Bot {
     takeTurn(currentState) {
         const action = currentState.sequenceOfPlay.availableActions()[0];
         currentState.sequenceOfPlay.recordFactionAction(FactionIDs.ROMANS, action);
+        return action;
     }
 
     willHarass(factionId) {

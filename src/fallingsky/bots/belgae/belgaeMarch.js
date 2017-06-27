@@ -8,6 +8,7 @@ import MovePieces from '../../actions/movePieces';
 import HidePieces from '../../actions/hidePieces';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
+import RemoveResources from '../../actions/removeResources';
 import Map from '../../util/map';
 
 class BelgaeMarch {
@@ -62,7 +63,7 @@ class BelgaeMarch {
                 }
 
                 if(!modifiers.free) {
-                    belgae.removeResources(march.cost);
+                    RemoveResources.execute(state, { factionId: FactionIDs.BELGAE, count: march.cost});
                 }
                 const destination = _(solutions).map(
                     (arr) => {
@@ -148,7 +149,7 @@ class BelgaeMarch {
         console.log('*** Belgae march to control region ' + marchData.destination.name + ' ***');
         const belgae = state.belgae;
         if (!modifiers.free) {
-            belgae.removeResources(marchData.cost);
+            RemoveResources.execute(state, { factionId: FactionIDs.BELGAE, count: marchData.cost});
         }
 
         const warbands = _.filter(marchData.region.getMobilePiecesForFaction(FactionIDs.BELGAE), {type: "warband"});

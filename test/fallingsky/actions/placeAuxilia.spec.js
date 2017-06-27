@@ -36,7 +36,7 @@ describe("Place Auxilia", function () {
         expect(aeduiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(5);
         expect(aeduiRegion.getHiddenPiecesForFaction(FactionIDs.ROMANS).length).to.equal(5);
 
-        state.history.undo(state);
+        state.actionHistory.undo(state);
 
         expect(aeduiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
         expect(aeduiRegion.getHiddenPiecesForFaction(FactionIDs.ROMANS).length).to.equal(0);

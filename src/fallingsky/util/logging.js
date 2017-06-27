@@ -3,31 +3,39 @@ import _ from '../../lib/lodash';
 class Logging {
 
     static logPieces(pieces) {
+        _.each(this.getPiecesList(pieces), (piece)=>{
+            console.log('    ' + piece);
+        });
+    }
+
+    static getPiecesList(pieces) {
+        const list = [];
+
         const piecesByType = _.groupBy(pieces, 'type');
 
         const leaders = piecesByType.leader;
         _.each(leaders, function (leader) {
-                console.log('    ' + leader.toString());
+                list.push(leader.toString());
             });
 
         const citadels = piecesByType.citadel;
         _.each(citadels, function (citadel) {
-                console.log('    ' + citadel.tribeId + ' Citadel');
+                list.push(citadel.tribeId + ' Citadel');
             });
 
         const forts = piecesByType.fort;
         if (forts) {
-            console.log('    Roman Fort');
+            list.push('Roman Fort');
         }
 
         const allies = piecesByType.alliedtribe;
         _.each(allies, function (ally) {
-                console.log('    ' + ally.tribeId + ' Ally');
+                list.push(ally.tribeId + ' Ally');
             });
 
         const legions = piecesByType.legion;
         if (legions) {
-            console.log('    ' + legions.length + 'x Legions');
+            list.push(legions.length + 'x Legions');
         }
 
         let status;
@@ -36,8 +44,7 @@ class Logging {
             status = _.groupBy(warbands, function (warband) {
                     return warband.revealed() ? 'revealed' : 'hidden';
                 });
-            console.log(
-                '    ' + warbands.length + 'x Warbands (' +
+            list.push(warbands.length + 'x Warbands (' +
                 (status.hidden ? status.hidden.length : 0) + ' hidden, ' +
                 (status.revealed ? status.revealed.length : 0) + ' revealed)');
         }
@@ -47,12 +54,12 @@ class Logging {
             status = _.groupBy(auxilia, function (auxilia) {
                     return auxilia.revealed() ? 'revealed' : 'hidden';
                 });
-            console.log(
-                '    ' + auxilia.length + 'x Auxilia (' +
+            list.push(auxilia.length + 'x Auxilia (' +
                 (status.hidden ? status.hidden.length : 0) + ' hidden, ' +
                 (status.revealed ? status.revealed.length : 0) + ' revealed)');
         }
 
+        return list;
     }
 
 }

@@ -24,6 +24,11 @@ class PlaceFort extends Action {
         throw 'Unable to undo PlaceFort Action';
     }
 
+    instructions(state) {
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        return ['Place ' + faction.name + ' Fort in ' + region.name];
+    }
 }
 
 export default PlaceFort;

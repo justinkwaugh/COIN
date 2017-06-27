@@ -1,5 +1,6 @@
 import FactionIDs from '../config/factionIds';
 import UndisperseTribe from '../actions/undisperseTribe';
+import AddResources from '../actions/addResources';
 import HidePieces from '../actions/hidePieces';
 
 class Winter {
@@ -50,7 +51,7 @@ class Winter {
         const romans = state.factionsById[FactionIDs.ROMANS];
         const romanVictory = romans.victoryScore(state);
         if(romanVictory > 0) {
-            romans.addResources(romanVictory);
+            AddResources.execute(state, { factionId: FactionIDs.ROMANS, count: romanVictory});
         }
 
         _.each([FactionIDs.AEDUI, FactionIDs.ARVERNI, FactionIDs.BELGAE], function(factionId) {
@@ -60,7 +61,7 @@ class Winter {
                 resources += 4;
             }
             if(resources > 0) {
-                faction.addResources(resources);
+                AddResources.execute(state, { factionId: faction.id, count: resources});
             }
         });
     }

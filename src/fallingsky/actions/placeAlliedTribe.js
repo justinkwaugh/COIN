@@ -34,6 +34,13 @@ class PlaceAlliedTribe extends Action {
         throw 'Unable to undo PlaceAlliedTribe Action';
     }
 
+    instructions(state) {
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        const tribe = state.tribesById[this.tribeId];
+        return ['Place ' + faction.name + ' Ally in ' + tribe.name + ' in region ' + region.name];
+    }
+
 }
 
 export default PlaceAlliedTribe;

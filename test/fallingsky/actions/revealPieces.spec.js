@@ -31,7 +31,7 @@ describe("Reveal Pieces", function () {
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(5);
         RevealPieces.execute(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI});
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);
-        state.history.undo(state);
+        state.actionHistory.undo(state);
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(5);
     });
 
@@ -43,7 +43,7 @@ describe("Reveal Pieces", function () {
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(4);
         RevealPieces.execute(state, { factionId : FactionIDs.AEDUI, regionId : RegionIDs.AEDUI, count: 3});
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(1);
-        state.history.undo(state);
+        state.actionHistory.undo(state);
         expect(aedui.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(4);
     });
 });

@@ -161,12 +161,28 @@ class FallingSkyRegion extends Region {
         return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && !piece.revealed());
     }
 
+    getRevealedPiecesForFaction(factionId) {
+        return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && piece.revealed());
+    }
+
+    getScoutedPiecesForFaction(factionId) {
+        return _.filter(this.piecesByFaction()[factionId], piece => piece.type === 'warband' && piece.scouted());
+    }
+
     getMobilePiecesForFaction(factionId) {
         return _.filter(this.piecesByFaction()[factionId], {isMobile:true});
     }
 
     getWarbandsOrAuxiliaForFaction(factionId) {
         return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia'));
+    }
+
+    getLegions() {
+        return _.filter(this.piecesByFaction()[FactionIDs.ROMANS], piece => piece.type === 'legion' );
+    }
+
+    getFort() {
+        return _.find(this.piecesByFaction()[FactionIDs.ROMANS], piece => piece.type === 'fort' );
     }
 
     getAlliesForFaction(factionId) {
