@@ -89,6 +89,10 @@ class FallingSkyGameState extends GameState {
         this.capabilitiesById()[capability.id] = capability;
     }
 
+    removeCapability(capabilityId) {
+        delete this.capabilitiesById()[capability.id];
+    }
+
     hasShadedCapability(capabilityId, factionId) {
         const capability = this.capabilitiesById()[capabilityId];
         return capability &&

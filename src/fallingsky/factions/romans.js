@@ -18,7 +18,8 @@ class Romans extends FallingSkyFaction {
             numAlliedTribes: 6,
             numCitadels: 0,
             hasLeader: true,
-            leaderName: 'Julius Caesar'
+            leaderName: 'Julius Caesar',
+            passResources: 2
         };
         super(definition);
 

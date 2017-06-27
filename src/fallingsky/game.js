@@ -19,6 +19,12 @@ class Game {
         this.lastTurn = ko.observable();
         this.activePanel = ko.observable(ActivePanelIDs.REGIONS);
         this.ActivePanelIDs = ActivePanelIDs;
+        this.endOfCard = ko.pureComputed(() => {
+            return this.state().sequenceOfPlay.secondFaction() || this.state().sequenceOfPlay.eligibleFactions().length === 0;
+        });
+        this.winterNext = ko.pureComputed(() => {
+            return this.state().currentCard() && this.state().currentCard().type === 'winter';
+        });
     }
 
     setActivePanel(newPanel) {
@@ -59,9 +65,21 @@ class Game {
     }
 
     nextTurn() {
+        if (this.endOfCard()) {
+            this.state().sequenceOfPlay.updateEligibility();
+            this.drawCard();
+            this.lastTurn(null);
+            return;
+        }
+
         if (this.state().currentCard().type === 'winter') {
             this.state().frost(false);
+            const turn = new Turn({ number: this.state().turnHistory.nextTurnNumber(), factionId: 'Germanic', actionStartIndex: this.state().actionHistory.currentIndex()});
             Winter.executeWinter(this.state());
+            turn.actionEndIndex = this.state().actionHistory.currentIndex();
+            turn.commandAction = 'Winter';
+            this.state().turnHistory.addTurn(turn);
+            this.lastTurn(turn);
             this.drawCard();
             return;
         }
@@ -76,12 +94,6 @@ class Game {
         turn.commandAction = commandAction;
         this.state().turnHistory.addTurn(turn);
         this.lastTurn(turn);
-
-        if (this.state().sequenceOfPlay.secondFaction() || this.state().sequenceOfPlay.eligibleFactions().length === 0) {
-            console.log('End of event: ' + nextFaction);
-            this.state().sequenceOfPlay.updateEligibility();
-            this.drawCard();
-        }
     }
 
     styleSuffixForFaction(factionId) {

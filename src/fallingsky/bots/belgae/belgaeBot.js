@@ -8,6 +8,7 @@ import BelgaeMarch from './belgaeMarch';
 import CommandModifiers from '../../commands/commandModifiers';
 import CommandIDs from '../../config/commandIds';
 import FactionActions from '../../../common/factionActions';
+import Pass from '../../commands/pass';
 
 class BelgaeBot extends Bot {
     constructor() {
@@ -22,13 +23,11 @@ class BelgaeBot extends Bot {
         }
 
         if (!commandAction && this.shouldPassForNextCard(state)) {
-            state.sequenceOfPlay.recordFactionAction(FactionIDs.BELGAE, FactionActions.PASS);
-            return;
+            commandAction = FactionActions.PASS;
         }
 
         if (!commandAction && this.canPlayEvent(state) && BelgaeEvent.handleEvent(state)) {
-            state.sequenceOfPlay.recordFactionAction(FactionIDs.BELGAE, FactionActions.EVENT);
-            return;
+            commandAction = FactionActions.EVENT;
         }
 
         if (!commandAction && modifiers.isCommandAllowed(CommandIDs.RALLY)) {
@@ -49,6 +48,11 @@ class BelgaeBot extends Bot {
         }
 
         commandAction = commandAction || FactionActions.PASS;
+
+        if(commandAction === FactionActions.PASS) {
+            Pass.execute(state, {factionId: FactionIDs.BELGAE});
+        }
+
         state.sequenceOfPlay.recordFactionAction(FactionIDs.BELGAE, commandAction);
         return commandAction;
     }

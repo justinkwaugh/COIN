@@ -8,6 +8,7 @@ class RemoveResources extends Action {
         this.factionId = args.factionId;
         this.count = args.count;
         this.removed = args.removed;
+        this.numAfter = args.numAfter;
     }
 
     doExecute(state) {
@@ -15,6 +16,7 @@ class RemoveResources extends Action {
         const count = this.count;
 
         this.removed = faction.removeResources(count);
+        this.numAfter = faction.resources();
     }
 
     doUndo(state) {
@@ -25,7 +27,7 @@ class RemoveResources extends Action {
 
     instructions(state) {
         const faction = state.factionsById[this.factionId];
-        return ['Decrease ' + faction.name + ' resources by ' + this.removed];
+        return ['Decrease ' + faction.name + ' resources by ' + this.removed + ' to ' + this.numAfter];
     }
 
 }

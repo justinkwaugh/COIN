@@ -10,6 +10,9 @@ class Auxilia extends FactionPiece {
 
         this.revealed = ko.observable();
         this.scouted = ko.observable();
+        this.status = ko.pureComputed(() => {
+            return this.revealed() ? 'revealed' : 'hidden';
+        });
     }
 }
 

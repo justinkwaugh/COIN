@@ -83,7 +83,9 @@ class Winter {
         const romans = state.factionsById[FactionIDs.ROMANS];
         romans.returnLegionsFromFallen({spring : true});
         _.each(state.tribes, function(tribe) {
-            UndisperseTribe.execute(state, { factionId: romans.id, tribeId: tribe.id });
+            if(tribe.isDispersed() || tribe.isDispersedGathering()) {
+                UndisperseTribe.execute(state, {factionId: romans.id, tribeId: tribe.id});
+            }
         });
         _.each(state.regions, function(region) {
             region.devastated(false);

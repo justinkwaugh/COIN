@@ -11,6 +11,7 @@ import CommandModifiers from '../../commands/commandModifiers';
 import CommandIDs from '../../config/commandIds';
 import MovePieces from '../../actions/movePieces';
 import RemovePieces from '../../actions/removePieces';
+import Pass from '../../commands/pass';
 
 class AeduiBot extends Bot {
     constructor() {
@@ -34,6 +35,11 @@ class AeduiBot extends Bot {
         else {
             action = this.executeCommand(state, new CommandModifiers(), aeduiFaction);
         }
+
+        if(action === FactionActions.PASS) {
+            Pass.execute(state, {factionId: FactionIDs.AEDUI});
+        }
+
         state.sequenceOfPlay.recordFactionAction(FactionIDs.AEDUI, action);
         return action;
     }
@@ -55,10 +61,10 @@ class AeduiBot extends Bot {
             effectiveRaidRegions = AeduiRaid.getEffectiveRaidRegions(state, modifiers);
             if (aeduiFaction.resources() < 4) {
                 if (effectiveRaidRegions.length > 0) {
-                    return AeduiRaid.raid(state, modifiers, this, aeduiFaction, effectiveRaidRegions);
+                    commandAction = AeduiRaid.raid(state, modifiers, this, aeduiFaction, effectiveRaidRegions);
                 }
                 else {
-                    return FactionActions.PASS;
+                    commandAction = FactionActions.PASS;
                 }
             }
         }
@@ -69,11 +75,13 @@ class AeduiBot extends Bot {
 
         if(!commandAction && modifiers.isCommandAllowed(CommandIDs.RAID)) {
             if (effectiveRaidRegions.length > 0) {
-                return AeduiRaid.raid(state, modifiers, this, aeduiFaction, effectiveRaidRegions);
+                commandAction = AeduiRaid.raid(state, modifiers, this, aeduiFaction, effectiveRaidRegions);
             }
         }
 
-        return commandAction || FactionActions.PASS;
+        commandAction = commandAction || FactionActions.PASS;
+
+        return commandAction
     }
 
     quarters(state) {

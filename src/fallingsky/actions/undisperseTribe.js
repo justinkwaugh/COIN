@@ -1,6 +1,6 @@
 import Action from './action'
 
-class DisperseTribe extends Action {
+class UndisperseTribe extends Action {
 
     constructor(args) {
         super(args);
@@ -15,7 +15,6 @@ class DisperseTribe extends Action {
         const faction = state.factionsById[this.factionId];
         const tribe = state.tribesById[this.tribeId];
 
-        tribe.undisperse();
         if (tribe.isDispersedGathering()) {
             console.log(tribe.name + ' is now subdued');
             this.subdued = true;
@@ -25,16 +24,20 @@ class DisperseTribe extends Action {
             this.gathering = true;
             console.log(tribe.name + ' is now gathering');
         }
+        tribe.undisperse();
     }
 
     doUndo(state) {
         const faction = state.factionsById[this.factionId];
         const tribe = state.tribesById[this.tribeId];
 
-        console.log('Removing dispersal token from ' + tribe.name);
-        faction.returnDispersalToken();
-
-        tribe.undisperse();
+        if(this.subdued) {
+            faction.removeDispersalToken();
+            tribe.disperseGathering();
+        }
+        else {
+            tribe.disperse();
+        }
     }
 
     instructions(state) {
@@ -47,4 +50,4 @@ class DisperseTribe extends Action {
     }
 }
 
-export default DisperseTribe
+export default UndisperseTribe

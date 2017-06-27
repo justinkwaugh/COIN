@@ -1,16 +1,16 @@
 import FactionIDs from '../../../config/factionIds';
 import Capability from '../../../../common/capability';
 import {CapabilityIDs, CapabilityStates} from '../../../config/capabilities';
+import AddCapability from '../../../actions/addCapability';
 
 class Event55 {
     static handleEvent(state) {
-        const capability = new Capability(
+        AddCapability.execute(state,
             {
                 id: CapabilityIDs.COMMIUS,
                 state: CapabilityStates.UNSHADED,
                 factionId: FactionIDs.ROMANS
             });
-        state.addCapability(capability);
         return true;
     }
 }

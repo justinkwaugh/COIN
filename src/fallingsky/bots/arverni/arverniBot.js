@@ -8,6 +8,7 @@ import ArverniMarch from './arverniMarch';
 import CommandModifiers from '../../commands/commandModifiers';
 import CommandIDs from '../../config/commandIds';
 import FactionActions from '../../../common/factionActions';
+import Pass from '../../commands/pass';
 
 class ArverniBot extends Bot {
     constructor() {
@@ -22,8 +23,7 @@ class ArverniBot extends Bot {
         }
 
         if (!commandAction && this.canPlayEvent(state) && ArverniEvent.handleEvent(state)) {
-            state.sequenceOfPlay.recordFactionAction(FactionIDs.ARVERNI, FactionActions.EVENT);
-            return;
+            commandAction = FactionActions.EVENT;
         }
 
         if (!commandAction && modifiers.isCommandAllowed(CommandIDs.RALLY)) {
@@ -47,6 +47,11 @@ class ArverniBot extends Bot {
         }
 
         commandAction = commandAction || FactionActions.PASS;
+
+        if(commandAction === FactionActions.PASS) {
+            Pass.execute(state, {factionId: FactionIDs.ARVERNI});
+        }
+
         state.sequenceOfPlay.recordFactionAction(FactionIDs.ARVERNI, commandAction);
         return commandAction;
     }

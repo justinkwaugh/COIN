@@ -34,8 +34,7 @@ class MovePieces extends Action {
         const destRegion = state.regionsById[this.destRegionId];
         const pieces = this.pieces;
         const faction = state.factionsById[pieces[0].factionId];
-
-        return _.concat(['Move these ' + faction.name + ' pieces from ' + sourceRegion.name + ' to ' + destRegion.name],Logging.getPiecesList(pieces));
+        return _.map(Logging.getPiecesList(pieces), pieceString => 'Move ' + faction.name + ' ' + pieceString + ' from ' + sourceRegion.name + ' to ' + destRegion.name);
     }
 }
 

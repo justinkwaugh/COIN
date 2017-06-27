@@ -52,6 +52,10 @@ import Location from '../../common/location';
             this.state(TribeStates.DISPERSED);
         }
 
+        disperseGathering() {
+            this.state(TribeStates.DISPERSED_GATHERING);
+        }
+
         makeAllied(alliedTribe) {
             alliedTribe.tribeId = this.id;
             this.alliedFactionId(alliedTribe.factionId);

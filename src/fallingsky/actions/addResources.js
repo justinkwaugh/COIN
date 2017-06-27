@@ -8,6 +8,7 @@ class AddResources extends Action {
         this.factionId = args.factionId;
         this.count = args.count;
         this.added = args.added;
+        this.numAfter = args.numAfter;
     }
 
     doExecute(state) {
@@ -15,6 +16,7 @@ class AddResources extends Action {
         const count = this.count;
 
         this.added = faction.addResources(count);
+        this.numAfter = faction.resources();
     }
 
     doUndo(state) {
@@ -25,7 +27,7 @@ class AddResources extends Action {
 
     instructions(state) {
         const faction = state.factionsById[this.factionId];
-        return ['Increase ' + faction.name + ' resources by ' + this.added];
+        return ['Increase ' + faction.name + ' resources by ' + this.added + ' to ' + this.numAfter];
     }
 
 }

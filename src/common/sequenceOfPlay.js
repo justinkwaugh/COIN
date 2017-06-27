@@ -90,7 +90,6 @@ class SequenceOfPlay {
         console.log('Faction ' + factionId + ' did action ' + action);
         this.eligibleFactions.remove(factionId);
         if (action === FactionActions.PASS) {
-            // Handle resource
             this.passedFactions.push(factionId);
         }
         else if (this.firstFaction()) {

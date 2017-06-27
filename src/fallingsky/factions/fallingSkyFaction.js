@@ -14,6 +14,7 @@ class FallingSkyFaction extends Faction {
         this.numStartingAlliedTribes = definition.numAlliedTribes || 0;
         this.numStartingCitadels = definition.numCitadels || 0;
         this.hasLeader = definition.hasLeader || false;
+        this.passResources = definition.passResources || 1;
 
         this.availableLeader = ko.observable();
         if(this.hasLeader) {
