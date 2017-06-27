@@ -5,7 +5,6 @@ import TestMarch from './fallingsky/test/arverni/testMarch';
 
 // while(true) {
     const game = new Game({scenario: TheGreatRevolt});
-    $('test');
     ko.applyBindings(game);
     // game.start();
     //
