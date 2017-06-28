@@ -29,6 +29,7 @@ describe("Arverni entreat", function () {
         aedui = state.aedui;
         romans = state.romans;
         germanic = state.germanic;
+        state.turnHistory.startTurn(arverni.id);
     });
 
     it('replaces aedui, belgic, germanic, preferring city', function () {

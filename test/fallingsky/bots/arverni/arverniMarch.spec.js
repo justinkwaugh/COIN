@@ -24,11 +24,13 @@ describe("Arverni march", function () {
 
     beforeEach(function () {
         state = new FallingSkyGameState();
+        
         belgae = state.belgae;
         arverni = state.arverni;
         aedui = state.aedui;
         romans = state.romans;
         germanic = state.germanic;
+        state.turnHistory.startTurn(arverni.id);
     });
 
     it('spreads but does not march to control, due to exact control in carnutes after spread', function () {
@@ -56,6 +58,7 @@ describe("Arverni march", function () {
         PlaceWarbands.execute(state, {factionId: belgae.id, regionId: atrebatesRegion.id, count: 4});
         PlaceWarbands.execute(state, {factionId: aedui.id, regionId: atrebatesRegion.id, count: 4});
 
+        
         const command = ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'spread', true);
         command.should.equal(FactionActions.COMMAND);
         expect(arverni.availableWarbands().length).to.equal(25);
