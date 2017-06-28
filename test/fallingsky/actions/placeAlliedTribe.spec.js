@@ -35,6 +35,10 @@ describe("Place Allied Tribe", function () {
         });
         expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(1);
         expect(aeduiTribe.alliedFactionId()).to.equal(FactionIDs.AEDUI);
+
+        state.actionHistory.undo(state);
+
+        expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(0);
     });
 
 

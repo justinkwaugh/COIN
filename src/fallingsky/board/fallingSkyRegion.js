@@ -82,6 +82,9 @@ class FallingSkyRegion extends Region {
     }
 
     removePieces(pieces) {
+        if(!pieces || pieces.length === 0) {
+            throw 'Trying to remove nothing from region'
+        }
         this.pieces.removeAll(pieces);
     }
 
@@ -182,7 +185,7 @@ class FallingSkyRegion extends Region {
     }
 
     getFort() {
-        return _.find(this.piecesByFaction()[FactionIDs.ROMANS], piece => piece.type === 'fort' );
+        return _.find(this.piecesByFaction()[FactionIDs.ROMANS], piece => piece.type === 'fort' ) || null;
     }
 
     getAlliesForFaction(factionId) {
@@ -190,7 +193,7 @@ class FallingSkyRegion extends Region {
     }
 
     getCitadelForFaction(factionId) {
-        return _.find(this.piecesByFaction()[factionId], { type : 'citadel' });
+        return _.find(this.piecesByFaction()[factionId], { type : 'citadel' }) || null;
     }
 
     getHiddenWarbandsOrAuxiliaForFaction(factionId) {
@@ -198,7 +201,7 @@ class FallingSkyRegion extends Region {
     }
 
     getLeaderForFaction(factionId) {
-        return _(this.piecesByFaction()[factionId]).filter({type : 'leader'}).first();
+        return _(this.piecesByFaction()[factionId]).filter({type : 'leader'}).first() || null;
     }
 
     logState() {

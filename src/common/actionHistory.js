@@ -1,6 +1,7 @@
 import _ from '../lib/lodash';
 class ActionHistory {
-    constructor() {
+    constructor(state) {
+        this.state = state;
         this.actions = [];
     }
 
@@ -8,9 +9,9 @@ class ActionHistory {
         this.actions.push(action);
     }
 
-    undo(state) {
+    undo() {
         const action = this.actions.pop();
-        action.doUndo(state);
+        action.doUndo(this.state);
     }
 
     currentIndex() {
@@ -19,6 +20,18 @@ class ActionHistory {
 
     getActionRange(start, end) {
         return _.slice(this.actions, start, end);
+    }
+
+    undoRange(start, end) {
+        const actualEnd = end || this.actions.length;
+
+        if (actualEnd <= start) {
+            return [];
+        }
+
+        _.each(_.range(start,actualEnd), () => {
+            this.undo();
+        });
     }
 }
 

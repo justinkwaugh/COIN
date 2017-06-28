@@ -111,7 +111,6 @@ class TheGreatRevolt extends Scenario {
         const arverniRegion = state.regionsById[RegionIDs.ARVERNI];
         PlaceCitadel.execute(state, { factionId: arverni.id, regionId: arverniRegion.id, tribeId: TribeIDs.ARVERNI}, true);
         PlaceAlliedTribe.execute(state, { factionId: arverni.id, regionId: arverniRegion.id, tribeId: TribeIDs.CADURCI});
-        arverniRegion.logState();
         PlaceWarbands.execute(state, { factionId: arverni.id, regionId: arverniRegion.id, count: 10});
 
         const provinciaRegion = state.regionsById[RegionIDs.PROVINCIA];

@@ -13,8 +13,12 @@
                 <button type="button" class="btn btn-primary" style="margin-right:10px;"
                         data-bind="click:start, text: state().currentCard() ? 'Restart' : 'Start'"></button>
                 <!-- ko if: state().currentCard() -->
-                <button type="button" class="btn btn-success"
+                <button type="button" class="btn btn-success" style="margin-right:10px;"
                         data-bind="click:nextTurn, text: endOfCard() ? 'Draw Card' : winterNext() ? 'Winter' : 'Next Faction'"></button>
+                <!-- /ko -->
+                <!-- ko if: canUndo() -->
+                <button type="button" class="btn btn-danger"
+                        data-bind="click:undo">Undo</button>
                 <!-- /ko -->
             </div>
         </div>

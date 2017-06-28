@@ -40,10 +40,33 @@ describe("Place Citadel", function () {
             regionId: RegionIDs.AEDUI,
             tribeId: TribeIDs.AEDUI
         });
-        aeduiRegion.logState();
+
         expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(0);
         expect(aeduiRegion.getCitadelForFaction(FactionIDs.AEDUI)).to.not.be.null;
         expect(aeduiTribe.isCitadel()).to.equal(true);
+
+        state.actionHistory.undo(state);
+
+        expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(1);
+        expect(aeduiRegion.getCitadelForFaction(FactionIDs.AEDUI)).to.be.null;
+        expect(aeduiTribe.alliedFactionId()).to.equal(FactionIDs.AEDUI);
+
+        state.actionHistory.undo(state);
+        expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(0);
+
+        PlaceCitadel.execute(state, {
+            factionId: FactionIDs.AEDUI,
+            regionId: RegionIDs.AEDUI,
+            tribeId: TribeIDs.AEDUI
+        });
+
+        expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(0);
+        expect(aeduiRegion.getCitadelForFaction(FactionIDs.AEDUI)).to.not.be.null;
+        expect(aeduiTribe.isCitadel()).to.equal(true);
+
+        state.actionHistory.undo(state);
+        expect(aeduiRegion.getAlliesForFaction(FactionIDs.AEDUI).length).to.equal(0);
+        expect(aeduiRegion.getCitadelForFaction(FactionIDs.AEDUI)).to.be.null;
     });
 
 

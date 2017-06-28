@@ -1,15 +1,18 @@
 import _ from '../lib/lodash.js';
 import ko from '../lib/knockout.js';
 import FactionActions from './factionActions';
+import SequenceForCard from './sequenceForCard';
 
 class SequenceOfPlay {
     constructor(state, definition) {
         const that = this;
 
+        this.history = ko.observableArray([]);
         this.eligibleFactions = ko.observableArray(definition.factions);
         this.ineligibleFactions = ko.observableArray();
         this.passedFactions = ko.observableArray();
         this.forcedEligibleFactionIds = ko.observableArray();
+        this.currentSequenceForCard = ko.observable(new SequenceForCard({ eligible: _.clone(this.eligibleFactions())}));
         this.state = state;
 
         this.firstFaction = ko.observable();
@@ -21,7 +24,8 @@ class SequenceOfPlay {
         this.availableActions = ko.pureComputed(() => {
             const availableActions = [];
             if (!this.firstActionChosen()) {
-                availableActions.push.apply(availableActions, [FactionActions.EVENT, FactionActions.COMMAND, FactionActions.COMMAND_AND_SPECIAL]);
+                availableActions.push.apply(availableActions,
+                                            [FactionActions.EVENT, FactionActions.COMMAND, FactionActions.COMMAND_AND_SPECIAL]);
             }
             else if (this.firstActionChosen() === FactionActions.COMMAND_AND_SPECIAL) {
                 availableActions.push(FactionActions.EVENT);
@@ -48,17 +52,18 @@ class SequenceOfPlay {
     }
 
     updateEligibility() {
+
         _.each(this.passedFactions(), (factionId) => {
-                this.eligibleFactions.push(factionId);
-            });
+            this.eligibleFactions.push(factionId);
+        });
         this.passedFactions([]);
         _.each(this.ineligibleFactions(), (factionId) => {
-                this.eligibleFactions.push(factionId);
-            });
+            this.eligibleFactions.push(factionId);
+        });
 
         const newlyIneligible = [];
         if (this.firstFaction()) {
-            if(_.indexOf(this.forcedEligibleFactionIds(), this.firstFaction().id) >= 0) {
+            if (_.indexOf(this.forcedEligibleFactionIds(), this.firstFaction().id) >= 0) {
                 this.eligibleFactions.push(this.firstFaction());
             }
             else {
@@ -66,7 +71,7 @@ class SequenceOfPlay {
             }
         }
         if (this.secondFaction()) {
-            if(_.indexOf(this.forcedEligibleFactionIds(), this.secondFaction().id) >= 0) {
+            if (_.indexOf(this.forcedEligibleFactionIds(), this.secondFaction().id) >= 0) {
                 this.eligibleFactions.push(this.secondFaction());
             }
             else {
@@ -74,6 +79,11 @@ class SequenceOfPlay {
             }
         }
         this.ineligibleFactions(newlyIneligible);
+        this.history.push(this.currentSequenceForCard());
+        this.currentSequenceForCard(new SequenceForCard({
+            eligible: _.clone(this.eligibleFactions()),
+            ineligible: _.clone(this.ineligibleFactions())
+        }));
 
         this.firstFaction(null);
         this.secondFaction(null);
@@ -85,6 +95,11 @@ class SequenceOfPlay {
     resetEligibility() {
         this.eligibleFactions.push.apply(this.eligibleFactions, this.ineligibleFactions());
         this.ineligibleFactions([]);
+        this.history.push(this.currentSequenceForCard());
+        this.currentSequenceForCard(new SequenceForCard({
+            eligible: _.clone(this.eligibleFactions()),
+            ineligible: _.clone(this.ineligibleFactions())
+        }));
     }
 
     recordFactionAction(factionId, action) {
@@ -101,6 +116,7 @@ class SequenceOfPlay {
             this.firstActionChosen(action);
             this.firstFaction(factionId);
         }
+        this.currentSequenceForCard().addAction(factionId, action);
         this.state.turnHistory.commitTurn(action);
     }
 
@@ -113,6 +129,57 @@ class SequenceOfPlay {
 
     remainEligible(factionId) {
         this.forcedEligibleFactionIds.push(factionId);
+    }
+
+    canUndo() {
+        return this.currentSequenceForCard().numActionsTaken() > 0 || this.history().length > 0;
+    }
+
+    undo() {
+        if(this.currentSequenceForCard().numActionsTaken() === 0) {
+            if(this.history().length > 0) {
+                this.currentSequenceForCard(this.history.pop());
+                this.eligibleFactions(_.clone(this.currentSequenceForCard().eligible));
+                this.ineligibleFactions(_.clone(this.currentSequenceForCard().ineligible));
+                _.each(this.currentSequenceForCard().actions(), (actionData) => {
+                    if(actionData.actionId === FactionActions.PASS) {
+                        this.eligibleFactions.remove(actionData.factionId);
+                        this.passedFactions.push(actionData.factionId);
+                    }
+                    else if(!this.firstFaction()) {
+                        this.eligibleFactions.remove(actionData.factionId);
+                        this.firstFaction(actionData.factionId);
+                        this.firstActionChosen(actionData.actionId);
+                    }
+                    else {
+                        this.eligibleFactions.remove(actionData.factionId);
+                        this.secondFaction(actionData.factionId);
+                        this.secondActionChosen(actionData.actionId);
+                    }
+                });
+                return false;
+            }
+            else {
+                return false;
+            }
+        }
+
+        const lastAction = this.currentSequenceForCard().popAction();
+        if(lastAction.actionId === FactionActions.PASS) {
+            this.passedFactions.remove(lastAction.factionId);
+            this.eligibleFactions.push(lastAction.factionId);
+        }
+        else if(this.secondFaction() === lastAction.factionId) {
+            this.secondFaction(null);
+            this.secondActionChosen(null);
+            this.eligibleFactions.push(lastAction.factionId);
+        }
+        else if(this.firstFaction() === lastAction.factionId) {
+            this.firstFaction(null);
+            this.firstActionChosen(null);
+            this.eligibleFactions.push(lastAction.factionId);
+        }
+        return true;
     }
 
     logState() {

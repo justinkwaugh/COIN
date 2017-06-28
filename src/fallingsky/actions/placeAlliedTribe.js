@@ -15,11 +15,11 @@ class PlaceAlliedTribe extends Action {
         const region = state.regionsById[this.regionId];
         const tribe = state.tribesById[this.tribeId];
 
-        if(!tribe) {
+        if (!tribe) {
             debugger;
         }
 
-        if(!region.inPlay() || !faction.hasAvailableAlliedTribe() || !tribe.isSubdued()) {
+        if (!region.inPlay() || !faction.hasAvailableAlliedTribe() || !tribe.isSubdued()) {
             debugger;
             throw 'Invalid PlaceAlliedTribe Action';
         }
@@ -31,7 +31,14 @@ class PlaceAlliedTribe extends Action {
     }
 
     doUndo(state) {
-        throw 'Unable to undo PlaceAlliedTribe Action';
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        const tribe = state.tribesById[this.tribeId];
+        const ally = _.find(region.getAlliesForFaction(faction.id), {tribeId: this.tribeId});
+        tribe.removeAlly(ally);
+        region.removePieces([ally]);
+        faction.returnAlliedTribes([ally]);
+        console.log('Taking back ' + faction.name + ' Ally from ' + tribe.name + ' in ' + region.name);
     }
 
     instructions(state) {

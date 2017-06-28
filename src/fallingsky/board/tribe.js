@@ -63,7 +63,6 @@ import Location from '../../common/location';
         }
 
         removeAlly(alliedTribe) {
-            console.log("removing ally data for tribe " + this.name);
             alliedTribe.tribeId = null;
             this.alliedFactionId(null);
             this.state(TribeStates.SUBDUED);

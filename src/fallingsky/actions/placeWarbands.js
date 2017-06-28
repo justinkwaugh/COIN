@@ -29,7 +29,7 @@ class PlaceWarbands extends Action {
         const region = state.regionsById[this.regionId];
         const count = this.count;
 
-        console.log('Removing ' + count + 'x ' + faction.name + 'Warbands from ' + region.name);
+        console.log('Taking back ' + count + 'x ' + faction.name + ' Warbands from ' + region.name);
         const warbands = _.take(region.getHiddenPiecesForFaction(faction.id), count);
         if(warbands.length !== count) {
             throw 'Unable to undo PlaceWarbands Action';

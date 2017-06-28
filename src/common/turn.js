@@ -16,6 +16,10 @@ class Turn extends ActionGroup {
         this.currentSpecialAbility = null;
     }
 
+    undo() {
+        this.state.actionHistory.undoRange(this.actionStartIndex, this.actionEndIndex);
+    }
+
     startCommand(id) {
         this.currentCommand = new ActionGroup({
             type: 'command',
@@ -32,7 +36,10 @@ class Turn extends ActionGroup {
     }
 
     rollbackCommand() {
-        // add undo of actions
+        if(!this.currentCommand) {
+            return;
+        }
+        this.state.actionHistory.undoRange(this.currentCommand.actionStartIndex);
         this.currentCommand = null;
     }
 
@@ -52,7 +59,10 @@ class Turn extends ActionGroup {
     }
 
     rollbackSpecialAbility() {
-        // add undo of actions
+        if(!this.currentSpecialAbility) {
+            return;
+        }
+        this.state.actionHistory.undoRange(this.currentSpecialAbility.actionStartIndex);
         this.currentSpecialAbility = null;
     }
 
@@ -70,7 +80,10 @@ class Turn extends ActionGroup {
     }
 
     rollbackEvent() {
-        // add undo of actions
+        if(!this.event) {
+            return;
+        }
+        this.state.actionHistory.undoRange(this.event.actionStartIndex);
         this.event = null;
     }
 

@@ -40,6 +40,10 @@ class RevealPieces extends Action {
     doUndo(state) {
         const faction = state.factionsById[this.factionId];
         const region = state.regionsById[this.regionId];
+        if(this.count === 0) {
+            return;
+        }
+
         const revealable = _(region.getWarbandsOrAuxiliaForFaction(faction.id)).filter( piece => (piece.revealed() && !piece.scouted())).take(this.count).value();
         if (revealable.length === 0 ) {
             throw 'Unable to undo RevealPieces Action';
@@ -49,6 +53,7 @@ class RevealPieces extends Action {
             revealable, function (piece) {
                 piece.revealed(false);
             });
+        console.log('Hid ' + this.count + 'x ' + faction.name + ' pieces in ' + region.name);
     }
 
     instructions(state) {

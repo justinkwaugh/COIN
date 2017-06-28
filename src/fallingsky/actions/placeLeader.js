@@ -22,7 +22,14 @@ class PlaceLeader extends Action {
     }
 
     doUndo(state) {
-        throw 'Unable to undo PlaceFort Action';
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+
+        const leader = region.getLeaderForFaction(faction.id);
+        region.removePieces([leader]);
+        faction.returnLeader(leader);
+
+        console.log('Taking back ' + leader.toString() + ' from ' + region.name);
     }
 
     instructions(state) {

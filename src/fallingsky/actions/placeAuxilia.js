@@ -28,7 +28,7 @@ class PlaceAuxilia extends Action {
         const region = state.regionsById[this.regionId];
         const count = this.count;
 
-        console.log('Removing ' + count + 'x ' + faction.name + 'Auxilia from ' + region.name);
+        console.log('Taking back ' + count + 'x ' + faction.name + ' Auxilia from ' + region.name);
         const auxilia = _.take(region.getHiddenPiecesForFaction(faction.id), count);
         if(auxilia.length !== count) {
             throw 'Unable to undo PlaceAuxilia Action';

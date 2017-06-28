@@ -1,4 +1,5 @@
 import Action from './action';
+import _ from '../../lib/lodash';
 
 class PlaceCitadel extends Action {
 
@@ -8,6 +9,7 @@ class PlaceCitadel extends Action {
         this.factionId = args.factionId;
         this.regionId = args.regionId;
         this.tribeId = args.tribeId;
+        this.hadAlly = args.hadAlly;
     }
 
     doExecute(state) {
@@ -20,7 +22,10 @@ class PlaceCitadel extends Action {
         }
 
         const removedAlliedTribe = region.removeAlliedTribe(region.id, tribe.id);
-        faction.returnAlliedTribe(removedAlliedTribe);
+        if(removedAlliedTribe) {
+            this.hadAlly = true;
+            faction.returnAlliedTribe(removedAlliedTribe);
+        }
 
         const citadel = faction.removeCitadel();
         tribe.buildCitadel(citadel);
@@ -29,7 +34,21 @@ class PlaceCitadel extends Action {
     }
 
     doUndo(state) {
-        throw 'Unable to undo PlaceCitadel Action';
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+        const tribe = state.tribesById[this.tribeId];
+
+        const citadel = region.getCitadelForFaction(faction.id);
+        tribe.removeAlly(citadel);
+        region.removePieces([citadel]);
+        faction.returnCitadel(citadel);
+
+        if(this.hadAlly) {
+            const alliedTribe = faction.removeAlliedTribe();
+            tribe.makeAllied(alliedTribe);
+            region.addPiece(alliedTribe);
+        }
+        console.log('Taking back ' + faction.name + ' Citadel from ' + tribe.name);
     }
 
     instructions(state) {

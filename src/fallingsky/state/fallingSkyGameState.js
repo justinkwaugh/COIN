@@ -51,7 +51,7 @@ class FallingSkyGameState extends GameState {
             });
 
         this.turnHistory = new TurnHistory(this);
-        this.actionHistory = new ActionHistory();
+        this.actionHistory = new ActionHistory(this);
         this.capabilities = ko.observableArray([]);
         this.capabilitiesById = ko.pureComputed(()=> {
             return _.keyBy(this.capabilities(), 'id');

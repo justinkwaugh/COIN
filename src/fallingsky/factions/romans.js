@@ -138,6 +138,10 @@ class Romans extends FallingSkyFaction {
         return count <= availableCount;
     }
 
+    getLegionsFromFallen(count) {
+        return this.fallenLegions.splice(0, count);
+    }
+
     removeLegions(count) {
         const removedLegions = [];
         let numLeft = count;

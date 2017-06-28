@@ -21,7 +21,13 @@ class PlaceFort extends Action {
     }
 
     doUndo(state) {
-        throw 'Unable to undo PlaceFort Action';
+        const faction = state.factionsById[this.factionId];
+        const region = state.regionsById[this.regionId];
+
+        const fort = region.getFort();
+        region.removePieces([fort]);
+        faction.returnFort(fort);
+        console.log('Taking back ' + faction.name + ' Fort from ' + region.name);
     }
 
     instructions(state) {

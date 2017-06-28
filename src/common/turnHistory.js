@@ -20,9 +20,9 @@ class TurnHistory {
         this.currentTurn = null;
     }
 
-    undo(state) {
+    undoLastTurn() {
         const turn = this.turns.pop();
-        // start action index to end action index
+        turn.undo();
     }
 
     getCurrentTurn() {

@@ -1,9 +1,9 @@
 
 import ko from '../lib/knockout';
+import _ from '../lib/lodash';
 import FactionIDs from '../fallingsky/config/factionIds';
 import FallingSkyGameState from '../fallingsky/state/fallingSkyGameState.js';
 import Winter from './phases/winter';
-import Turn from '../common/turn.js';
 
 const ActivePanelIDs = {
     BOARD: 'board',
@@ -25,6 +25,9 @@ class Game {
         });
         this.winterNext = ko.pureComputed(() => {
             return this.state().currentCard() && this.state().currentCard().type === 'winter';
+        });
+        this.canUndo = ko.pureComputed(() => {
+            return (this.state().discard().length === 0 || _.last(this.state().discard()).type !== 'winter' || this.state().sequenceOfPlay.currentSequenceForCard().numActionsTaken() > 0) && this.state().sequenceOfPlay.canUndo();
         });
     }
 
@@ -91,6 +94,24 @@ class Game {
         player.takeTurn(this.state());
         this.lastTurn(this.state().turnHistory.lastTurn());
 
+    }
+
+    undo() {
+
+        if(this.state().sequenceOfPlay.undo()) {
+            console.log('*** Undoing the last Turn ***');
+            this.state().turnHistory.undoLastTurn();
+            this.lastTurn(this.state().turnHistory.lastTurn());
+        }
+        else if(this.state().discard().length > 0) {
+            if(this.state().upcomingCard().type === 'winter') {
+                this.state().frost(false);
+            }
+            this.state().deck.push(this.state().upcomingCard());
+            this.state().upcomingCard(this.state().currentCard());
+            this.state().currentCard(this.state().discard.pop());
+            this.lastTurn(null);
+        }
     }
 
     styleSuffixForFaction(factionId) {
