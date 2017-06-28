@@ -184,6 +184,7 @@
                                     <ul class="list-group" style="margin-bottom:0">
                                         <!-- ko if: $data.id !== 'Germanic' -->
                                         <li class="list-group-item">Victory Margin<span class="badge badge-info" data-bind="text:$data.id === 'Germanic' ? 'N/A' : $data.victoryMargin($root.state())"></span></li>
+                                        <li class="list-group-item">Resources<span class="badge badge-info" data-bind="text:$data.resources()"></span></li>
                                         <!-- /ko -->
                                         <li class="list-group-item"><span data-bind="text:$data.id === 'Romans' ? 'Auxilia': 'Warbands'"></span> Available<span class="badge badge-info" data-bind="text:$data.id === 'Romans' ? $data.availableAuxilia().length : $data.availableWarbands().length"></span></li>
                                         <li class="list-group-item">Allies Available<span class="badge badge-info" data-bind="text:$data.availableAlliedTribes().length"></span></li>
