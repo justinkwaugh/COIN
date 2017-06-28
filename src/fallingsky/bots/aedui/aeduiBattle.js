@@ -1,4 +1,6 @@
 import _ from '../../../lib/lodash';
+import CommandIDs from '../../config/commandIds';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 import FactionIDs from '../../config/factionIds';
 import Battle from '../../commands/battle';
 import AeduiTrade from './aeduiTrade';
@@ -19,18 +21,31 @@ class AeduiBattle {
             return false;
         }
 
+        let commandStarted = false;
+
         let ambushed = false;
         _.each(
             effectiveBattles, (battle) => {
-                if (aeduiFaction.resources() === 0) {
+                const cost = battle.region.devastated() ? 2 : 1;
+                if (aeduiFaction.resources() < cost && !modifiers.free) {
                     return false;
                 }
 
+                if(!commandStarted) {
+                    currentState.turnHistory.getCurrentTurn().startCommand(CommandIDs.BATTLE);
+                    commandStarted = true;
+                }
                 let willAmbush = false;
                 if (!ambushed && this.shouldAmbush(battle) && modifiers.canDoSpecial()) {
+                    currentState.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.AMBUSH);
+                    currentState.turnHistory.getCurrentTurn().commitSpecialAbility();
                     ambushed = true;
                     willAmbush = true;
                 }
+                if (!modifiers.free) {
+                    RemoveResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: cost });
+                }
+
                 Battle.execute(
                     currentState, {
                         region: battle.region,
@@ -38,16 +53,17 @@ class AeduiBattle {
                         defendingFaction: battle.defendingFaction,
                         ambush: willAmbush
                     });
-                if (!modifiers.free) {
-                    RemoveResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: battle.region.devastated() ? 2 : 1});
-                }
 
                 if (modifiers.limited) {
                     return false;
                 }
             });
 
+
         const usedSpecialAbility = modifiers.canDoSpecial() && (ambushed || AeduiTrade.trade(currentState, modifiers, bot));
+        if(commandStarted) {
+            currentState.turnHistory.getCurrentTurn().commitCommand();
+        }
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

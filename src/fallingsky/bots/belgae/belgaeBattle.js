@@ -1,4 +1,6 @@
 import _ from '../../../lib/lodash';
+import CommandIDs from '../../config/commandIds';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 import FactionIDs from '../../config/factionIds';
 import Battle from '../../commands/battle';
 import EnemyFactionPriority from './enemyFactionPriority';
@@ -49,12 +51,19 @@ class BelgaeBattle {
                         }));
         }
 
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.BATTLE);
         _.each(
-            prioritizedBattles, (battle) => {
+            prioritizedBattles, (battle,index) => {
                 const cost = battle.region.devastated() ? 2 : 1;
                 if (belgae.resources() < cost) {
                     return false;
                 }
+
+                if(index===0 && willAmbush) {
+                    state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.AMBUSH);
+                    state.turnHistory.getCurrentTurn().commitSpecialAbility();
+                }
+
                 Battle.execute(
                     state, {
                         region: battle.region,
@@ -65,6 +74,7 @@ class BelgaeBattle {
                     });
                 RemoveResources.execute(state, { factionId: FactionIDs.BELGAE, count: cost});
             });
+        state.turnHistory.getCurrentTurn().commitCommand();
 
         if (modifiers.canDoSpecial() && !didSpecial) {
             didSpecial = BelgaeEnlist.enlist(

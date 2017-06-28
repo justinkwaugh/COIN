@@ -8,7 +8,8 @@ import Turn from '../common/turn.js';
 const ActivePanelIDs = {
     BOARD: 'board',
     REGIONS: 'regions',
-    FACTIONS: 'factions'
+    FACTIONS: 'factions',
+    CAPABILITIES: 'capabilities'
 };
 
 class Game {
@@ -35,6 +36,7 @@ class Game {
         this.state(new FallingSkyGameState());
         this.scenario.initializeGameState(this.state());
         this.lastTurn(null);
+        this.state().startYear();
         this.drawCard();
         this.drawCard();
     }
@@ -74,12 +76,9 @@ class Game {
 
         if (this.state().currentCard().type === 'winter') {
             this.state().frost(false);
-            const turn = new Turn({ number: this.state().turnHistory.nextTurnNumber(), factionId: 'Germanic', actionStartIndex: this.state().actionHistory.currentIndex()});
             Winter.executeWinter(this.state());
-            turn.actionEndIndex = this.state().actionHistory.currentIndex();
-            turn.commandAction = 'Winter';
-            this.state().turnHistory.addTurn(turn);
-            this.lastTurn(turn);
+            this.lastTurn(this.state().turnHistory.lastTurn());
+            this.state().startYear();
             this.drawCard();
             return;
         }
@@ -88,12 +87,10 @@ class Game {
         console.log('Next Faction: ' + nextFaction);
 
         const player = this.state().playersByFaction[nextFaction];
-        const turn = new Turn({ number: this.state().turnHistory.nextTurnNumber(), factionId: nextFaction, actionStartIndex: this.state().actionHistory.currentIndex()});
-        const commandAction = player.takeTurn(this.state());
-        turn.actionEndIndex = this.state().actionHistory.currentIndex();
-        turn.commandAction = commandAction;
-        this.state().turnHistory.addTurn(turn);
-        this.lastTurn(turn);
+        this.state().turnHistory.startTurn(nextFaction);
+        player.takeTurn(this.state());
+        this.lastTurn(this.state().turnHistory.lastTurn());
+
     }
 
     styleSuffixForFaction(factionId) {

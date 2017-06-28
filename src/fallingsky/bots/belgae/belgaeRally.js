@@ -1,4 +1,5 @@
 import _ from '../../../lib/lodash';
+import CommandIDs from '../../config/commandIds';
 import FactionIDs from '../../config/factionIds';
 import Rally from '../../commands/rally';
 import BelgaeRampage from './belgaeRampage';
@@ -13,8 +14,9 @@ class BelgaeRally {
         if (!this.isRallyEffective(state, executableRallyRegions)) {
             return false;
         }
-
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RALLY);
         Rally.execute(state, {faction: state.belgae, regionResults: executableRallyRegions});
+        state.turnHistory.getCurrentTurn().commitCommand();
         const usedSpecialAbility = modifiers.canDoSpecial() && (BelgaeRampage.rampage(state, modifiers) || BelgaeEnlist.enlist(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }

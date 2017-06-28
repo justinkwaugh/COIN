@@ -3,6 +3,7 @@ import Entreat from '../../commands/arverni/entreat';
 import RemoveResources from '../../actions/removeResources';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionIDs from '../../config/factionIds';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 
 class ArverniEntreat {
 
@@ -15,6 +16,7 @@ class ArverniEntreat {
             return effectiveEntreats;
         }
 
+        state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.ENTREAT);
         _.each(effectiveEntreats, (entreat) => {
             if(!modifiers.free && arverni.resources() < entreat.cost) {
                 return false;
@@ -26,6 +28,12 @@ class ArverniEntreat {
             effective = true;
         });
 
+        if(!effective) {
+            state.turnHistory.getCurrentTurn().rollbackSpecialAbility();
+        }
+        else {
+            state.turnHistory.getCurrentTurn().commitSpecialAbility();
+        }
         return effective;
     }
 

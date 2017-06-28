@@ -1,4 +1,5 @@
 class Command {
+
     static doTest(state, args) {
 
     }

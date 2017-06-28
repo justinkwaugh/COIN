@@ -28,6 +28,7 @@ import Event55 from './events/event55';
 import Event56 from './events/event56';
 
 const NoEvents = [58, 47, 1, 53, 32, 17, 72, 54, 20, 23, 69, 29];
+const CapabilityEvents = [8,10,12,13,15,25,27,30,38,39,43,55,59,63];
 const PlayerOrWinningBotRomans = [7, 16, 13, 4, 14, 55, 31, 56, 5, 15, 2, 6, 11, 3, 21, 12];
 const RomansHandleEvent = [2, 3, 4, 5, 6, 7, 14, 18, 21, 31, 33];
 const EventHandlers = {
@@ -66,6 +67,10 @@ class AeduiEvent {
             return false;
         }
 
+        if(state.isLastYear() && _.indexOf(CapabilityEvents, currentCard.id) >= 0) {
+            return false;
+        }
+
         if (_.indexOf(PlayerOrWinningBotRomans, currentCard.id) >= 0) {
             const player = state.playersByFaction[FactionIDs.ROMANS];
             const faction = state.factionsById[FactionIDs.ROMANS];
@@ -84,7 +89,16 @@ class AeduiEvent {
             return false;
         }
 
-        return eventHandler.handleEvent(state);
+        state.turnHistory.getCurrentTurn().startEvent(currentCard.id);
+        const handled = eventHandler.handleEvent(state);
+        if(!handled) {
+            state.turnHistory.getCurrentTurn().rollbackEvent();
+        }
+        else {
+            state.turnHistory.getCurrentTurn().commitEvent();
+        }
+
+        return handled;
     }
 
 }

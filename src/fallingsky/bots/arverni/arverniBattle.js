@@ -1,4 +1,6 @@
 import _ from '../../../lib/lodash';
+import CommandIDs from '../../config/commandIds';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 import FactionIDs from '../../config/factionIds';
 import Battle from '../../commands/battle';
 import EnemyFactionPriority from './enemyFactionPriority';
@@ -39,11 +41,16 @@ class ArverniBattle {
             didSpecial = ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers);
         }
 
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.BATTLE);
         _.each(
-            prioritizedBattles, (battle) => {
+            prioritizedBattles, (battle, index) => {
                 const cost = battle.region.devastated() ? 2 : 1;
                 if (arverni.resources() < cost) {
                     return false;
+                }
+                if(index === 0 && willAmbush) {
+                    state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.AMBUSH);
+                    state.turnHistory.getCurrentTurn().commitSpecialAbility();
                 }
                 Battle.execute(
                     state, {
@@ -54,7 +61,7 @@ class ArverniBattle {
                     });
                 RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: cost});
             });
-
+        state.turnHistory.getCurrentTurn().commitCommand();
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

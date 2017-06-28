@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 import Trade from '../../commands/aedui/trade';
 import AddResources from '../../actions/addResources';
 
@@ -46,7 +47,9 @@ class AeduiTrade {
             return false;
         }
         console.log('*** Aedui Trading ***');
+        currentState.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.TRADE);
         AddResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: resourcesToBeGained});
+        currentState.turnHistory.getCurrentTurn().commitSpecialAbility();
 
         return true;
     }

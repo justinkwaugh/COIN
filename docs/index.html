@@ -10,9 +10,11 @@
     <div class="row">
         <div class="col-md-12">
             <div style="margin:20px 0;">
-                <button type="button" class="btn btn-primary" style="margin-right:10px;" data-bind="click:start, text: state().currentCard() ? 'Restart' : 'Start'"></button>
+                <button type="button" class="btn btn-primary" style="margin-right:10px;"
+                        data-bind="click:start, text: state().currentCard() ? 'Restart' : 'Start'"></button>
                 <!-- ko if: state().currentCard() -->
-                <button type="button" class="btn btn-success" data-bind="click:nextTurn">Next Turn</button>
+                <button type="button" class="btn btn-success"
+                        data-bind="click:nextTurn, text: endOfCard() ? 'Draw Card' : winterNext() ? 'Winter' : 'Next Faction'"></button>
                 <!-- /ko -->
             </div>
         </div>
@@ -52,21 +54,96 @@
                     </ul>
                 </div>
             </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="pull-left" style="text-align: center;width:33%">
+                        <div style="min-height:84px;">
+                            <div style="font-size:24px;font-weight:300;color:#333;margin-bottom:10px;">
+                                Eligible
+                            </div>
+                            <ul class="list-inline">
+                                <!-- ko foreach: state().sequenceOfPlay.eligibleFactions() -->
+                                <li style="margin:0 0 5px;">
+                                    <img style="width:35px"
+                                         data-bind="attr: { 'src': 'images/' + $data + 'Pawn.png' }"/>
+                                </li>
+                                <!-- /ko -->
+                            </ul>
+                        </div>
+                        <div style="min-height:79px;">
+                            <div style="font-size:24px;font-weight:300;color:#333;margin-bottom:10px;">Passed
+                            </div>
+                            <ul class="list-inline">
+                                <!-- ko foreach: state().sequenceOfPlay.passedFactions() -->
+                                <li>
+                                    <img style="width:35px"
+                                         data-bind="attr: { 'src': 'images/' + $data + 'Pawn.png' }"/>
+                                </li>
+                                <!-- /ko -->
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pull-left" style="text-align: center;width:33%">
+                        <div style="min-height:79px;">
+                            <div style="font-size:24px;font-weight:300;color:#333;margin-bottom:10px;">
+                                1st
+                            </div>
+                            <ul class="list-inline">
+                                <!-- ko if: state().sequenceOfPlay.firstFaction() -->
+                                <li>
+                                    <img style="width:35px"
+                                         data-bind="attr: { 'src': 'images/' + state().sequenceOfPlay.firstFaction() + 'Pawn.png' }"/>
+                                </li>
+                                <!-- /ko -->
+                            </ul>
+                        </div>
+                        <div style="min-height:79px;">
+                            <div style="font-size:24px;font-weight:300;color:#333;margin-bottom:10px;">
+                                2nd
+                            </div>
+                            <ul class="list-inline">
+                                <!-- ko if: state().sequenceOfPlay.secondFaction() -->
+                                <li>
+                                    <img style="width:35px"
+                                         data-bind="attr: { 'src': 'images/' + state().sequenceOfPlay.secondFaction() + 'Pawn.png' }"/>
+                                </li>
+                                <!-- /ko -->
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="pull-right" style="text-align: center; width:33%">
+                        <div>
+                            <div style="font-size:24px;font-weight:300;color:#333;margin-bottom:10px;">
+                                Ineligible
+                            </div>
+                            <ul class="list-inline">
+                                <!-- ko foreach: state().sequenceOfPlay.ineligibleFactions() -->
+                                <li>
+                                    <img style="width:35px"
+                                         data-bind="attr: { 'src': 'images/' + $data + 'Pawn.png' }"/>
+                                </li>
+                                <!-- /ko -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="col-md-8">
             <!-- ko if: lastTurn() -->
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <h2>Turn <span data-bind="text: lastTurn().number"></span> - <span
+                    <h2 style="font-weight:300">Turn <span data-bind="text: lastTurn().number"></span> - <span
                             data-bind="text: lastTurn().factionId"></span> - <span
                             data-bind="text: lastTurn().commandAction"></span></h2>
                     <table class="table table-striped">
                         <tbody>
                         <!-- ko foreach: lastTurn().getInstructions(state()) -->
-                        <tr>
+                        <tr data-bind="css: { info: $data.type === 'command', success: $data.type === 'sa', warning: $data.type === 'event' }">
                             <td>
-                                <div data-bind="text: $data"></div>
+                                <div data-bind="text: $data.instruction, style: { 'margin-left': $data.type === 'action' ? '20px' : 0 } "></div>
                             </td>
+
                         </tr>
                         <!-- /ko -->
                         </tbody>
@@ -83,12 +160,59 @@
                     <li role="presentation" data-bind="css: {active : activePanel() === ActivePanelIDs.REGIONS}"><a
                             href="#" data-bind="click: function() {setActivePanel(ActivePanelIDs.REGIONS)}">Regions</a>
                     </li>
-                    <li role="presentation" data-bind="css: {active : activePanel() === ActivePanelIDs.BOARD}"><a
-                            href="#" data-bind="click: function() {setActivePanel(ActivePanelIDs.BOARD)}">Board</a></li>
+
                     <li role="presentation" data-bind="css: {active : activePanel() === ActivePanelIDs.FACTIONS}"><a
                             href="#"
                             data-bind="click: function() {setActivePanel(ActivePanelIDs.FACTIONS)}">Factions</a></li>
+                    <li role="presentation" data-bind="css: {active : activePanel() === ActivePanelIDs.CAPABILITIES}"><a
+                            href="#"
+                            data-bind="click: function() {setActivePanel(ActivePanelIDs.CAPABILITIES)}">Capabilities</a>
+                    </li>
+                    <li role="presentation" data-bind="css: {active : activePanel() === ActivePanelIDs.BOARD}"><a
+                            href="#" data-bind="click: function() {setActivePanel(ActivePanelIDs.BOARD)}">Board</a></li>
                 </ul>
+            </div>
+            <div class="panel panel-default" data-bind="visible: activePanel() === ActivePanelIDs.FACTIONS">
+                <div class="panel-body">
+                    <ul class="list-inline">
+                        <!-- ko foreach: state().factions -->
+                        <li>
+                            <div class="panel" data-bind="css: 'panel-' + $root.styleSuffixForFaction($data.id)" style="min-width:220px;">
+                                <div class="panel-heading" data-bind="text: $data.name">
+                                </div>
+                                <div class="panel-body" style="padding:0">
+                                    <ul class="list-group" style="margin-bottom:0">
+                                        <!-- ko if: $data.id !== 'Germanic' -->
+                                        <li class="list-group-item">Victory Margin<span class="badge badge-info" data-bind="text:$data.id === 'Germanic' ? 'N/A' : $data.victoryMargin($root.state())"></span></li>
+                                        <!-- /ko -->
+                                        <li class="list-group-item"><span data-bind="text:$data.id === 'Romans' ? 'Auxilia': 'Warbands'"></span> Available<span class="badge badge-info" data-bind="text:$data.id === 'Romans' ? $data.availableAuxilia().length : $data.availableWarbands().length"></span></li>
+                                        <li class="list-group-item">Allies Available<span class="badge badge-info" data-bind="text:$data.availableAlliedTribes().length"></span></li>
+                                        <!-- ko if: $data.id !== 'Germanic' && $data.id !== 'Romans' -->
+                                        <li class="list-group-item">Citadels Available<span class="badge badge-info" data-bind="text:$data.availableCitadels().length"></span></li>
+                                        <!-- /ko -->
+                                        <!-- ko if: $data.id === 'Romans' -->
+                                        <li class="list-group-item">Forts Available<span class="badge badge-info" data-bind="text:$data.availableForts().length"></span></li>
+                                        <li class="list-group-item">Dispersal Tokens<span class="badge badge-info" data-bind="text:$data.availableDispersalTokens()"></span></li>
+                                        <!-- /ko -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- /ko -->
+                    </ul>
+                </div>
+            </div>
+            <div class="panel panel-default" data-bind="visible: activePanel() === ActivePanelIDs.CAPABILITIES">
+                <div class="panel-body">
+                    <ul class="list-inline">
+                        <!-- ko foreach: state().capabilities() -->
+                        <li>
+                            <img style="width:180px"
+                                 data-bind="attr: { 'src': 'images/cards/' + $data.id + '.jpg' }"/>
+                        </li>
+                        <!-- /ko -->
+                    </ul>
+                </div>
             </div>
             <div class="panel panel-default" data-bind="visible: activePanel() === ActivePanelIDs.BOARD">
                 <div style="position:relative;width:3300px;height:2550px;transform-origin:0 0;transform:scale(0.4, 0.4)">
@@ -207,18 +331,22 @@
                                                         <!-- /ko -->
                                                         <!-- ko if: $parent.getRevealedPiecesForFaction($data).length > 0 -->
                                                         <li style="text-align:center">
+                                                            <div style="position:relative;display:flex;justify-content:center;flex-direction:column;align-items: center;text-align:center;">
                                                             <img style="width:25px"
                                                                  data-bind="attr: { 'src': 'images/' + $data + 'Warband-R.png' }"/>
                                                             <div style="color:#333"
                                                                  data-bind="text:$parent.getRevealedPiecesForFaction($data).length"></div>
+                                                            </div>
                                                         </li>
                                                         <!-- /ko -->
                                                         <!-- ko if: $parent.getScoutedPiecesForFaction($data).length > 0 -->
                                                         <li style="text-align:center">
+                                                            <div style="position:relative;display:flex;justify-content:center;flex-direction:column;align-items: center;text-align:center;">
                                                             <img style="width:25px"
                                                                  data-bind="attr: { 'src': 'images/' + $data + 'Warband-S.png' }"/>
                                                             <div style="color:#333"
                                                                  data-bind="text:$parent.getScoutedPiecesForFaction($data).length"></div>
+                                                            </div>
                                                         </li>
                                                         <!-- /ko -->
                                                     </ul>

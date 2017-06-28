@@ -42,7 +42,7 @@ class FallingSkyGameState extends GameState {
             [FactionIDs.GERMANIC_TRIBES]: new GermanicBot()
         };
 
-        this.sequenceOfPlay = new SequenceOfPlay(
+        this.sequenceOfPlay = new SequenceOfPlay(this,
             {
                 factions: [FactionIDs.ROMANS,
                            FactionIDs.ARVERNI,
@@ -50,9 +50,12 @@ class FallingSkyGameState extends GameState {
                            FactionIDs.BELGAE]
             });
 
-        this.turnHistory = new TurnHistory();
+        this.turnHistory = new TurnHistory(this);
         this.actionHistory = new ActionHistory();
-        this.capabilitiesById = ko.observable({});
+        this.capabilities = ko.observableArray([]);
+        this.capabilitiesById = ko.pureComputed(()=> {
+            return _.keyBy(this.capabilities(), 'id');
+        });
 
         this.deck = ko.observableArray();
         this.discard = ko.observableArray();
@@ -61,6 +64,9 @@ class FallingSkyGameState extends GameState {
         this.frost = ko.observable();
 
         this.yearsRemaining = ko.observable();
+        this.isLastYear = ko.pureComputed(() => {
+            return this.yearsRemaining() === 0;
+        });
         this.gameEnded = ko.observable();
         this.victor = ko.observable();
     }
@@ -71,6 +77,10 @@ class FallingSkyGameState extends GameState {
 
     setYearsRemaining(years) {
         this.yearsRemaining(years);
+    }
+
+    startYear() {
+        this.yearsRemaining(this.yearsRemaining() - 1);
     }
 
     cloneGameState(state) {
@@ -86,11 +96,11 @@ class FallingSkyGameState extends GameState {
     }
 
     addCapability(capability) {
-        this.capabilitiesById()[capability.id] = capability;
+        this.capabilities.push(capability);
     }
 
     removeCapability(capabilityId) {
-        delete this.capabilitiesById()[capability.id];
+        this.capabilities.remove( function(item) { return item.id === capabilityId });
     }
 
     hasShadedCapability(capabilityId, factionId) {

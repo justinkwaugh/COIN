@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import CommandIDs from '../../config/commandIds';
 import RevealPieces from '../../actions/revealPieces';
 import RemoveResources from '../../actions/removeResources';
 import AddResources from '../../actions/addResources';
@@ -18,6 +19,7 @@ class ArverniRaid {
             return;
         }
 
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RAID);
         _.each(
             effectiveRaidRegions, function (raidResult) {
                 console.log('*** ' + state.arverni.name + ' Raiding in region ' + raidResult.region.name);
@@ -44,7 +46,7 @@ class ArverniRaid {
 
                 AddResources.execute(state, { factionId: FactionIDs.ARVERNI, count: raidResult.resourcesGained});
             });
-
+        state.turnHistory.getCurrentTurn().commitCommand();
         const usedSpecialAbility = modifiers.canDoSpecial() && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }

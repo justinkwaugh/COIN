@@ -1,4 +1,5 @@
 import _ from '../../../lib/lodash';
+import CommandIDs from '../../config/commandIds';
 import FactionIDs from '../../config/factionIds';
 import Rally from '../../commands/rally';
 import AeduiTrade from './aeduiTrade';
@@ -12,8 +13,10 @@ class AeduiRally {
         if ((aeduiFaction.availableWarbands() <= 10 || executableRallyRegions.length === 0) && !this.isRallyEffective(state, executableRallyRegions)) {
             return false;
         }
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RALLY);
         Rally.execute(state, {faction: aeduiFaction, regionResults: executableRallyRegions});
         const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state, modifiers, bot) || AeduiSuborn.suborn(state, modifiers));
+        state.turnHistory.getCurrentTurn().commitCommand();
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

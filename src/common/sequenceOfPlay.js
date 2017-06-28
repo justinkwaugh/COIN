@@ -3,13 +3,14 @@ import ko from '../lib/knockout.js';
 import FactionActions from './factionActions';
 
 class SequenceOfPlay {
-    constructor(definition) {
+    constructor(state, definition) {
         const that = this;
 
         this.eligibleFactions = ko.observableArray(definition.factions);
         this.ineligibleFactions = ko.observableArray();
         this.passedFactions = ko.observableArray();
         this.forcedEligibleFactionIds = ko.observableArray();
+        this.state = state;
 
         this.firstFaction = ko.observable();
         this.secondFaction = ko.observable();
@@ -57,7 +58,7 @@ class SequenceOfPlay {
 
         const newlyIneligible = [];
         if (this.firstFaction()) {
-            if(_.indexOf(this.forcedEligibleFactionIds, this.firstFaction().id) >= 0) {
+            if(_.indexOf(this.forcedEligibleFactionIds(), this.firstFaction().id) >= 0) {
                 this.eligibleFactions.push(this.firstFaction());
             }
             else {
@@ -65,7 +66,7 @@ class SequenceOfPlay {
             }
         }
         if (this.secondFaction()) {
-            if(_.indexOf(this.forcedEligibleFactionIds, this.secondFaction().id) >= 0) {
+            if(_.indexOf(this.forcedEligibleFactionIds(), this.secondFaction().id) >= 0) {
                 this.eligibleFactions.push(this.secondFaction());
             }
             else {
@@ -100,6 +101,7 @@ class SequenceOfPlay {
             this.firstActionChosen(action);
             this.firstFaction(factionId);
         }
+        this.state.turnHistory.commitTurn(action);
     }
 
     nextFaction(currentCard) {

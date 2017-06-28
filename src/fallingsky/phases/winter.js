@@ -1,4 +1,5 @@
 import FactionIDs from '../config/factionIds';
+import Turn from '../../common/turn';
 import UndisperseTribe from '../actions/undisperseTribe';
 import AddResources from '../actions/addResources';
 import HidePieces from '../actions/hidePieces';
@@ -7,12 +8,14 @@ class Winter {
 
     static executeWinter(state) {
         console.log('*** Winter ***');
+        state.turnHistory.startTurn(FactionIDs.GERMANIC_TRIBES);
         this.victoryCheck(state);
         this.germanPhase(state);
         this.quarters(state);
         this.harvest(state);
         this.senate(state);
         this.spring(state);
+        state.turnHistory.commitTurn('Winter');
     }
 
     static victoryCheck(state) {

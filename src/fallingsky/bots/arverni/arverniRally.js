@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import CommandIDs from '../../config/commandIds';
 import Rally from '../../commands/rally';
 import ArverniMarch from './arverniMarch';
 import ArverniDevastate from './arverniDevastate';
@@ -20,7 +21,9 @@ class ArverniRally {
             return false;
         }
 
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RALLY);
         Rally.execute(state, {faction: state.arverni, regionResults: executableRallyRegions});
+        state.turnHistory.getCurrentTurn().commitCommand();
         const usedSpecialAbility = modifiers.canDoSpecial() && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }

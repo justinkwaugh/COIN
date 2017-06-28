@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 import Suborn from '../../commands/aedui/suborn';
 import PlaceAlliedTribe from '../../actions/placeAlliedTribe';
 import RemovePieces from '../../actions/removePieces';
@@ -71,9 +72,11 @@ class AeduiSuborn {
         const chosenSuborns = _.sampleSize(subornChoices, convictolitavis ? 2 : 1);
 
         if (chosenSuborns.length > 0) {
+            currentState.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.SUBORN);
             _.each(chosenSuborns, (chosenSuborn) => {
                 this.executeSuborn(currentState, modifiers, chosenSuborn);
             });
+            currentState.turnHistory.getCurrentTurn().commitSpecialAbility();
             return true;
         }
 
@@ -91,8 +94,10 @@ class AeduiSuborn {
                 tribe = _.sample(subdued);
             }
 
+            if(!modifiers.free) {
+                RemoveResources.execute(state, {factionId: FactionIDs.AEDUI, count: 2});
+            }
             PlaceAlliedTribe.execute(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, tribeId: tribe.id});
-            RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: 2});
             piecesHandled += 1;
         }
         else if ((aeduiFaction.resources() >= 2 || modifiers.free) && subornResult.alliedFactions.length > 0) {
@@ -117,24 +122,25 @@ class AeduiSuborn {
             if(!alliedTribe) {
                 debugger;
             }
+            if(!modifiers.free) {
+                RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: 2});
+            }
             RemovePieces.execute(
                 state, {
                     factionId: alliedTribe.factionId,
                     regionId: subornResult.region.id,
                     pieces: [alliedTribe]
                 });
-            if(!modifiers.free) {
-                RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: 2});
-            }
+
             piecesHandled += 1;
         }
 
         const numWarbandsToAdd = _.min([(modifiers.free ? 999 : aeduiFaction.resources()), aeduiFaction.availableWarbands().length, 3 - piecesHandled]);
         if (numWarbandsToAdd) {
-            PlaceWarbands.execute(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, count: numWarbandsToAdd});
             if(!modifiers.free) {
                 RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: numWarbandsToAdd});
             }
+            PlaceWarbands.execute(state, {factionId: aeduiFaction.id, regionId: subornResult.region.id, count: numWarbandsToAdd});
             piecesHandled += numWarbandsToAdd;
         }
 
@@ -164,15 +170,16 @@ class AeduiSuborn {
 
                     const numPiecesToRemove = _.min([(modifiers.free ? 999 : aeduiFaction.resources()), pieces.length, 3 - piecesHandled]);
                     if (numPiecesToRemove) {
+                        if(!modifiers.free) {
+                            RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: numPiecesToRemove});
+                        }
                         RemovePieces.execute(
                             state, {
                                 factionId: factionId,
                                 regionId: subornResult.region.id,
                                 pieces: _.take(pieces, numPiecesToRemove)
                             });
-                        if(!modifiers.free) {
-                            RemoveResources.execute(state, { factionId: FactionIDs.AEDUI, count: numPiecesToRemove});
-                        }
+
                         piecesHandled += numPiecesToRemove;
                     }
 

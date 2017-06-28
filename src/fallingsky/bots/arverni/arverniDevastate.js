@@ -1,23 +1,29 @@
 import _ from '../../../lib/lodash';
 import Devastate from '../../commands/arverni/devastate';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 
 class ArverniDevastate {
 
     static devastate(state, modifiers) {
-        let effective = false;
 
         const effectiveDevastations = this.getEffectiveDevastations(state, modifiers);
         if(modifiers.test) {
             return effectiveDevastations;
         }
+
+        if(effectiveDevastations.length === 0) {
+            return false;
+        }
+
+        state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.DEVASTATE);
         _.each(effectiveDevastations, (devastation) => {
             Devastate.execute(state, {
                 devastation
             });
-            effective = true;
         });
+        state.turnHistory.getCurrentTurn().commitSpecialAbility();
 
-        return effective;
+        return true;
     }
 
     static getEffectiveDevastations(state, modifiers) {

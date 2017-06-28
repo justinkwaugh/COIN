@@ -1,4 +1,5 @@
 import _ from '../../../lib/lodash';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 import FactionIDs from '../../config/factionIds';
 import Enlist from '../../commands/belgae/enlist';
 import Battle from '../../commands/battle';
@@ -12,12 +13,24 @@ class BelgaeEnlist {
 
     static enlist(state, modifiers) {
         const enlistResults = Enlist.test(state);
+        let effective = false;
+
+        state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.ENLIST);
         if(modifiers.commandSpecific.battles) {
-            return this.enlistForBattle(state, modifiers, enlistResults);
+            effective = this.enlistForBattle(state, modifiers, enlistResults);
         }
         else {
-            return this.enlistForCommand(state, modifiers, enlistResults);
+            effective = this.enlistForCommand(state, modifiers, enlistResults);
         }
+
+        if(!effective) {
+            state.turnHistory.getCurrentTurn().rollbackSpecialAbility();
+        }
+        else {
+            state.turnHistory.getCurrentTurn().commitSpecialAbility();
+        }
+
+        return effective;
     }
 
     static enlistForBattle(state, modifiers, enlistResults) {

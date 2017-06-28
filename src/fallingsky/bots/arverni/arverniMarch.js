@@ -1,4 +1,5 @@
 import _ from '../../../lib/lodash';
+import CommandIDs from '../../config/commandIds';
 import FactionIDs from '../../config/factionIds';
 import RegionGroups from '../../config/regionGroups';
 import RegionIDs from '../../config/regionIds';
@@ -53,6 +54,7 @@ class ArverniMarch {
         let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaMarch(marches);
         let didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
 
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         console.log('*** Arverni Marching to Escape Threat ***');
         _.each(
             marches, (march) => {
@@ -80,8 +82,10 @@ class ArverniMarch {
             });
 
         if (!effective) {
+            state.turnHistory.getCurrentTurn().rollbackCommand();
             return false;
         }
+        state.turnHistory.getCurrentTurn().commitCommand();
 
         if (canDoSpecial && !didSpecial) {
             didSpecial = ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers);
@@ -154,6 +158,7 @@ class ArverniMarch {
         }
 
         const alreadyMarchedById = {};
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         if(this.doSpreadMarches(state, modifiers, spreadMarches, alreadyMarchedById)) {
             effective = true;
         }
@@ -163,8 +168,11 @@ class ArverniMarch {
         }
 
         if (!effective) {
+            state.turnHistory.getCurrentTurn().rollbackCommand();
             return false;
         }
+
+        state.turnHistory.getCurrentTurn().commitCommand();
 
         let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaSpreadMarch(marches) && !this.wasBritanniaControlMarch(leaderMarch);
         const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
@@ -426,15 +434,18 @@ class ArverniMarch {
             return false;
         }
 
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         const legionControlMarch = this.getLegionControlMarch(state, modifiers, leaderMarch, marchResults);
         if(legionControlMarch) {
             effective = this.doControlMarch(state, modifiers, legionControlMarch, {});
         }
 
         if(!effective) {
+            state.turnHistory.getCurrentTurn().rollbackCommand();
             return false;
         }
 
+        state.turnHistory.getCurrentTurn().commitCommand();
         let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaControlMarch(legionControlMarch);
         const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;

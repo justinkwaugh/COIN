@@ -1,4 +1,5 @@
 import _ from '../../../lib/lodash';
+import CommandIDs from '../../config/commandIds';
 import FactionIDs from '../../config/factionIds';
 import RegionGroups from '../../config/regionGroups';
 import RegionIDs from '../../config/regionIds';
@@ -56,6 +57,7 @@ class BelgaeMarch {
 
         let effective = false;
         let wasBritannia = false;
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         _.each(
             necessaryMarches, (march) => {
                 if (belgae.resources() < march.cost && !modifiers.free) {
@@ -104,7 +106,11 @@ class BelgaeMarch {
             });
 
         if(!effective) {
+            state.turnHistory.getCurrentTurn().rollbackCommand();
             return false;
+        }
+        else {
+            state.turnHistory.getCurrentTurn().commitCommand();
         }
         const usedSpecialAbility = modifiers.canDoSpecial() && !wasBritannia && (BelgaeEnlist.enlist(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
@@ -118,6 +124,7 @@ class BelgaeMarch {
 
         let effective = false;
         if (firstControlMarch) {
+            state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
             let marchedFromRegions = [firstControlMarch.region.id];
             let marchedToRegions = [firstControlMarch.destination.id];
 
@@ -131,6 +138,7 @@ class BelgaeMarch {
             }
 
             this.doLeaderMarch(state, modifiers, marchedFromRegions, marchedToRegions);
+            state.turnHistory.getCurrentTurn().commitCommand();
             effective = true;
         }
 

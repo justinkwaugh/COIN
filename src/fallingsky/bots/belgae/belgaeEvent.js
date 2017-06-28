@@ -3,6 +3,7 @@ import FactionIDs from '../../config/factionIds';
 
 
 const NoEvents = [];
+const CapabilityEvents = [8,10,12,13,15,25,27,30,38,39,43,55,59,63];
 const EventHandlers = {
 
 };
@@ -20,7 +21,16 @@ class BelgaeEvent {
             return false;
         }
 
-        return eventHandler.handleEvent(state);
+        state.turnHistory.getCurrentTurn().startEvent(currentCard.id);
+        const handled = eventHandler.handleEvent(state);
+        if(!handled) {
+            state.turnHistory.getCurrentTurn().rollbackEvent();
+        }
+        else {
+            state.turnHistory.getCurrentTurn().commitEvent();
+        }
+
+        return handled;
     }
 
 }

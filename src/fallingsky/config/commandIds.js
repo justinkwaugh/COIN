@@ -1,10 +1,10 @@
 const CommandIDs = {
-    BATTLE: 'battle',
-    MARCH: 'march',
-    RAID: 'raid',
-    RALLY: 'rally',
-    RECRUIT: 'recruit',
-    SIEZE: 'sieze'
+    BATTLE: 'Battle',
+    MARCH: 'March',
+    RAID: 'Raid',
+    RALLY: 'Rally',
+    RECRUIT: 'Recruit',
+    SIEZE: 'Sieze'
 };
 
 export default CommandIDs;

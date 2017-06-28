@@ -1,4 +1,5 @@
 import _ from '../../../lib/lodash';
+import SpecialAbilityIDs from '../../config/specialAbilityIds';
 import FactionIDs from '../../config/factionIds';
 import Rampage from '../../commands/belgae/rampage';
 import EnemyFactionPriority from './enemyFactionPriority';
@@ -6,15 +7,18 @@ import EnemyFactionPriority from './enemyFactionPriority';
 class BelgaeRampage {
 
     static rampage(state, modifiers) {
-        let effective = false;
 
         const prioritizedRampages = this.getPrioritizedRampages(state, modifiers);
+        if(prioritizedRampages.length === 0) {
+            return false;
+        }
+        state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.RAMPAGE);
         _.each(prioritizedRampages, function(rampage) {
             Rampage.execute(state, { rampage });
-            effective = true;
         });
+        state.turnHistory.getCurrentTurn().commitSpecialAbility();
 
-        return effective;
+        return true;
     }
 
     static getPrioritizedRampages(state, modifiers) {

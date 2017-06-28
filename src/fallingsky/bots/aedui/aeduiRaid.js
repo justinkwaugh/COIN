@@ -1,4 +1,5 @@
 import _ from '../../../lib/lodash';
+import CommandIDs from '../../config/commandIds';
 import FactionIDs from '../../config/factionIds';
 import RevealPieces from '../../actions/revealPieces';
 import RemoveResources from '../../actions/removeResources';
@@ -11,6 +12,7 @@ import FactionActions from '../../../common/factionActions';
 
 class AeduiRaid {
     static raid(currentState, modifiers, bot, aeduiFaction, executableRaidRegions) {
+        currentState.turnHistory.getCurrentTurn().startCommand(CommandIDs.RAID);
         _.each(executableRaidRegions, function (raidResult) {
                 console.log('*** ' + aeduiFaction.name + ' Raiding in region ' + raidResult.region.name);
 
@@ -32,6 +34,7 @@ class AeduiRaid {
             });
 
         const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(currentState, modifiers, bot) || AeduiSuborn.suborn(currentState, modifiers));
+        currentState.turnHistory.getCurrentTurn().commitCommand();
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

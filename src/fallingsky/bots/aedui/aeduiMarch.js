@@ -1,6 +1,7 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import March from '../../commands/march';
+import CommandIDs from '../../config/commandIds';
 import AeduiTrade from './aeduiTrade';
 import AeduiSuborn from './aeduiSuborn';
 import MovePieces from '../../actions/movePieces';
@@ -20,7 +21,7 @@ class AeduiMarch {
         if (!effectiveMarch) {
             return false;
         }
-
+        currentState.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         const regionsMarched = {};
 
         if (effectiveMarch.expansionMarchRegions.length > 0) {
@@ -76,6 +77,7 @@ class AeduiMarch {
         }
 
         const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(currentState, modifiers, bot) || AeduiSuborn.suborn(currentState, modifiers));
+        currentState.turnHistory.getCurrentTurn().commitCommand();
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 
