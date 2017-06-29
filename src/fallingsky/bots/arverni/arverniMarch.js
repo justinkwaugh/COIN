@@ -479,12 +479,16 @@ class ArverniMarch {
                 if (!this.payForMarchAndHide(state, modifiers, march, {})) {
                     return false;
                 }
-                const warbands = march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI);
+                const pieces = _.take(march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI), march.numMassWarbands);
+                const leader = march.region.getLeaderForFaction(FactionIDs.ARVERNI);
+                if(leader) {
+                    pieces.unshift(leader);
+                }
                 MovePieces.execute(
                     state, {
                         sourceRegionId: march.region.id,
                         destRegionId: march.massDestination.id,
-                        pieces: _.take(warbands, march.numMassWarbands)
+                        pieces: pieces
                     });
                 effective = true;
             });

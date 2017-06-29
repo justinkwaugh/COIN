@@ -393,6 +393,7 @@ describe("Arverni march", function () {
         expect(aeduiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(1);
         expect(moriniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(2);
         expect(sequaniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(10);
+        expect(sequaniRegion.getLeaderForFaction(FactionIDs.ARVERNI)).to.not.be.null;
         expect(sugambriRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(2);
     });
 });
