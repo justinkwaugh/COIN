@@ -475,13 +475,17 @@ class ArverniMarch {
     static doMassMarches(state, modifiers, marches) {
         let effective = false;
         _.each(
-            marches, (march) => {
+            marches, (march, index) => {
                 if (!this.payForMarchAndHide(state, modifiers, march, {})) {
                     return false;
                 }
-                const pieces = _.take(march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI), march.numMassWarbands);
+                if (index === 0) {
+                    console.log('*** Arverni March to mass near legion');
+                }
+                const pieces = _.take(march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI),
+                                      march.numMassWarbands);
                 const leader = march.region.getLeaderForFaction(FactionIDs.ARVERNI);
-                if(leader) {
+                if (leader) {
                     pieces.unshift(leader);
                 }
                 MovePieces.execute(
@@ -568,7 +572,7 @@ class ArverniMarch {
         const destinationsNextToLegion = _(leaderMarch.destinations).filter(
             destination => destinationPathsById[destination.id]).filter(
             (destination) => {
-                if(destination.getLegions().length > 0) {
+                if (destination.getLegions().length > 0) {
                     return false;
                 }
                 const numAfterHarassment = numMarching - destinationPathsById[destination.id].bestPath.harassmentLosses;
@@ -590,7 +594,7 @@ class ArverniMarch {
                 destination,
                 numToMass: massResults.numToMass,
                 massResults,
-                priority: 99-massResults.numToMass + '-' + 10 + massResults.marches.length
+                priority: 99 - massResults.numToMass + '-' + 10 + massResults.marches.length
             }
         }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
 
@@ -602,9 +606,11 @@ class ArverniMarch {
         leaderMarch.massDestination = chosenMassResults.destination;
         leaderMarch.harassmentLosses = destinationPathsById[chosenMassResults.destination.id].bestPath.harassmentLosses;
 
-        const leaderAlreadyAdjacentToLegion = _.find(leaderMarch.region.adjacent, adjacent => adjacent.getLegions().length > 0);
+        const leaderAlreadyAdjacentToLegion = _.find(leaderMarch.region.adjacent,
+                                                     adjacent => adjacent.getLegions().length > 0);
         const marchMassTotal = (leaderMarch.numMassWarbands - leaderMarch.harassmentLosses) + chosenMassResults.numToMass;
-        if( leaderAlreadyAdjacentToLegion && marchMassTotal <= leaderMarch.region.getPiecesForFaction(FactionIDs.ARVERNI)) {
+        if (leaderAlreadyAdjacentToLegion && marchMassTotal <= leaderMarch.region.getPiecesForFaction(
+                FactionIDs.ARVERNI)) {
             return [];
         }
 
