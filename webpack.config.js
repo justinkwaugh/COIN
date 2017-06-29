@@ -14,12 +14,15 @@ module.exports = {
             'Access-Control-Allow-Origin': '*'
         }
     },
+
+    // This section is needed for tests, but breaks the dev server.  Haven't figured out why yet.
     // resolve: {
     //     modules: [
     //         path.resolve('./src'),
     //         path.resolve('./node_modules')
     //     ]
     // },
+
     module: {
         loaders: [{
             test: /\.js$/,
