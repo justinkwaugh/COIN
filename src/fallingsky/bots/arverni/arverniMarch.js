@@ -52,7 +52,8 @@ class ArverniMarch {
 
         const marches = _.concat([leaderMarch], remainingMarches);
         let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaMarch(marches);
-        let didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
+        let didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state,
+                                                                                                                 modifiers));
 
         state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         console.log('*** Arverni Marching to Escape Threat ***');
@@ -63,7 +64,7 @@ class ArverniMarch {
                 }
 
                 if (!modifiers.free) {
-                    RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: leaderMarch.march.cost});
+                    RemoveResources.execute(state, {factionId: FactionIDs.ARVERNI, count: leaderMarch.march.cost});
                 }
 
                 HidePieces.execute(
@@ -96,11 +97,12 @@ class ArverniMarch {
 
     static getLeaderMarch(marchResults) {
         const leaderMarch = _(marchResults).find(march => march.region.getLeaderForFaction(FactionIDs.ARVERNI));
-        if(!leaderMarch) {
+        if (!leaderMarch) {
             debugger;
         }
         const leaderAdjacentRegionIds = _(leaderMarch.region.adjacent).map('id').value();
-        const targetDestination = _(leaderMarch.destinations).filter(destination => _.indexOf(leaderAdjacentRegionIds, destination.id) >= 0).map(
+        const targetDestination = _(leaderMarch.destinations).filter(
+            destination => _.indexOf(leaderAdjacentRegionIds, destination.id) >= 0).map(
             (region) => {
                 const pieces = region.getPiecesForFaction(FactionIDs.ARVERNI);
                 return {
@@ -118,7 +120,8 @@ class ArverniMarch {
     }
 
     static getRemainingMarches(state, marchResults, leaderRegion) {
-        return _(marchResults).reject(march => march.region.id === leaderRegion.id).reject(march => march.region.getLeaderForFaction(FactionIDs.ARVERNI)).map(
+        return _(marchResults).reject(march => march.region.id === leaderRegion.id).reject(
+            march => march.region.getLeaderForFaction(FactionIDs.ARVERNI)).map(
             (march) => {
                 if (march.mobilePieces.length < 2) {
                     return;
@@ -141,7 +144,8 @@ class ArverniMarch {
     }
 
     static wasBritanniaMarch(marches) {
-        return _.find(marches, march => (march.region.id === RegionIDs.BRITANNIA || march.targetDestination.id === RegionIDs.BRITANNIA));
+        return _.find(marches,
+                      march => (march.region.id === RegionIDs.BRITANNIA || march.targetDestination.id === RegionIDs.BRITANNIA));
     }
 
     static spreadMarch(state, modifiers) {
@@ -159,11 +163,11 @@ class ArverniMarch {
 
         const alreadyMarchedById = {};
         state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
-        if(this.doSpreadMarches(state, modifiers, spreadMarches, alreadyMarchedById)) {
+        if (this.doSpreadMarches(state, modifiers, spreadMarches, alreadyMarchedById)) {
             effective = true;
         }
 
-        if(this.doControlMarch(state, modifiers, leaderMarch, alreadyMarchedById)) {
+        if (this.doControlMarch(state, modifiers, leaderMarch, alreadyMarchedById)) {
             effective = true;
         }
 
@@ -174,13 +178,16 @@ class ArverniMarch {
 
         state.turnHistory.getCurrentTurn().commitCommand();
 
-        let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaSpreadMarch(marches) && !this.wasBritanniaControlMarch(leaderMarch);
-        const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
+        let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaSpreadMarch(
+                marches) && !this.wasBritanniaControlMarch(leaderMarch);
+        const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(
+                state, modifiers));
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 
     static wasBritanniaSpreadMarch(marches) {
-        return _.find(marches, march => (march.region.id === RegionIDs.BRITANNIA || _.find(march.spreadDestinations, {id: RegionIDs.BRITANNIA})));
+        return _.find(marches, march => (march.region.id === RegionIDs.BRITANNIA || _.find(march.spreadDestinations,
+                                                                                           {id: RegionIDs.BRITANNIA})));
     }
 
     static wasBritanniaControlMarch(march) {
@@ -193,7 +200,7 @@ class ArverniMarch {
         console.log('*** Arverni Marching to Spread ***');
         _.each(
             marches, (march) => {
-                this.payForMarchAndHide(state,modifiers,march,alreadyMarchedById);
+                this.payForMarchAndHide(state, modifiers, march, alreadyMarchedById);
 
                 const warbands = march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI);
                 _.each(
@@ -222,7 +229,7 @@ class ArverniMarch {
         const arverni = state.arverni;
         console.log('*** Arverni Marching to Take Control ***');
 
-        this.payForMarchAndHide(state,modifiers,march,alreadyMarchedById);
+        this.payForMarchAndHide(state, modifiers, march, alreadyMarchedById);
 
         const warbands = march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI);
         const leader = march.region.getLeaderForFaction(FactionIDs.ARVERNI);
@@ -254,14 +261,14 @@ class ArverniMarch {
             }
 
             if (!modifiers.free) {
-                RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: march.cost});
+                RemoveResources.execute(state, {factionId: FactionIDs.ARVERNI, count: march.cost});
             }
-
             HidePieces.execute(
                 state, {
                     factionId: arverni.id,
                     regionId: march.region.id
                 });
+            return true;
         }
     }
 
@@ -273,11 +280,14 @@ class ArverniMarch {
                 if (numWarbands === 0) {
                     return;
                 }
-                const spreadDestinations = _(march.adjacentDestinations).filter(destination => destination.getHiddenWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length === 0).map(
+                const spreadDestinations = _(march.adjacentDestinations).filter(
+                    destination => destination.getHiddenWarbandsOrAuxiliaForFaction(
+                        FactionIDs.ARVERNI).length === 0).map(
                     (destination) => {
                         const numOverlaps = _.reduce(
                             marchResults, (sum, otherMarch) => {
-                                if (_.find(otherMarch.adjacentDestinations, otherDestination => destination.id === otherDestination.id)) {
+                                if (_.find(otherMarch.adjacentDestinations,
+                                           otherDestination => destination.id === otherDestination.id)) {
                                     return sum + 1;
                                 }
                                 return sum;
@@ -287,7 +297,8 @@ class ArverniMarch {
                             id: destination.id,
                             numOverlaps
                         }
-                    }).sortBy('numOverlaps').groupBy('numOverlaps').map(_.shuffle).flatten().take(numWarbands).map('id').value();
+                    }).sortBy('numOverlaps').groupBy('numOverlaps').map(_.shuffle).flatten().take(numWarbands).map(
+                    'id').value();
 
                 if (spreadDestinations.length === 0) {
                     return;
@@ -307,7 +318,8 @@ class ArverniMarch {
     }
 
     static getSpreadLeaderMarch(state, marchResults, spreadMarches) {
-        const leaderMarch = _(spreadMarches).find(march => march.region.getLeaderForFaction(FactionIDs.ARVERNI)) || _(marchResults).find(march => march.region.getLeaderForFaction(FactionIDs.ARVERNI));
+        const leaderMarch = _(spreadMarches).find(march => march.region.getLeaderForFaction(FactionIDs.ARVERNI)) || _(
+                marchResults).find(march => march.region.getLeaderForFaction(FactionIDs.ARVERNI));
         if (!leaderMarch) {
             return;
         }
@@ -316,7 +328,8 @@ class ArverniMarch {
         const spreadDestinationsById = _(spreadMarches).map('spreadDestinations').flatten().keyBy(_.identity).value();
         const alreadyMarchedWarbands = (leaderMarch.numSpreadWarbands || 0);
         const leaderRegionControlMargin = leaderMarch.region.controllingMarginByFaction()[FactionIDs.ARVERNI] - alreadyMarchedWarbands;
-        const availableWarbands = leaderMarch.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length - (alreadyMarchedWarbands + 1); // Leave one behind
+        const availableWarbands = leaderMarch.region.getWarbandsOrAuxiliaForFaction(
+                FactionIDs.ARVERNI).length - (alreadyMarchedWarbands + 1); // Leave one behind
         if (availableWarbands < 0) {
             return;
         }
@@ -329,8 +342,10 @@ class ArverniMarch {
         const numWarbandsToMarch = leaderRegionControlMargin < 1 ? availableWarbands : leaderRegionControlMargin - 2;
         const numMarching = numWarbandsToMarch + 1;
         // Find best path to all destinations considering harassment
-        const destinationPathsById = _.keyBy(this.getDestinationPaths(state, numMarching, leaderMarch.region, leaderMarch.destinations), 'id');
-        const destinationToControl = _(leaderMarch.destinations).reject({id: RegionIDs.AEDUI}).filter(destination => destinationPathsById[destination.id]).filter(
+        const destinationPathsById = _.keyBy(
+            this.getDestinationPaths(state, numMarching, leaderMarch.region, leaderMarch.destinations), 'id');
+        const destinationToControl = _(leaderMarch.destinations).reject({id: RegionIDs.AEDUI}).filter(
+            destination => destinationPathsById[destination.id]).filter(
             (destination) => {
                 // See if we can take control from Romans or Aedui even after harassment
                 const numAfterHarassment = numMarching - destinationPathsById[destination.id].bestPath.harassmentLosses;
@@ -343,7 +358,8 @@ class ArverniMarch {
                 // Now figure out the priority based on harassment and adjacent regions with arverni present
                 const numAdjacentRegionsWithArverni = _.reduce(
                     destination.adjacent, (sum, adjacent) => {
-                        if (adjacent.getPiecesForFaction(FactionIDs.ARVERNI).length > 0 || spreadDestinationsById[adjacent.id]) {
+                        if (adjacent.getPiecesForFaction(
+                                FactionIDs.ARVERNI).length > 0 || spreadDestinationsById[adjacent.id]) {
                             return sum + 1;
                         }
                         return sum;
@@ -398,7 +414,8 @@ class ArverniMarch {
                             path,
                             harassmentLosses
                         }
-                    }).compact().sortBy('harassmentLosses').groupBy('harassmentLosses').map(_.shuffle).flatten().first();
+                    }).compact().sortBy('harassmentLosses').groupBy('harassmentLosses').map(
+                    _.shuffle).flatten().first();
 
                 if (!bestPath) {
                     return;
@@ -436,19 +453,42 @@ class ArverniMarch {
 
         state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         const legionControlMarch = this.getLegionControlMarch(state, modifiers, leaderMarch, marchResults);
-        if(legionControlMarch) {
+        if (legionControlMarch) {
             effective = this.doControlMarch(state, modifiers, legionControlMarch, {});
         }
-
-        if(!effective) {
+        else {
+            const massMarches = this.getMassMarches(state, modifiers, leaderMarch, marchResults);
+            effective = this.doMassMarches(state, modifiers, massMarches);
+        }
+        if (!effective) {
             state.turnHistory.getCurrentTurn().rollbackCommand();
             return false;
         }
 
         state.turnHistory.getCurrentTurn().commitCommand();
         let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaControlMarch(legionControlMarch);
-        const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
+        const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(
+                state, modifiers));
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
+    }
+
+    static doMassMarches(state, modifiers, marches) {
+        let effective = false;
+        _.each(
+            marches, (march) => {
+                if (!this.payForMarchAndHide(state, modifiers, march, {})) {
+                    return false;
+                }
+                const warbands = march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI);
+                MovePieces.execute(
+                    state, {
+                        sourceRegionId: march.region.id,
+                        destRegionId: march.massDestination.id,
+                        pieces: _.take(warbands, march.numMassWarbands)
+                    });
+                effective = true;
+            });
+        return effective;
     }
 
     static getLegionControlMarch(state, modifiers, leaderMarch, marchResults) {
@@ -456,26 +496,29 @@ class ArverniMarch {
         const availableWarbands = leaderMarch.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length;
         const numMarching = availableWarbands + 1;
 
-        const destinationPathsById = _.keyBy(this.getDestinationPaths(state, numMarching, leaderMarch.region, leaderMarch.destinations), 'id');
-        const destinationToControl = _(leaderMarch.destinations).filter(destination => destinationPathsById[destination.id]).filter(
+        const destinationPathsById = _.keyBy(
+            this.getDestinationPaths(state, numMarching, leaderMarch.region, leaderMarch.destinations), 'id');
+        const destinationToControl = _(leaderMarch.destinations).filter(
+            destination => destinationPathsById[destination.id]).filter(
             (destination) => {
                 // Can't already be controlled by Arverni
-                if(destination.controllingFactionId() === FactionIDs.ARVERNI) {
+                if (destination.controllingFactionId() === FactionIDs.ARVERNI) {
                     return false;
                 }
 
                 // Has to have a legion
                 const romanMobilePieces = destination.getMobilePiecesForFaction(FactionIDs.ROMANS);
-                const hasLegion = _.find(romanMobilePieces, { type : 'legion' });
-                if(!hasLegion) {
+                const hasLegion = _.find(romanMobilePieces, {type: 'legion'});
+                if (!hasLegion) {
                     return false;
                 }
 
                 // We need more than 2x the number of roman mobile pieces
                 const numAfterHarassment = numMarching - destinationPathsById[destination.id].bestPath.harassmentLosses;
-                const numAfterMarch = destination.getMobilePiecesForFaction(FactionIDs.ARVERNI).length + numAfterHarassment;
+                const numAfterMarch = destination.getMobilePiecesForFaction(
+                        FactionIDs.ARVERNI).length + numAfterHarassment;
                 const hasCaesar = _.find(romanMobilePieces, piece => piece.type === 'leader' && !piece.isSuccessor());
-                if(hasCaesar && (numAfterMarch <= romanMobilePieces*2)) {
+                if (hasCaesar && (numAfterMarch <= romanMobilePieces.length * 2)) {
                     return false;
                 }
 
@@ -496,11 +539,101 @@ class ArverniMarch {
             return;
         }
 
-        leaderMarch.numControlWarbands = availableWarbands.length;
+
+        leaderMarch.numControlWarbands = availableWarbands;
         leaderMarch.controlDestination = destinationToControl.destination;
         leaderMarch.harassmentLosses = destinationToControl.numHarassmentLosses;
 
         return leaderMarch;
+    }
+
+    static getMassMarches(state, modifiers, leaderMarch, marchResults) {
+
+        const availableWarbands = leaderMarch.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length;
+        if (availableWarbands.length < 1) {
+            return [];
+        }
+
+        const numMarching = availableWarbands; // + leader, - one left behind;
+
+        const marchResultsByRegionId = _.keyBy(marchResults, march => march.region.id);
+        const destinationPathsById = _.keyBy(
+            this.getDestinationPaths(state, numMarching, leaderMarch.region, leaderMarch.destinations), 'id');
+
+        // Find destinations that the leader can march to which are next to a legion
+        const destinationsNextToLegion = _(leaderMarch.destinations).filter(
+            destination => destinationPathsById[destination.id]).filter(
+            (destination) => {
+                if(destination.getLegions().length > 0) {
+                    return false;
+                }
+                const numAfterHarassment = numMarching - destinationPathsById[destination.id].bestPath.harassmentLosses;
+                if (numAfterHarassment === 0) {
+                    return false;
+                }
+                return _.find(destination.adjacent, adjacent => adjacent.getLegions().length > 0);
+            }).value();
+
+        if (destinationsNextToLegion.length === 0) {
+            return [];
+        }
+
+        // Now pick the one which can be marched to by the most warbands (aside from the leader's march)
+        const chosenMassResults = _(destinationsNextToLegion).map((destination) => {
+            const massResults = this.calculateMassResultsForDestination(state, leaderMarch, marchResultsByRegionId,
+                                                                        destination);
+            return {
+                destination,
+                numToMass: massResults.numToMass,
+                massResults,
+                priority: 99-massResults.numToMass + '-' + 10 + massResults.marches.length
+            }
+        }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
+
+        if (!chosenMassResults) {
+            return;
+        }
+
+        leaderMarch.numMassWarbands = availableWarbands - 1;
+        leaderMarch.massDestination = chosenMassResults.destination;
+        leaderMarch.harassmentLosses = destinationPathsById[chosenMassResults.destination.id].bestPath.harassmentLosses;
+
+        const leaderAlreadyAdjacentToLegion = _.find(leaderMarch.region.adjacent, adjacent => adjacent.getLegions().length > 0);
+        const marchMassTotal = (leaderMarch.numMassWarbands - leaderMarch.harassmentLosses) + chosenMassResults.numToMass;
+        if( leaderAlreadyAdjacentToLegion && marchMassTotal <= leaderMarch.region.getPiecesForFaction(FactionIDs.ARVERNI)) {
+            return [];
+        }
+
+        const massMarches = chosenMassResults.massResults.marches;
+        _.each(massMarches, (march) => {
+            march.massDestination = chosenMassResults.destination;
+        });
+
+        massMarches.unshift(leaderMarch);
+        return massMarches;
+    }
+
+    static calculateMassResultsForDestination(state, leaderMarch, marchResultsByRegionId, destination) {
+        const arverni = state.arverni;
+        const arverniPiecesAtDestination = destination.getPiecesForFaction(FactionIDs.ARVERNI).length;
+        return _(destination.adjacent).reject(region => region.id === leaderMarch.region.id).map((region) => {
+            return {
+                region,
+                numWarbands: region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length
+            }
+        }).filter(regionData => regionData.numWarbands > 1).sortBy('numWarbands').reverse().reduce(
+            (accumulator, regionData) => {
+                const cost = marchResultsByRegionId[regionData.region.id].cost;
+                if (cost < accumulator.resources) {
+                    const march = marchResultsByRegionId[regionData.region.id];
+                    march.numMassWarbands = regionData.numWarbands - 1;
+
+                    accumulator.resources -= cost;
+                    accumulator.numToMass += march.numMassWarbands;
+                    accumulator.marches.push(march);
+                }
+                return accumulator;
+            }, {resources: arverni.resources() - leaderMarch.cost, numToMass: arverniPiecesAtDestination, marches: []});
     }
 
 }

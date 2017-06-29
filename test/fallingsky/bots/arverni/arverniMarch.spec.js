@@ -24,7 +24,6 @@ describe("Arverni march", function () {
 
     beforeEach(function () {
         state = new FallingSkyGameState();
-        
         belgae = state.belgae;
         arverni = state.arverni;
         aedui = state.aedui;
@@ -306,4 +305,94 @@ describe("Arverni march", function () {
         expect(mandubiiRegion.controllingFactionId()).to.equal(FactionIDs.AEDUI);
     });
 
+    it('marches to control legion', function () {
+        arverni.setResources(20);
+
+        const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
+
+        const sequaniRegion = state.regionsById[RegionIDs.SEQUANI];
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: sequaniRegion.id, count: 2});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: sequaniRegion.id, count: 3});
+
+        const venetiRegion = state.regionsById[RegionIDs.VENETI];
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: venetiRegion.id, count: 1});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: venetiRegion.id, count: 8});
+
+        ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'mass', true);
+        expect(arverni.resources()).to.equal(19);
+        expect(venetiRegion.controllingFactionId()).to.equal(FactionIDs.ROMANS);
+        expect(sequaniRegion.controllingFactionId()).to.equal(FactionIDs.ARVERNI);
+        expect(sequaniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(8);
+        expect(sequaniRegion.getLeaderForFaction(FactionIDs.ARVERNI)).to.not.be.null;
+    });
+
+    it('does not march to control legion if Caesar and too many', function () {
+        arverni.setResources(20);
+
+        const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
+
+        const sequaniRegion = state.regionsById[RegionIDs.SEQUANI];
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: sequaniRegion.id, count: 2});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: sequaniRegion.id, count: 2});
+        PlaceLeader.execute(state, {factionId: romans.id, regionId: sequaniRegion.id});
+
+        const venetiRegion = state.regionsById[RegionIDs.VENETI];
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: venetiRegion.id, count: 1});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: venetiRegion.id, count: 8});
+
+
+        ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'mass', true);
+        expect(arverni.resources()).to.equal(19);
+        expect(venetiRegion.controllingFactionId()).to.equal(FactionIDs.ROMANS);
+        expect(venetiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(0);
+        expect(venetiRegion.getLeaderForFaction(FactionIDs.ARVERNI)).to.be.null;
+        expect(sequaniRegion.controllingFactionId()).to.equal(FactionIDs.ROMANS);
+        expect(sequaniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(0);
+        expect(sequaniRegion.getLeaderForFaction(FactionIDs.ARVERNI)).to.be.null;
+    });
+
+    it('marches to mass near legion', function () {
+        arverni.setResources(20);
+
+        const carnutesRegion = state.regionsById[RegionIDs.CARNUTES];
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: carnutesRegion.id, count: 8});
+
+        const treveriRegion = state.regionsById[RegionIDs.TREVERI];
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: treveriRegion.id, count: 2});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: treveriRegion.id, count: 2});
+        PlaceLeader.execute(state, {factionId: romans.id, regionId: treveriRegion.id});
+
+        const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, count: 1});
+
+        const aeduiRegion = state.regionsById[RegionIDs.AEDUI];
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: aeduiRegion.id, count: 2});
+
+        const sequaniRegion = state.regionsById[RegionIDs.SEQUANI];
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: sequaniRegion.id, count: 2});
+
+        const moriniRegion = state.regionsById[RegionIDs.MORINI];
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: moriniRegion.id, count: 2});
+
+        const sugambriRegion = state.regionsById[RegionIDs.SUGAMBRI];
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: sugambriRegion.id, count: 2});
+
+        ArverniMarch.march(state, new CommandModifier({noSpecial : true}), 'mass', true);
+
+        // Not Nervii or Atrebates because not the most mass
+        // Not Mandubii because more marches than Sequani
+
+        expect(arverni.resources()).to.equal(18);
+        expect(treveriRegion.controllingFactionId()).to.equal(FactionIDs.ROMANS);
+        expect(mandubiiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(1);
+        expect(aeduiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(1);
+        expect(moriniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(2);
+        expect(sequaniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(10);
+        expect(sugambriRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(2);
+    });
 });

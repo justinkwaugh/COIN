@@ -14,7 +14,7 @@ module.exports = {
             'Access-Control-Allow-Origin': '*'
         }
     },
-    
+
     resolve: {
         modules: [
             "node_modules",
