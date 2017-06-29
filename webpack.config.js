@@ -2,9 +2,12 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-    entry: ['bootstrap-loader', './src/main.js'],
+    entry: {
+        web: ['bootstrap-loader','./src/main.js'],
+        headless: ['./src/headless.js']
+    },
     output: {
-        filename: 'bundle.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist')
     },
     devtool: "cheap-module-eval-source-map",
