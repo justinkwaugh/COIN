@@ -85,8 +85,8 @@ class Game {
             player.takeTurn(this.state(), new CommandModifiers({ agreements: agreements }));
             this.lastTurn(this.state().turnHistory.lastTurn());
         } catch(err) {
-            if(err.name === 'AgreementRequestedError') {
-                Events.emit('AgreementRequested', err.agreement);
+            if(err.name === 'PlayerInteractionNeededError') {
+                Events.emit('PlayerInteractionRequested', err.interaction);
                 this.state().turnHistory.rollbackCurrentAction();
             }
             else {
@@ -103,8 +103,8 @@ class Game {
             player.takeTurn(this.state(), new CommandModifiers({ agreements: agreements }));
             this.lastTurn(this.state().turnHistory.lastTurn());
         } catch(err) {
-            if(err.name === 'AgreementRequestedError') {
-                Events.emit('AgreementRequested', err.agreement);
+            if(err.name === 'PlayerInteractionNeededError') {
+                Events.emit('PlayerInteractionRequested', err.interaction);
             }
             else {
                 this.state().turnHistory.rollbackTurn();

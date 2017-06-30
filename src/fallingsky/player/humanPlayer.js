@@ -1,22 +1,22 @@
 import FallingSkyPlayer from './fallingSkyPlayer';
-import AgreementRequiredError from 'common/agreementRequiredError';
+import PlayerInteractionNeededError from 'common/playerInteractionNeededError';
 
 class HumanPlayer extends FallingSkyPlayer {
 
     willHarass(factionId, context) {
-        throw new AgreementRequiredError('Would you like to harass' + factionId, { factionId : factionId });
+        return false;
     }
 
     willAgreeToQuarters(factionId) {
-        throw new AgreementRequiredError('Will you allow quarters' + factionId, { factionId : factionId });
+        return false;
     }
 
     willAgreeToRetreat(factionId) {
-        throw new AgreementRequiredError('Will you allow retreat' + factionId, { factionId : factionId });
+        return false;
     }
 
     willAgreeToSupplyLine(factionId) {
-        throw new AgreementRequiredError('Will you allow supply line' + factionId, { factionId : factionId });
+        throw new PlayerInteractionNeededError('Will you allow supply line for ' + factionId, { factionId : factionId });
     }
 }
 

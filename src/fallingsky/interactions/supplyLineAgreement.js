@@ -1,6 +1,6 @@
-import Agreement from 'common/agreement';
+import PlayerInteraction from 'common/playerInteraction';
 
-class SupplyLineAgreement extends Agreement {
+class SupplyLineAgreement extends PlayerInteraction {
     constructor(definition) {
         definition.type = 'SupplyLineAgreement';
         super(definition);

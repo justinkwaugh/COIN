@@ -20,8 +20,10 @@ class Dashboard {
         this.activePanel = ko.observable(ActivePanelIDs.REGIONS);
         this.ActivePanelIDs = ActivePanelIDs;
 
-        Events.on('AgreementRequested', (agreement) => {
-            this.agreement(agreement);
+        Events.on('PlayerInteractionRequested', (interaction) => {
+            if(interaction.type === 'SupplyLineAgreement') {
+                this.agreement(interaction);
+            }
         });
     }
 

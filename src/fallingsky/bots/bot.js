@@ -7,8 +7,8 @@ import MovePieces from '../actions/movePieces';
 import PlaceLeader from '../actions/placeLeader';
 import Logging from '../util/logging';
 import FactionActions from '../../common/factionActions';
-import AgreementRequestedError from '../../common/agreementRequestedError';
-import SupplyLineAgreement from 'fallingsky/agreements/supplyLineAgreement';
+import PlayerInteractionNeededError from '../../common/playerInteractionNeededError';
+import SupplyLineAgreement from 'fallingsky/interactions/supplyLineAgreement';
 
 class Bot extends FallingSkyPlayer {
     constructor(definition) {
@@ -42,36 +42,21 @@ class Bot extends FallingSkyPlayer {
         return _.indexOf(currentState.sequenceOfPlay.availableActions(), FactionActions.EVENT) >= 0;
     }
 
-    // willAgreeToQuarters(factionId) {
-    //     return false;
-    // }
-    //
-    // willAgreeToRetreat() {
-    //     return false;
-    // }
-    //
-    // willAgreeToSupplyLine(factionId) {
-    //     return false;
-    // }
-
     willHarass(factionId, context) {
-        throw new AgreementRequestedError('Would you like to harass' + factionId, {factionId: factionId});
+        return true;
     }
 
     willAgreeToQuarters(factionId) {
-        throw new AgreementRequestedError('Will you allow quarters' + factionId, {factionId: factionId});
+        return false;
     }
 
     willAgreeToRetreat(factionId) {
-        if (this.factionId === FactionIDs.ARVERNI) {
-            throw new AgreementRequestedError('Will you allow retreat' + factionId, {factionId: factionId});
-        }
         return false;
     }
 
     willAgreeToSupplyLine(factionId) {
         if (this.factionId === FactionIDs.ARVERNI) {
-            throw new AgreementRequestedError('Will you allow supply line' + factionId, new SupplyLineAgreement({
+            throw new PlayerInteractionNeededError('Will you allow supply line to ' + factionId, new SupplyLineAgreement({
                 requestingFactionId: factionId,
                 respondingFactionId: this.factionId
             }));
