@@ -218,7 +218,7 @@ class Bot extends FallingSkyPlayer {
         const agreements = [];
         _.each(
             factionIds, (factionId) => {
-                const existingAgreement = _.find(modifiers.agreements,
+                const existingAgreement = _.find(state.turnHistory.getCurrentTurn().getCurrentAgreements(),
                                                  agreement => agreement.type === 'SupplyLineAgreement' && agreement.respondingFactionId === factionId);
                 const agreed = existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[factionId].willAgreeToSupplyLine(
                         this.factionId);

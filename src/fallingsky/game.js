@@ -82,12 +82,11 @@ class Game {
         const player = this.state().playersByFaction[nextFaction];
         this.state().turnHistory.startTurn(nextFaction);
         try {
-            player.takeTurn(this.state(), new CommandModifiers({ agreements: agreements }));
+            player.takeTurn(this.state(), new CommandModifiers());
             this.lastTurn(this.state().turnHistory.lastTurn());
         } catch(err) {
             if(err.name === 'PlayerInteractionNeededError') {
                 Events.emit('PlayerInteractionRequested', err.interaction);
-                this.state().turnHistory.rollbackCurrentAction();
             }
             else {
                 this.state().turnHistory.rollbackTurn();
@@ -96,11 +95,12 @@ class Game {
         }
     }
 
-    resumeTurn(agreements) {
+    resumeTurn(agreement) {
         const nextFaction = this.state().sequenceOfPlay.nextFaction(this.state().currentCard());
         const player = this.state().playersByFaction[nextFaction];
         try {
-            player.takeTurn(this.state(), new CommandModifiers({ agreements: agreements }));
+            this.state().turnHistory.getCurrentTurn().addAgreement(agreement);
+            player.takeTurn(this.state(), new CommandModifiers());
             this.lastTurn(this.state().turnHistory.lastTurn());
         } catch(err) {
             if(err.name === 'PlayerInteractionNeededError') {

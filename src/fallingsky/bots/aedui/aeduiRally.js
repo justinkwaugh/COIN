@@ -7,7 +7,7 @@ import AeduiSuborn from './aeduiSuborn';
 import FactionActions from '../../../common/factionActions';
 
 const Checkpoints = {
-    RALLY_COMPLETE_CHECK : 1
+    RALLY_COMPLETE_CHECK : 'rcc'
 };
 
 class AeduiRally {
@@ -15,7 +15,7 @@ class AeduiRally {
         const aeduiFaction = state.aedui;
         const turn = state.turnHistory.getCurrentTurn();
 
-        if(!turn.hasPassedCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK, 1)) {
+        if(!turn.getCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK)) {
             console.log('*** Are there any effective Aedui Rallies? ***');
             const executableRallyRegions = AeduiRally.getExecutableRallyRegions(state, modifiers, aeduiFaction);
             if ((aeduiFaction.availableWarbands() <= 10 || executableRallyRegions.length === 0) && !this.isRallyEffective(
@@ -27,7 +27,7 @@ class AeduiRally {
             turn.commitCommand();
         }
 
-        turn.markCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK, 1);
+        turn.markCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK);
         const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state, modifiers) || AeduiSuborn.suborn(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }

@@ -11,7 +11,7 @@ import {CapabilityIDs} from '../../config/capabilities';
 import FactionActions from '../../../common/factionActions';
 
 const Checkpoints = {
-    RAID_COMPLETE_CHECK : 1
+    RAID_COMPLETE_CHECK : 'racc'
 };
 
 
@@ -20,7 +20,7 @@ class AeduiRaid {
         const aedui = state.aedui;
         const turn = state.turnHistory.getCurrentTurn();
 
-        if(!turn.hasPassedCheckpoint(Checkpoints.RAID_COMPLETE_CHECK, 1)) {
+        if(!turn.getCheckpoint(Checkpoints.RAID_COMPLETE_CHECK)) {
 
             console.log('*** Are there any effective Aedui Raids? ***');
             const effectiveRaidRegions = this.getEffectiveRaidRegions(state, modifiers);
@@ -28,7 +28,7 @@ class AeduiRaid {
                 return;
             }
 
-            state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RAID);
+            turn.startCommand(CommandIDs.RAID);
             _.each(effectiveRaidRegions, function (raidResult) {
                 console.log('*** ' + aedui.name + ' Raiding in region ' + raidResult.region.name);
 
@@ -52,9 +52,9 @@ class AeduiRaid {
                 }
                 AddResources.execute(state, {factionId: FactionIDs.AEDUI, count: raidResult.resourcesGained});
             });
-            state.turnHistory.getCurrentTurn().commitCommand();
+            turn.commitCommand();
         }
-        turn.markCheckpoint(Checkpoints.RAID_COMPLETE_CHECK, 1);
+        turn.markCheckpoint(Checkpoints.RAID_COMPLETE_CHECK);
         const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state, modifiers) || AeduiSuborn.suborn(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }

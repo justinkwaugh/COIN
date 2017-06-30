@@ -1,5 +1,6 @@
 import ActionGroup from './actionGroup';
 import _ from '../lib/lodash';
+import Checkpoint from './checkpoint';
 
 class Turn extends ActionGroup {
 
@@ -11,10 +12,7 @@ class Turn extends ActionGroup {
         this.commandAction = definition.commandAction;
         this.actionGroups = [];
         this.inProgress = [];
-        this.currentCommand = definition.currentCommand;
-        this.event = definition.event;
-        this.currentSpecialAbility = definition.currentSpecialAbility;
-        this.checkpoint = definition.checkpoint || 0;
+        this.checkpoints = definition.checkpoints || [];
     }
 
     undo() {
@@ -101,20 +99,29 @@ class Turn extends ActionGroup {
         return currentCheckpointBase + (checkpoint / (10 ** actualLevel));
     }
 
-    markCheckpoint(checkpoint, level = 0) {
-        const newCheckpointValue = this.calculateCheckpointValue(checkpoint, level);
-        if (newCheckpointValue > this.checkpoint) {
-            this.checkpoint = newCheckpointValue;
+    markCheckpoint(id, context={}) {
+        const checkpoint = new Checkpoint({ id, context });
+        this.checkpoints.push(checkpoint);
+    }
+
+    getCheckpoint(id) {
+        return _.find(this.checkpoints, checkpoint => checkpoint.id === id);
+    }
+
+    clearCheckpoints() {
+        this.checkpoints = [];
+    }
+
+    addAgreement(agreement) {
+        const actionGroup = _.last(this.actionGroups);
+        if(actionGroup) {
+            actionGroup.agreements.push(agreement);
         }
     }
 
-    hasPassedCheckpoint(checkpoint, level = 0) {
-        const actualCheckpointValue = this.calculateCheckpointValue(checkpoint, level);
-        return (this.checkpoint >= actualCheckpointValue);
-    }
-
-    getCheckpoint() {
-        return this.checkpoint;
+    getCurrentAgreements() {
+        const actionGroup = _.last(this.actionGroups);
+        return actionGroup ? actionGroup.agreements : [];
     }
 
     getInstructions(state) {

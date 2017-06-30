@@ -43,14 +43,14 @@ class Dashboard {
         const agreement = this.agreement();
         this.agreement(null);
         agreement.status = 'agreed';
-        this.game().resumeTurn([agreement]);
+        this.game().resumeTurn(agreement);
     }
 
     refuse() {
         const agreement = this.agreement();
         this.agreement(null);
         agreement.status = 'refused';
-        this.game().resumeTurn([agreement]);
+        this.game().resumeTurn(agreement);
     }
 
     nextTurn() {

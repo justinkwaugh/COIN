@@ -26,6 +26,7 @@ class TurnHistory {
     commitTurn(action) {
         this.currentTurn.commandAction = action;
         this.currentTurn.actionEndIndex = this.state.actionHistory.currentIndex();
+        this.currentTurn.clearCheckpoints();
         this.turns.push(this.currentTurn);
         this.currentTurn = null;
     }

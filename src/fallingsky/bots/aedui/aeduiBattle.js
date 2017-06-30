@@ -9,7 +9,7 @@ import FactionActions from '../../../common/factionActions';
 import RemoveResources from '../../actions/removeResources';
 
 const Checkpoints = {
-    BATTLE_COMPLETE_CHECK : 1
+    BATTLE_COMPLETE_CHECK : 'bcc'
 };
 
 
@@ -19,7 +19,7 @@ class AeduiBattle {
         const aeduiFaction = state.aedui;
         const turn = state.turnHistory.getCurrentTurn();
 
-        if(!turn.hasPassedCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK, 1)) {
+        if(!turn.getCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK)) {
 
             if (aeduiFaction.resources() === 0 && !modifiers.free) {
                 return false;
@@ -78,7 +78,7 @@ class AeduiBattle {
             }
         }
 
-        turn.markCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK, 1);
+        turn.markCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK);
 
         const usedSpecialAbility = modifiers.canDoSpecial() && AeduiTrade.trade(state, modifiers);
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
