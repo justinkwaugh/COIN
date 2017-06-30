@@ -10,36 +10,51 @@ import AeduiSuborn from './aeduiSuborn';
 import {CapabilityIDs} from '../../config/capabilities';
 import FactionActions from '../../../common/factionActions';
 
+const Checkpoints = {
+    RAID_COMPLETE_CHECK : 1
+};
+
+
 class AeduiRaid {
     static raid(state, modifiers) {
         const aedui = state.aedui;
-        console.log('*** Are there any effective Aedui Raids? ***');
-        const effectiveRaidRegions = this.getEffectiveRaidRegions(state, modifiers);
-        if(effectiveRaidRegions.length === 0) {
-            return;
-        }
-        
-        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RAID);
-        _.each(effectiveRaidRegions, function (raidResult) {
+        const turn = state.turnHistory.getCurrentTurn();
+
+        if(!turn.hasPassedCheckpoint(Checkpoints.RAID_COMPLETE_CHECK, 1)) {
+
+            console.log('*** Are there any effective Aedui Raids? ***');
+            const effectiveRaidRegions = this.getEffectiveRaidRegions(state, modifiers);
+            if (effectiveRaidRegions.length === 0) {
+                return;
+            }
+
+            state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RAID);
+            _.each(effectiveRaidRegions, function (raidResult) {
                 console.log('*** ' + aedui.name + ' Raiding in region ' + raidResult.region.name);
 
-                RevealPieces.execute(state, {factionId: aedui.id, regionId: raidResult.region.id, count: raidResult.resourcesGained});
+                RevealPieces.execute(state, {
+                    factionId: aedui.id,
+                    regionId: raidResult.region.id,
+                    count: raidResult.resourcesGained
+                });
 
                 let numResourcesToSteal = raidResult.resourcesGained;
                 if (_.indexOf(raidResult.raidableFactions, FactionIDs.ARVERNI) >= 0) {
                     const arverni = state.factionsById[FactionIDs.ARVERNI];
                     let stolenFromArverni = Math.min(numResourcesToSteal, arverni.resources());
-                    RemoveResources.execute(state, { factionId: FactionIDs.ARVERNI, count: stolenFromArverni});
+                    RemoveResources.execute(state, {factionId: FactionIDs.ARVERNI, count: stolenFromArverni});
                     numResourcesToSteal -= stolenFromArverni;
                 }
                 else if (_.indexOf(raidResult.raidableFactions, FactionIDs.BELGAE) >= 0) {
                     const belgae = state.factionsById[FactionIDs.BELGAE];
                     let stolenFromBelgae = Math.min(numResourcesToSteal, belgae.resources());
-                    RemoveResources.execute(state, { factionId: FactionIDs.BELGAE, count: stolenFromBelgae});
+                    RemoveResources.execute(state, {factionId: FactionIDs.BELGAE, count: stolenFromBelgae});
                 }
-                AddResources.execute(state, { factionId: FactionIDs.AEDUI, count: raidResult.resourcesGained});
+                AddResources.execute(state, {factionId: FactionIDs.AEDUI, count: raidResult.resourcesGained});
             });
-        state.turnHistory.getCurrentTurn().commitCommand();
+            state.turnHistory.getCurrentTurn().commitCommand();
+        }
+        turn.markCheckpoint(Checkpoints.RAID_COMPLETE_CHECK, 1);
         const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state, modifiers) || AeduiSuborn.suborn(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
