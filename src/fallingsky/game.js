@@ -1,16 +1,11 @@
 
 import ko from '../lib/knockout';
 import _ from '../lib/lodash';
-import FactionIDs from '../fallingsky/config/factionIds';
 import FallingSkyGameState from '../fallingsky/state/fallingSkyGameState.js';
 import Winter from './phases/winter';
+import Events from 'fallingsky/util/events';
+import CommandModifiers from 'fallingsky/commands/commandModifiers';
 
-const ActivePanelIDs = {
-    BOARD: 'board',
-    REGIONS: 'regions',
-    FACTIONS: 'factions',
-    CAPABILITIES: 'capabilities'
-};
 
 class Game {
     constructor(definition) {
@@ -18,8 +13,7 @@ class Game {
         this.scenario = definition.scenario;
         this.ended = ko.observable(false);
         this.lastTurn = ko.observable();
-        this.activePanel = ko.observable(ActivePanelIDs.REGIONS);
-        this.ActivePanelIDs = ActivePanelIDs;
+
         this.endOfCard = ko.pureComputed(() => {
             return this.state().sequenceOfPlay.secondFaction() || this.state().sequenceOfPlay.eligibleFactions().length === 0;
         });
@@ -29,10 +23,6 @@ class Game {
         this.canUndo = ko.pureComputed(() => {
             return (this.state().discard().length === 0 || _.last(this.state().discard()).type !== 'winter' || this.state().sequenceOfPlay.currentSequenceForCard().numActionsTaken() > 0) && this.state().sequenceOfPlay.canUndo();
         });
-    }
-
-    setActivePanel(newPanel) {
-        this.activePanel(newPanel);
     }
 
     start() {
@@ -69,7 +59,7 @@ class Game {
         console.log('Upcoming card is ' + (this.state().upcomingCard() ? this.state().upcomingCard().title : 'empty'));
     }
 
-    nextTurn() {
+    nextTurn(agreements) {
         if (this.endOfCard()) {
             this.state().sequenceOfPlay.updateEligibility();
             this.drawCard();
@@ -91,13 +81,39 @@ class Game {
 
         const player = this.state().playersByFaction[nextFaction];
         this.state().turnHistory.startTurn(nextFaction);
-        player.takeTurn(this.state());
-        this.lastTurn(this.state().turnHistory.lastTurn());
+        try {
+            player.takeTurn(this.state(), new CommandModifiers({ agreements: agreements }));
+            this.lastTurn(this.state().turnHistory.lastTurn());
+        } catch(err) {
+            if(err.name === 'AgreementRequestedError') {
+                Events.emit('AgreementRequested', err.agreement);
+                this.state().turnHistory.rollbackCurrentAction();
+            }
+            else {
+                this.state().turnHistory.rollbackTurn();
+                throw err;
+            }
+        }
+    }
 
+    resumeTurn(agreements) {
+        const nextFaction = this.state().sequenceOfPlay.nextFaction(this.state().currentCard());
+        const player = this.state().playersByFaction[nextFaction];
+        try {
+            player.takeTurn(this.state(), new CommandModifiers({ agreements: agreements }));
+            this.lastTurn(this.state().turnHistory.lastTurn());
+        } catch(err) {
+            if(err.name === 'AgreementRequestedError') {
+                Events.emit('AgreementRequested', err.agreement);
+            }
+            else {
+                this.state().turnHistory.rollbackTurn();
+                throw err;
+            }
+        }
     }
 
     undo() {
-
         if(this.state().sequenceOfPlay.undo()) {
             console.log('*** Undoing the last Turn ***');
             this.state().turnHistory.undoLastTurn();
@@ -111,27 +127,6 @@ class Game {
             this.state().upcomingCard(this.state().currentCard());
             this.state().currentCard(this.state().discard.pop());
             this.lastTurn(null);
-        }
-    }
-
-    styleSuffixForFaction(factionId) {
-        if(factionId === FactionIDs.ROMANS) {
-            return 'danger';
-        }
-        else if(factionId === FactionIDs.BELGAE) {
-            return 'warning';
-        }
-        else if(factionId === FactionIDs.AEDUI) {
-            return 'info';
-        }
-        else if(factionId === FactionIDs.ARVERNI) {
-            return 'success';
-        }
-        else if(factionId === FactionIDs.GERMANIC_TRIBES) {
-            return 'default';
-        }
-        else {
-            return 'default';
         }
     }
 }

@@ -13,6 +13,16 @@ class TurnHistory {
         this.currentTurn = new Turn(this.state, { number: this.nextTurnNumber(), factionId: factionId, actionStartIndex: this.state.actionHistory.currentIndex()});
     }
 
+    rollbackTurn() {
+        if(this.currentTurn) {
+            this.currentTurn.undo();
+        }
+    }
+
+    rollbackCurrentAction() {
+        this.currentTurn.rollbackActionGroup();
+    }
+
     commitTurn(action) {
         this.currentTurn.commandAction = action;
         this.currentTurn.actionEndIndex = this.state.actionHistory.currentIndex();

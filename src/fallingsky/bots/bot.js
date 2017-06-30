@@ -1,4 +1,4 @@
-import Player from '../../common/player';
+import FallingSkyPlayer from '../player/fallingSkyPlayer';
 import _ from '../../lib/lodash';
 import FactionIDs from '../config/factionIds';
 import Battle from '../commands/battle';
@@ -7,14 +7,16 @@ import MovePieces from '../actions/movePieces';
 import PlaceLeader from '../actions/placeLeader';
 import Logging from '../util/logging';
 import FactionActions from '../../common/factionActions';
+import AgreementRequestedError from '../../common/agreementRequestedError';
+import SupplyLineAgreement from 'fallingsky/agreements/supplyLineAgreement';
 
-class Bot extends Player {
+class Bot extends FallingSkyPlayer {
     constructor(definition) {
         super({isNonPlayer: true});
         this.factionId = definition.factionId;
     }
 
-    takeTurn(currentState) {
+    takeTurn(currentState, agreements) {
     }
 
     quarters(currentState) {
@@ -24,30 +26,56 @@ class Bot extends Player {
     placeLeader(state) {
         const faction = state.factionsById[this.factionId];
         if (faction.hasAvailableLeader()) {
-            const region = _(state.regions).map((region) =>{
+            const region = _(state.regions).map((region) => {
                 const pieces = region.piecesByFaction()[this.factionId] || [];
                 return {
                     region: region,
                     numPieces: pieces.length
                 }
             }).sortBy('numPieces').groupBy('numPieces').map(_.shuffle).flatten().map('region').reverse().first();
-            PlaceLeader.execute(state, { factionId: faction.id, regionId: region.id });
+            PlaceLeader.execute(state, {factionId: faction.id, regionId: region.id});
         }
     }
 
     canPlayEvent(currentState) {
+        console.log('*** Aedui allowed to play event by sequence of play? ***');
         return _.indexOf(currentState.sequenceOfPlay.availableActions(), FactionActions.EVENT) >= 0;
     }
 
-    willAgreeToQuarters(factionId) {
-        return false;
+    // willAgreeToQuarters(factionId) {
+    //     return false;
+    // }
+    //
+    // willAgreeToRetreat() {
+    //     return false;
+    // }
+    //
+    // willAgreeToSupplyLine(factionId) {
+    //     return false;
+    // }
+
+    willHarass(factionId, context) {
+        throw new AgreementRequestedError('Would you like to harass' + factionId, {factionId: factionId});
     }
 
-    willAgreeToRetreat() {
+    willAgreeToQuarters(factionId) {
+        throw new AgreementRequestedError('Will you allow quarters' + factionId, {factionId: factionId});
+    }
+
+    willAgreeToRetreat(factionId) {
+        if (this.factionId === FactionIDs.ARVERNI) {
+            throw new AgreementRequestedError('Will you allow retreat' + factionId, {factionId: factionId});
+        }
         return false;
     }
 
     willAgreeToSupplyLine(factionId) {
+        if (this.factionId === FactionIDs.ARVERNI) {
+            throw new AgreementRequestedError('Will you allow supply line' + factionId, new SupplyLineAgreement({
+                requestingFactionId: factionId,
+                respondingFactionId: this.factionId
+            }));
+        }
         return false;
     }
 
@@ -152,7 +180,8 @@ class Bot extends Player {
         const counterAttackLossesTooFew = attackerLosses < (nonRetreatResults.removed.length / 2);
 
         if (!hasDefendingCitadelOrFort && counterAttackLossesTooFew) {
-            console.log(this.factionId + ' wants to retreat due to lack of citadel or fort and too few counterattack losses');
+            console.log(
+                this.factionId + ' wants to retreat due to lack of citadel or fort and too few counterattack losses');
             wantToRetreat = true;
         }
 
@@ -200,12 +229,16 @@ class Bot extends Player {
         return agreeingRegion ? agreeingRegion.controllingFactionId() : null;
     }
 
-    getSupplyLineAgreements(state, factionIds) {
+    getSupplyLineAgreements(state, modifiers, factionIds) {
         const agreements = [];
         _.each(
             factionIds, (factionId) => {
-                const agreed = state.playersByFaction[factionId].willAgreeToSupplyLine(this.factionId);
-                console.log(this.factionId + ' asked ' + factionId + ' for supply line agreement -> ' + factionId + (agreed ? ' agreed' : ' denied'));
+                const existingAgreement = _.find(modifiers.agreements,
+                                                 agreement => agreement.type === 'SupplyLineAgreement' && agreement.respondingFactionId === factionId);
+                const agreed = existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[factionId].willAgreeToSupplyLine(
+                        this.factionId);
+                console.log(
+                    this.factionId + ' asked ' + factionId + ' for supply line agreement -> ' + factionId + (agreed ? ' agreed' : ' denied'));
                 if (agreed) {
                     agreements.push(factionId);
                 }
@@ -254,7 +287,7 @@ class Bot extends Player {
         attackResults.removed = pieces.removed || [];
         attackResults.remaining.push.apply(attackResults.remaining, pieces.saved);
 
-        if(attackResults.removed.length > 0) {
+        if (attackResults.removed.length > 0) {
             RemovePieces.execute(
                 state, {
                     regionId: region.id,
@@ -288,7 +321,8 @@ class Bot extends Player {
                 return 'staying';
             });
 
-        let retreatRegion = this.retreatPieces(state, region, groupedPieces.leaving || [], attackResults.agreeingFactionId);
+        let retreatRegion = this.retreatPieces(state, region, groupedPieces.leaving || [],
+                                               attackResults.agreeingFactionId);
 
         if (groupedPieces.leader) {
             const sourceFriendlyPieces = region.piecesByFaction()[this.factionId];
@@ -304,8 +338,8 @@ class Bot extends Player {
         }
     }
 
-    retreatPieces( state, region, pieces, agreeingFactionId ) {
-        if(pieces.length === 0) {
+    retreatPieces(state, region, pieces, agreeingFactionId) {
+        if (pieces.length === 0) {
             return;
         }
 

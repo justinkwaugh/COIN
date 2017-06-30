@@ -36,7 +36,6 @@ class BelgaeBot extends Bot {
 
         if (!commandAction && state.belgae.resources() < 4 && modifiers.isCommandAllowed(CommandIDs.RAID)) {
             commandAction = BelgaeRaid.raid(state, modifiers) || FactionActions.PASS;
-
         }
 
         if(!commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {

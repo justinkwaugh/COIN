@@ -6,17 +6,29 @@ import AeduiTrade from './aeduiTrade';
 import AeduiSuborn from './aeduiSuborn';
 import FactionActions from '../../../common/factionActions';
 
+const Checkpoints = {
+    RALLY_COMPLETE_CHECK : 1
+};
 
 class AeduiRally {
-    static rally(state, modifiers, bot, aeduiFaction) {
-        const executableRallyRegions = AeduiRally.getExecutableRallyRegions(state, modifiers, aeduiFaction);
-        if ((aeduiFaction.availableWarbands() <= 10 || executableRallyRegions.length === 0) && !this.isRallyEffective(state, executableRallyRegions)) {
-            return false;
+    static rally(state, modifiers) {
+        const aeduiFaction = state.aedui;
+        const turn = state.turnHistory.getCurrentTurn();
+
+        if(!turn.hasPassedCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK, 1)) {
+            console.log('*** Are there any effective Aedui Rallies? ***');
+            const executableRallyRegions = AeduiRally.getExecutableRallyRegions(state, modifiers, aeduiFaction);
+            if ((aeduiFaction.availableWarbands() <= 10 || executableRallyRegions.length === 0) && !this.isRallyEffective(
+                    state, executableRallyRegions)) {
+                return false;
+            }
+            turn.startCommand(CommandIDs.RALLY);
+            Rally.execute(state, {faction: aeduiFaction, regionResults: executableRallyRegions});
+            turn.commitCommand();
         }
-        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RALLY);
-        Rally.execute(state, {faction: aeduiFaction, regionResults: executableRallyRegions});
-        const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state, modifiers, bot) || AeduiSuborn.suborn(state, modifiers));
-        state.turnHistory.getCurrentTurn().commitCommand();
+
+        turn.markCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK, 1);
+        const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state, modifiers) || AeduiSuborn.suborn(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

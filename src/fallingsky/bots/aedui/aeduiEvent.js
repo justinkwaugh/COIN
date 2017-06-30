@@ -63,14 +63,17 @@ class AeduiEvent {
 
     static handleEvent(state) {
         const currentCard = state.currentCard();
+        console.log('*** Is Aedui No Event? ***');
         if (_.indexOf(NoEvents, currentCard.id) >= 0) {
             return false;
         }
 
+        console.log('*** Is Capability in final year? ***');
         if(state.isLastYear() && _.indexOf(CapabilityEvents, currentCard.id) >= 0) {
             return false;
         }
 
+        console.log('*** Are Romans a player or winning by too much? ***');
         if (_.indexOf(PlayerOrWinningBotRomans, currentCard.id) >= 0) {
             const player = state.playersByFaction[FactionIDs.ROMANS];
             const faction = state.factionsById[FactionIDs.ROMANS];
@@ -79,11 +82,13 @@ class AeduiEvent {
             }
         }
 
+        console.log('*** Should we ask Romans to handle this event? ***');
         if (_.indexOf(RomansHandleEvent, currentCard.id) >= 0) {
             const romanPlayer = state.playersByFaction[FactionIDs.ROMANS];
             return romanPlayer.handleEvent(state, currentCard);
         }
 
+        console.log('*** Is Event effective? ***');
         const eventHandler = EventHandlers[currentCard.id];
         if (!eventHandler) {
             return false;

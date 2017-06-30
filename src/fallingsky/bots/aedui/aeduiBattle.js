@@ -8,62 +8,79 @@ import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
 import RemoveResources from '../../actions/removeResources';
 
+const Checkpoints = {
+    BATTLE_COMPLETE_CHECK : 1
+};
+
+
 class AeduiBattle {
 
-    static battle(currentState, modifiers, bot, aeduiFaction) {
+    static battle(state, modifiers) {
+        const aeduiFaction = state.aedui;
+        const turn = state.turnHistory.getCurrentTurn();
 
-        if (aeduiFaction.resources() === 0 && !modifiers.free) {
-            return false;
+        if(!turn.hasPassedCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK, 1)) {
+
+            if (aeduiFaction.resources() === 0 && !modifiers.free) {
+                return false;
+            }
+
+            console.log('*** Are there any effective Aedui Battles? ***');
+            const effectiveBattles = this.findEffectiveBattles(state, modifiers);
+            if (effectiveBattles.length === 0) {
+                return false;
+            }
+
+            let commandStarted = false;
+
+            let ambushed = false;
+            _.each(
+                effectiveBattles, (battle) => {
+                    const cost = battle.region.devastated() ? 2 : 1;
+                    if (aeduiFaction.resources() < cost && !modifiers.free) {
+                        return false;
+                    }
+
+                    if (!commandStarted) {
+                        turn.startCommand(CommandIDs.BATTLE);
+                        commandStarted = true;
+                    }
+                    let willAmbush = false;
+                    if (!ambushed && this.shouldAmbush(battle) && modifiers.canDoSpecial()) {
+                        turn.startSpecialAbility(SpecialAbilityIDs.AMBUSH);
+                        turn.commitSpecialAbility();
+                        ambushed = true;
+                        willAmbush = true;
+                    }
+                    if (!modifiers.free) {
+                        RemoveResources.execute(state, {factionId: FactionIDs.AEDUI, count: cost});
+                    }
+
+                    Battle.execute(
+                        state, {
+                            region: battle.region,
+                            attackingFaction: battle.attackingFaction,
+                            defendingFaction: battle.defendingFaction,
+                            ambush: willAmbush
+                        });
+
+                    if (modifiers.limited) {
+                        return false;
+                    }
+                });
+
+            if (commandStarted) {
+                turn.commitCommand();
+            }
+
+            if(ambushed) {
+                return FactionActions.COMMAND_AND_SPECIAL;
+            }
         }
 
-        const effectiveBattles = this.findEffectiveBattles(currentState, modifiers);
-        if (effectiveBattles.length === 0) {
-            return false;
-        }
+        turn.markCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK, 1);
 
-        let commandStarted = false;
-
-        let ambushed = false;
-        _.each(
-            effectiveBattles, (battle) => {
-                const cost = battle.region.devastated() ? 2 : 1;
-                if (aeduiFaction.resources() < cost && !modifiers.free) {
-                    return false;
-                }
-
-                if(!commandStarted) {
-                    currentState.turnHistory.getCurrentTurn().startCommand(CommandIDs.BATTLE);
-                    commandStarted = true;
-                }
-                let willAmbush = false;
-                if (!ambushed && this.shouldAmbush(battle) && modifiers.canDoSpecial()) {
-                    currentState.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.AMBUSH);
-                    currentState.turnHistory.getCurrentTurn().commitSpecialAbility();
-                    ambushed = true;
-                    willAmbush = true;
-                }
-                if (!modifiers.free) {
-                    RemoveResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: cost });
-                }
-
-                Battle.execute(
-                    currentState, {
-                        region: battle.region,
-                        attackingFaction: battle.attackingFaction,
-                        defendingFaction: battle.defendingFaction,
-                        ambush: willAmbush
-                    });
-
-                if (modifiers.limited) {
-                    return false;
-                }
-            });
-
-
-        const usedSpecialAbility = modifiers.canDoSpecial() && (ambushed || AeduiTrade.trade(currentState, modifiers, bot));
-        if(commandStarted) {
-            currentState.turnHistory.getCurrentTurn().commitCommand();
-        }
+        const usedSpecialAbility = modifiers.canDoSpecial() && AeduiTrade.trade(state, modifiers);
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

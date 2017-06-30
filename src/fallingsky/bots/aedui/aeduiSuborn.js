@@ -12,6 +12,7 @@ import {CapabilityIDs} from '../../config/capabilities';
 class AeduiSuborn {
 
     static suborn(currentState, modifiers) {
+        console.log('*** Is Aedui Suborn effective? ***');
         const aeduiFaction = currentState.factionsById[FactionIDs.AEDUI];
         if (!modifiers.free && aeduiFaction.resources() === 0) {
             return false;

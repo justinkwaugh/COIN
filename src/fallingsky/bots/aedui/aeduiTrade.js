@@ -6,9 +6,9 @@ import AddResources from '../../actions/addResources';
 
 class AeduiTrade {
 
-    static trade(currentState, modifiers, bot) {
-        const aeduiFaction = currentState.factionsById[FactionIDs.AEDUI];
-        const romanFaction = currentState.factionsById[FactionIDs.ROMANS];
+    static trade(state, modifiers) {
+        const aeduiFaction = state.factionsById[FactionIDs.AEDUI];
+        const romanFaction = state.factionsById[FactionIDs.ROMANS];
 
         if (aeduiFaction.resources() >= 10 && (aeduiFaction.resources() + romanFaction.resources() >= 20)) {
             return false;
@@ -19,14 +19,19 @@ class AeduiTrade {
         }
 
 
-        const possibleTrades = Trade.test(currentState);
+        const possibleTrades = Trade.test(state);
         if(!possibleTrades || possibleTrades.length === 0) {
             return false;
         }
 
+        state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.TRADE);
         console.log('*** Aedui checking trade viability ***');
+        const bot = state.playersByFaction[FactionIDs.AEDUI];
         const agreeingFactionsNeeded = _(possibleTrades).map('agreementsNeeded').flatten().flatten().concat([FactionIDs.ROMANS]).uniq().value();
-        const agreements = bot.getSupplyLineAgreements(currentState, agreeingFactionsNeeded);
+        const agreements = bot.getSupplyLineAgreements(state, modifiers, agreeingFactionsNeeded);
+
+
+
         const resourcesToBeGained = _.reduce(
             possibleTrades, function (sum, regionResult) {
                 const inSupplyLine = regionResult.inSupplyLine || _.find(
@@ -44,12 +49,13 @@ class AeduiTrade {
 
         if (resourcesToBeGained <= 2) {
             console.log('*** Aedui cannot viably trade ***');
+            state.turnHistory.getCurrentTurn().rollbackSpecialAbility();
             return false;
         }
         console.log('*** Aedui Trading ***');
-        currentState.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.TRADE);
-        AddResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: resourcesToBeGained});
-        currentState.turnHistory.getCurrentTurn().commitSpecialAbility();
+
+        AddResources.execute(state, { factionId: FactionIDs.AEDUI, count: resourcesToBeGained});
+        state.turnHistory.getCurrentTurn().commitSpecialAbility();
 
         return true;
     }

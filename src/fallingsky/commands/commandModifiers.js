@@ -4,6 +4,7 @@ import RegionIDs from '../config/regionIds';
 
 class CommandModifiers {
     constructor(definition = {}) {
+        this.agreements = definition.agreements || [];
         this.limited = definition.limited;
         this.allowLimitedSpecial = definition.allowLimitedSpecial;
         this.noSpecial = definition.noSpecial;

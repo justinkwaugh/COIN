@@ -1,6 +1,5 @@
-import Game from './fallingsky/game.js';
-import TheGreatRevolt from './fallingsky/scenarios/theGreatRevolt';
+import Dashboard from 'ui/dashboard';
 import ko from './lib/knockout';
 
-const game = new Game({scenario: TheGreatRevolt});
-ko.applyBindings(game);
+const dashboard = new Dashboard();
+ko.applyBindings(dashboard);
