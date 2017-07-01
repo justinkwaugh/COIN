@@ -39,7 +39,7 @@ class BelgaeRampage {
 
     static getRampageFactionData(state, modifiers, region, factionId) {
 
-        const battles = modifiers.commandSpecific.battles;
+        const battles = modifiers.context.battles;
         const isBattling = _.find(battles, function(battleResult) {
             return battleResult.region.id === region.id && battleResult.defendingFaction.id === factionId;
         });

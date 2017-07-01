@@ -7,7 +7,6 @@ import AeduiMarch from './aeduiMarch';
 import AeduiBattle from './aeduiBattle';
 import AeduiEvent from './aeduiEvent';
 import FactionActions from '../../../common/factionActions';
-import CommandModifiers from '../../commands/commandModifiers';
 import CommandIDs from '../../config/commandIds';
 import MovePieces from '../../actions/movePieces';
 import RemovePieces from '../../actions/removePieces';
@@ -32,9 +31,9 @@ class AeduiBot extends Bot {
         return factionId === FactionIDs.ARVERNI;
     }
 
-    takeTurn(state, modifiers) {
+    takeTurn(state) {
         let action = null;
-        const turn = state.turnHistory.getCurrentTurn();
+        const turn = state.turnHistory.currentTurn;
 
         if (!turn.getCheckpoint(Checkpoints.PASS_CHECK) && this.shouldPassForNextCard(state)) {
             action = FactionActions.PASS;
@@ -47,7 +46,7 @@ class AeduiBot extends Bot {
         turn.markCheckpoint(Checkpoints.EVENT_CHECK);
 
         if(!action) {
-            action = this.executeCommand(state, modifiers);
+            action = this.executeCommand(state, turn);
         }
 
         if(action === FactionActions.PASS) {
@@ -58,9 +57,9 @@ class AeduiBot extends Bot {
         return action;
     }
 
-    executeCommand(state, modifiers) {
+    executeCommand(state, turn) {
         let commandAction = null;
-        const turn = state.turnHistory.getCurrentTurn();
+        const modifiers = turn.getContext();
 
         if(!turn.getCheckpoint(Checkpoints.BATTLE_CHECK) && modifiers.isCommandAllowed(CommandIDs.BATTLE)) {
             commandAction = AeduiBattle.battle(state, modifiers);

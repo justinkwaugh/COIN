@@ -20,7 +20,7 @@ class BelgaeMarch {
             return false;
         }
 
-        if (modifiers.commandSpecific.threatRegions) {
+        if (modifiers.context.threatRegions) {
             return this.threatMarch(state, modifiers);
         }
         else {
@@ -30,7 +30,7 @@ class BelgaeMarch {
 
     static threatMarch(state, modifiers) {
         const belgae = state.belgae;
-        const threatRegions = modifiers.commandSpecific.threatRegions;
+        const threatRegions = modifiers.context.threatRegions;
         const marchResults = March.test(state, {factionId: FactionIDs.BELGAE});
         const largestBelgaeGroup = _.reduce(
             state.regions, (largest, region) => {

@@ -13,10 +13,33 @@ class Turn extends ActionGroup {
         this.actionGroups = [];
         this.inProgress = [];
         this.checkpoints = definition.checkpoints || [];
+        this.contexts = definition.contexts || [];
+        this.currentContext = null;
     }
 
     undo() {
         this.state.actionHistory.undoRange(this.actionStartIndex, this.actionEndIndex);
+    }
+
+    resume() {
+        this.currentContext = _.first(this.contexts);
+    }
+
+    getContext() {
+        return this.currentContext;
+    }
+
+    pushContext(context) {
+        const existingContext = _.find(this.contexts, {id : context.id });
+        if(!existingContext) {
+            this.contexts.push(context);
+        }
+        this.currentContext = existingContext || context;
+    }
+
+    popContext() {
+        this.contexts.pop();
+        this.currentContext = _.last(this.contexts);
     }
 
     commitActionGroup(type) {
@@ -99,13 +122,14 @@ class Turn extends ActionGroup {
         return currentCheckpointBase + (checkpoint / (10 ** actualLevel));
     }
 
-    markCheckpoint(id, context={}) {
-        const checkpoint = new Checkpoint({ id, context });
+    markCheckpoint(id) {
+        const checkpoint = new Checkpoint({ id: this.currentContext.id + '-' +id });
         this.checkpoints.push(checkpoint);
     }
 
     getCheckpoint(id) {
-        return _.find(this.checkpoints, checkpoint => checkpoint.id === id);
+        const contextId = this.currentContext.id + '-' +id;
+        return _.find(this.checkpoints, checkpoint => checkpoint.id === contextId);
     }
 
     clearCheckpoints() {

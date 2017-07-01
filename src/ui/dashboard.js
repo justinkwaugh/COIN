@@ -21,9 +21,7 @@ class Dashboard {
         this.ActivePanelIDs = ActivePanelIDs;
 
         Events.on('PlayerInteractionRequested', (interaction) => {
-            if(interaction.type === 'SupplyLineAgreement') {
-                this.agreement(interaction);
-            }
+            this.agreement(interaction);
         });
     }
 

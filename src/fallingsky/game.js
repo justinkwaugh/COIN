@@ -4,7 +4,6 @@ import _ from '../lib/lodash';
 import FallingSkyGameState from '../fallingsky/state/fallingSkyGameState.js';
 import Winter from './phases/winter';
 import Events from 'fallingsky/util/events';
-import CommandModifiers from 'fallingsky/commands/commandModifiers';
 
 
 class Game {
@@ -82,7 +81,7 @@ class Game {
         const player = this.state().playersByFaction[nextFaction];
         this.state().turnHistory.startTurn(nextFaction);
         try {
-            player.takeTurn(this.state(), new CommandModifiers());
+            player.takeTurn(this.state(), this.state().turnHistory.currentTurn);
             this.lastTurn(this.state().turnHistory.lastTurn());
         } catch(err) {
             if(err.name === 'PlayerInteractionNeededError') {
@@ -100,7 +99,7 @@ class Game {
         const player = this.state().playersByFaction[nextFaction];
         try {
             this.state().turnHistory.getCurrentTurn().addAgreement(agreement);
-            player.takeTurn(this.state(), new CommandModifiers());
+            player.resume(this.state());
             this.lastTurn(this.state().turnHistory.lastTurn());
         } catch(err) {
             if(err.name === 'PlayerInteractionNeededError') {

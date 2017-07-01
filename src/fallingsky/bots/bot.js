@@ -9,6 +9,9 @@ import Logging from '../util/logging';
 import FactionActions from '../../common/factionActions';
 import PlayerInteractionNeededError from '../../common/playerInteractionNeededError';
 import SupplyLineAgreement from 'fallingsky/interactions/supplyLineAgreement';
+import QuartersAgreement from 'fallingsky/interactions/quartersAgreement';
+import RetreatAgreement from 'fallingsky/interactions/retreatAgreement';
+import Harassment from 'fallingsky/interactions/harassment';
 
 class Bot extends FallingSkyPlayer {
     constructor(definition) {
@@ -16,10 +19,16 @@ class Bot extends FallingSkyPlayer {
         this.factionId = definition.factionId;
     }
 
-    takeTurn(currentState, agreements) {
+    takeTurn(state) {
+
     }
 
-    quarters(currentState) {
+    resume(state) {
+        state.turnHistory.currentTurn.resume();
+        this.takeTurn(state)
+    }
+
+    quarters(state) {
 
     }
 
@@ -43,20 +52,38 @@ class Bot extends FallingSkyPlayer {
     }
 
     willHarass(factionId, context) {
+        if (this.factionId === FactionIDs.ROMANS) {
+            throw new PlayerInteractionNeededError('Harassment possible for ' + factionId, new Harassment({
+                requestingFactionId: factionId,
+                respondingFactionId: this.factionId
+            }));
+        }
         return true;
     }
 
     willAgreeToQuarters(factionId) {
+        if (this.factionId === FactionIDs.ROMANS) {
+            throw new PlayerInteractionNeededError('Quarters requested by ' + factionId, new QuartersAgreement({
+                requestingFactionId: factionId,
+                respondingFactionId: this.factionId
+            }));
+        }
         return false;
     }
 
     willAgreeToRetreat(factionId) {
+        if (this.factionId === FactionIDs.ROMANS) {
+            throw new PlayerInteractionNeededError('Retreat requested by ' + factionId, new RetreatAgreement({
+                requestingFactionId: factionId,
+                respondingFactionId: this.factionId
+            }));
+        }
         return false;
     }
 
     willAgreeToSupplyLine(factionId) {
-        if (this.factionId === FactionIDs.ARVERNI) {
-            throw new PlayerInteractionNeededError('Will you allow supply line to ' + factionId, new SupplyLineAgreement({
+        if (this.factionId === FactionIDs.ROMANS) {
+            throw new PlayerInteractionNeededError('Supply line requested by ' + factionId, new SupplyLineAgreement({
                 requestingFactionId: factionId,
                 respondingFactionId: this.factionId
             }));
