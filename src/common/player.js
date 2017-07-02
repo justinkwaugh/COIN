@@ -1,6 +1,7 @@
 class Player {
-    constructor(definition) {
+    constructor(definition = {}) {
         this.isNonPlayer = definition.isNonPlayer;
+        this.factionId = definition.factionId;
     }
 }
 

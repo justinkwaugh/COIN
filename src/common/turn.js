@@ -64,14 +64,18 @@ class Turn extends ActionGroup {
     }
 
     startActionGroup(id, type) {
+        const current = _.last(this.inProgress);
+        if(current && current.id === id && current.type === type) {
+            return;
+        }
         console.log('Starting ' + type + ' ' + id);
-        const commandGroup = new ActionGroup({
+        const actionGroup = new ActionGroup({
             type: type,
             id: id,
             factionId: this.factionId,
             actionStartIndex: this.state.actionHistory.currentIndex()
         });
-        this.inProgress.push(commandGroup);
+        this.inProgress.push(actionGroup);
     }
 
     startCommand(id) {
@@ -137,14 +141,14 @@ class Turn extends ActionGroup {
     }
 
     addAgreement(agreement) {
-        const actionGroup = _.last(this.actionGroups);
+        const actionGroup = _.last(this.inProgress);
         if(actionGroup) {
             actionGroup.agreements.push(agreement);
         }
     }
 
     getCurrentAgreements() {
-        const actionGroup = _.last(this.actionGroups);
+        const actionGroup = _.last(this.inProgress);
         return actionGroup ? actionGroup.agreements : [];
     }
 

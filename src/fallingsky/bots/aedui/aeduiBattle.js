@@ -9,7 +9,7 @@ import FactionActions from '../../../common/factionActions';
 import RemoveResources from '../../actions/removeResources';
 
 const Checkpoints = {
-    BATTLE_COMPLETE_CHECK : 'bcc'
+    BATTLE_COMPLETE_CHECK: 'battle-complete'
 };
 
 
@@ -19,61 +19,37 @@ class AeduiBattle {
         const aeduiFaction = state.aedui;
         const turn = state.turnHistory.getCurrentTurn();
 
-        if(!turn.getCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK)) {
+        if (!turn.getCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK)) {
 
             if (aeduiFaction.resources() === 0 && !modifiers.free) {
                 return false;
             }
 
-            console.log('*** Are there any effective Aedui Battles? ***');
-            const effectiveBattles = this.findEffectiveBattles(state, modifiers);
-            if (effectiveBattles.length === 0) {
+
+            const battles = modifiers.context.battles || this.getBattleList(state, modifiers);
+            if (battles.length === 0) {
                 return false;
             }
 
-            let commandStarted = false;
+            turn.startCommand(CommandIDs.BATTLE);
+            modifiers.context.battles = battles;
 
-            let ambushed = false;
-            _.each(
-                effectiveBattles, (battle) => {
-                    const cost = battle.region.devastated() ? 2 : 1;
-                    if (aeduiFaction.resources() < cost && !modifiers.free) {
-                        return false;
-                    }
-
-                    if (!commandStarted) {
-                        turn.startCommand(CommandIDs.BATTLE);
-                        commandStarted = true;
-                    }
-                    let willAmbush = false;
-                    if (!ambushed && this.shouldAmbush(battle) && modifiers.canDoSpecial()) {
-                        turn.startSpecialAbility(SpecialAbilityIDs.AMBUSH);
-                        turn.commitSpecialAbility();
-                        ambushed = true;
-                        willAmbush = true;
-                    }
-                    if (!modifiers.free) {
-                        RemoveResources.execute(state, {factionId: FactionIDs.AEDUI, count: cost});
-                    }
-
-                    Battle.execute(
-                        state, {
-                            region: battle.region,
-                            attackingFaction: battle.attackingFaction,
-                            defendingFaction: battle.defendingFaction,
-                            ambush: willAmbush
-                        });
-
-                    if (modifiers.limited) {
-                        return false;
-                    }
-                });
-
-            if (commandStarted) {
-                turn.commitCommand();
+            const ambushed = _.find(battles, {willAmbush: true});
+            if (ambushed) {
+                turn.startSpecialAbility(SpecialAbilityIDs.AMBUSH);
+                turn.commitSpecialAbility();
             }
 
-            if(ambushed) {
+            _.each(battles, (battle) => {
+                if(!battle.complete) {
+                    Battle.execute(state, { battleResults: battle });
+                }
+            });
+
+            turn.commitCommand();
+            modifiers.context.battles = null;
+
+            if (ambushed) {
                 return FactionActions.COMMAND_AND_SPECIAL;
             }
         }
@@ -82,6 +58,40 @@ class AeduiBattle {
 
         const usedSpecialAbility = modifiers.canDoSpecial() && AeduiTrade.trade(state, modifiers);
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
+    }
+
+    static getBattleList(state, modifiers) {
+        const aedui = state.aedui;
+        console.log('*** Are there any effective Aedui Battles? ***');
+        const effectiveBattles = this.findEffectiveBattles(state, modifiers);
+        if (effectiveBattles.length === 0) {
+            return [];
+        }
+
+        let battles = modifiers.free ? effectiveBattles : _.reduce(effectiveBattles, (accumulator, battle) => {
+            if (accumulator.resourcesRemaining >= battle.cost) {
+                accumulator.resourcesRemaining -= battle.cost;
+                accumulator.battles.push(battle);
+            }
+            return accumulator
+        }, {resourcesRemaining: aedui.resources(), battles: []}).battles;
+
+        if (battles.length > 0) {
+
+            if (modifiers.limited) {
+                battles = _.take(battles, 1);
+            }
+
+            _.each(battles, battle => {
+                if (this.shouldAmbush(battle) && modifiers.canDoSpecial()) {
+                    battle.willAmbush = true;
+                    return false;
+                }
+            });
+        }
+
+        return battles;
+
     }
 
     static findEffectiveBattles(state, modifiers) {
@@ -101,20 +111,13 @@ class AeduiBattle {
             });
 
         if (ambushed) {
-            const unusedRegions = _.reject(state.regions, function(region) {
+            const unusedRegions = _.reject(state.regions, function (region) {
                 return usedRegions[region.id];
             });
             const noAmbushBattles = this.getOrderedBattlesForRegions(state, modifiers, unusedRegions, false);
             finalBattleList.push.apply(finalBattleList, _.map(noAmbushBattles, 'battle'));
         }
 
-        // console.log('*** Final list ***');
-        // _.each(
-        //     finalBattleList, function (battle) {
-        //         battle.logResults();
-        //     });
-        //
-        // console.log('*** Done figuring it out ***');
         if (_.find(
                 finalBattleList, (battleResult) => {
                     return this.isHighlyEffectiveBattle(battleResult);
@@ -139,7 +142,7 @@ class AeduiBattle {
             }).map(
             (region) => {
                 const battleData = this.findBestBattleForRegion(state, region, canAmbush);
-                if(battleData) {
+                if (battleData) {
                     return {
                         region: region,
                         priority: battleData.priority,
@@ -166,11 +169,11 @@ class AeduiBattle {
                             defendingFactionId: factionId
                         });
 
-                    if(!canAmbush) {
+                    if (!canAmbush) {
                         battleResult.canAmbush = false;
                     }
 
-                    if(this.isEffectiveBattle(battleResult)) {
+                    if (this.isEffectiveBattle(battleResult)) {
                         const priority = this.getBattlePriority(battleResult);
                         return {
                             priority,
@@ -197,7 +200,8 @@ class AeduiBattle {
     }
 
     static mostDefenderLosses(battleResult) {
-        return Math.max(battleResult.worstCaseDefenderLosses.normal, (battleResult.canAmbush ? battleResult.worstCaseDefenderLosses.ambush : 0))
+        return Math.max(battleResult.worstCaseDefenderLosses.normal,
+                        (battleResult.canAmbush ? battleResult.worstCaseDefenderLosses.ambush : 0))
     }
 
     static willCauseEnoughDefenderLosses(battleResult) {

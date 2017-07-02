@@ -54,9 +54,9 @@ class Bot extends FallingSkyPlayer {
     willHarass(factionId, context) {
         if (this.factionId === FactionIDs.ROMANS) {
             throw new PlayerInteractionNeededError('Harassment possible for ' + factionId, new Harassment({
-                requestingFactionId: factionId,
-                respondingFactionId: this.factionId
-            }));
+                                                                                                              requestingFactionId: factionId,
+                                                                                                              respondingFactionId: this.factionId
+                                                                                                          }));
         }
         return true;
     }
@@ -64,9 +64,9 @@ class Bot extends FallingSkyPlayer {
     willAgreeToQuarters(factionId) {
         if (this.factionId === FactionIDs.ROMANS) {
             throw new PlayerInteractionNeededError('Quarters requested by ' + factionId, new QuartersAgreement({
-                requestingFactionId: factionId,
-                respondingFactionId: this.factionId
-            }));
+                                                                                                                   requestingFactionId: factionId,
+                                                                                                                   respondingFactionId: this.factionId
+                                                                                                               }));
         }
         return false;
     }
@@ -74,9 +74,9 @@ class Bot extends FallingSkyPlayer {
     willAgreeToRetreat(factionId) {
         if (this.factionId === FactionIDs.ROMANS) {
             throw new PlayerInteractionNeededError('Retreat requested by ' + factionId, new RetreatAgreement({
-                requestingFactionId: factionId,
-                respondingFactionId: this.factionId
-            }));
+                                                                                                                 requestingFactionId: factionId,
+                                                                                                                 respondingFactionId: this.factionId
+                                                                                                             }));
         }
         return false;
     }
@@ -84,9 +84,9 @@ class Bot extends FallingSkyPlayer {
     willAgreeToSupplyLine(factionId) {
         if (this.factionId === FactionIDs.ROMANS) {
             throw new PlayerInteractionNeededError('Supply line requested by ' + factionId, new SupplyLineAgreement({
-                requestingFactionId: factionId,
-                respondingFactionId: this.factionId
-            }));
+                                                                                                                        requestingFactionId: factionId,
+                                                                                                                        respondingFactionId: this.factionId
+                                                                                                                    }));
         }
         return false;
     }
@@ -202,10 +202,10 @@ class Bot extends FallingSkyPlayer {
         }
 
         if (wantToRetreat && !hasSafeRetreatRegion) {
-            retreatResults.agreeingFaction = this.getRetreatAgreement(state, region);
+            retreatResults.agreeingFactionId = this.getRetreatAgreement(state, region);
         }
 
-        return wantToRetreat && (hasSafeRetreatRegion || retreatResults.agreeingFaction);
+        return wantToRetreat && (hasSafeRetreatRegion || retreatResults.agreeingFactionId);
     }
 
     getRetreatAgreement(state, region) {
@@ -221,14 +221,15 @@ class Bot extends FallingSkyPlayer {
 
         const factionsAsked = {};
         const agreeingRegion = _.find(
-            agreementRequiredRetreatRegions, function (agreementRequiredRegion) {
+            agreementRequiredRetreatRegions, (agreementRequiredRegion) => {
                 const regionFactionId = agreementRequiredRegion.controllingFactionId();
                 if (factionsAsked[regionFactionId]) {
                     return false;
                 }
                 console.log('Asking ' + regionFactionId + ' for region ' + agreementRequiredRegion.name);
                 factionsAsked[regionFactionId] = true;
-                return state.playersByFaction[regionFactionId].willAgreeToRetreat();
+                const existingAgreement = this.getExistingAgreement(state, regionFactionId, 'RetreatAgreement');
+                return existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[regionFactionId].willAgreeToRetreat();
             });
 
 
@@ -241,14 +242,18 @@ class Bot extends FallingSkyPlayer {
         return agreeingRegion ? agreeingRegion.controllingFactionId() : null;
     }
 
+    getExistingAgreement(state, factionId, agreementType) {
+        return _.find(state.turnHistory.getCurrentTurn().getCurrentAgreements(),
+                      agreement => agreement.type === agreementType && agreement.respondingFactionId === factionId);
+    }
+
     getSupplyLineAgreements(state, modifiers, factionIds) {
         const agreements = [];
         _.each(
             factionIds, (factionId) => {
-                const existingAgreement = _.find(state.turnHistory.getCurrentTurn().getCurrentAgreements(),
-                                                 agreement => agreement.type === 'SupplyLineAgreement' && agreement.respondingFactionId === factionId);
+                const existingAgreement = this.getExistingAgreement(state, factionId, 'SupplyLineAgreement');
                 const agreed = existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[factionId].willAgreeToSupplyLine(
-                        this.factionId);
+                    this.factionId);
                 console.log(
                     this.factionId + ' asked ' + factionId + ' for supply line agreement -> ' + factionId + (agreed ? ' agreed' : ' denied'));
                 if (agreed) {
@@ -377,21 +382,17 @@ class Bot extends FallingSkyPlayer {
     }
 
     findRetreatRegion(state, region, agreeingFactionId) {
-        let mostFriendly = 0;
-        let targetRegion = null;
-        _.each(
-            region.adjacent, (adjacentRegion) => {
-                if (adjacentRegion.controllingFactionId() !== this.factionId && adjacentRegion.controllingFactionId() !== agreeingFactionId) {
-                    return;
+        return _(region.adjacent).reject(
+            adjacent => (adjacent.controllingFactionId() !== this.factionId && adjacent.controllingFactionId() !== agreeingFactionId)).map(
+            (adjacent) => {
+                const friendlyPieces = adjacent.getPiecesForFaction(this.factionId);
+                return {
+                    numFriendly: friendlyPieces.length,
+                    region: adjacent
                 }
+            }).sortBy('numFriendly').groupBy('numFriendly').map(_.shuffle).flatten().reverse().map('region').first();
 
-                const friendlyPieces = adjacentRegion.piecesByFaction()[this.factionId];
-                if (friendlyPieces && friendlyPieces.length > mostFriendly) {
-                    mostFriendly = friendlyPieces.length;
-                    targetRegion = adjacentRegion;
-                }
-            });
-        return targetRegion;
     }
 }
+
 export default Bot;

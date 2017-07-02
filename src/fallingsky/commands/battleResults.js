@@ -4,6 +4,7 @@ import Logging from '../util/logging';
 class BattleResults {
     constructor(definition) {
         this.region = definition.region;
+        this.cost = definition.cost;
 
         this.attackingFaction = definition.attackingFaction;
         this.defendingFaction = definition.defendingFaction;
@@ -20,9 +21,9 @@ class BattleResults {
         this.worstCaseAttackerLosses = definition.worstCaseAttackerLosses;
         this.worstCaseCounterattackResults = definition.worstCaseCounterattackResults;
 
-
-        // this.bestDefenderLosses = (this.canAmbush || !this.defenderCanRetreat) ? this.worstCaseNoRetreatDefenderResults.removed.length : this.worstCaseRetreatDefenderResults.removed.length;
-        //
+        this.willAmbush = definition.willAmbush;
+        this.willEnlistGermans = definition.willEnlistGermans;
+        this.complete = definition.complete;
     }
 
     willCauseLeaderLoss(ambush=false) {
