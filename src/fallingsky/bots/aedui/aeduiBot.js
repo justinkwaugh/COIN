@@ -40,7 +40,7 @@ class AeduiBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.PASS_CHECK);
 
-        if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !action && this.canPlayEvent(state) && AeduiEvent.handleEvent(state)) {
+        if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !action && turn.getContext().isCommandAllowed(CommandIDs.EVENT) && this.canPlayEvent(state) && AeduiEvent.handleEvent(state)) {
             action = FactionActions.EVENT;
         }
         turn.markCheckpoint(Checkpoints.EVENT_CHECK);
