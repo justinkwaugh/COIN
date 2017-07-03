@@ -67,6 +67,7 @@ class Battle extends Command {
         return new BattleResults (
             {
                 region: region,
+                cost: (region.devastated() ? 2 : 1) * (attackingFaction.id === FactionIDs.ROMANS ? 2: 1),
 
                 attackingFaction: attackingFaction,
                 defendingFaction: defendingFaction,
@@ -88,20 +89,21 @@ class Battle extends Command {
     }
 
     static doExecute(state, args) {
-        const region = args.region;
-        const attackingFaction = args.attackingFaction;
-        const defendingFaction = args.defendingFaction;
+        const battleResults = args.battleResults || args;
+        const region = battleResults.region;
+        const attackingFaction = battleResults.attackingFaction;
+        const defendingFaction = battleResults.defendingFaction;
         const attackingPlayer = state.playersByFaction[attackingFaction.id];
         const defendingPlayer = state.playersByFaction[defendingFaction.id];
-        const enlistingGermans = args.enlistGermans;
-        const ambush = args.ambush;
+        const enlistingGermans = battleResults.willEnlistGermans;
+        const ambush = battleResults.willAmbush;
 
-        console.log(args.attackingFaction.name + ' is battling ' + args.defendingFaction.name + ' in region ' + region.name + (enlistingGermans ? ' with German help' : '' ));
+        console.log(attackingFaction.name + ' is battling ' + defendingFaction.name + ' in region ' + region.name + (enlistingGermans ? ' with German help' : '' ));
         console.log('*** Battleground: ***');
         region.logState();
         console.log('*** Battle: ***');
         if (ambush) {
-            console.log(args.attackingFaction.name + ' is ambushing!');
+            console.log(attackingFaction.name + ' is ambushing!');
         }
 
         let attackingPieces = region.piecesByFaction()[attackingFaction.id];
@@ -136,7 +138,7 @@ class Battle extends Command {
 
             retreatDeclared = state.playersByFaction[defendingFaction.id].willRetreat(state, region, attackingFaction, worstCaseAttackerLosses, noRetreatDefenderResults, retreatDefenderResults);
             if (retreatDeclared) {
-                console.log(args.defendingFaction.name + ' is retreating!');
+                console.log(defendingFaction.name + ' is retreating!');
                 defenderResults = retreatDefenderResults;
             }
         }
@@ -177,6 +179,7 @@ class Battle extends Command {
                     });
             }
         }
+        battleResults.complete = true;
         // region.logState();
         console.log('Battle complete');
 

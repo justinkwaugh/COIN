@@ -5,7 +5,6 @@ import BelgaeBattle from './belgaeBattle';
 import BelgaeRally from './belgaeRally';
 import BelgaeRaid from './belgaeRaid';
 import BelgaeMarch from './belgaeMarch';
-import CommandModifiers from '../../commands/commandModifiers';
 import CommandIDs from '../../config/commandIds';
 import FactionActions from '../../../common/factionActions';
 import Pass from '../../commands/pass';
@@ -15,8 +14,10 @@ class BelgaeBot extends Bot {
         super({factionId: FactionIDs.BELGAE});
     }
 
-    takeTurn(state, modifiers = new CommandModifiers({})) {
+    takeTurn(state) {
         let commandAction = null;
+        const turn = state.turnHistory.currentTurn;
+        const modifiers = turn.getContext();
 
         if (modifiers.isCommandAllowed(CommandIDs.BATTLE)) {
             commandAction = BelgaeBattle.battle(state, modifiers);
@@ -36,10 +37,9 @@ class BelgaeBot extends Bot {
 
         if (!commandAction && state.belgae.resources() < 4 && modifiers.isCommandAllowed(CommandIDs.RAID)) {
             commandAction = BelgaeRaid.raid(state, modifiers) || FactionActions.PASS;
-
         }
 
-        if(!commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
+        if (!commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
             commandAction = BelgaeMarch.march(state, modifiers);
         }
 
@@ -49,7 +49,7 @@ class BelgaeBot extends Bot {
 
         commandAction = commandAction || FactionActions.PASS;
 
-        if(commandAction === FactionActions.PASS) {
+        if (commandAction === FactionActions.PASS) {
             Pass.execute(state, {factionId: FactionIDs.BELGAE});
         }
 

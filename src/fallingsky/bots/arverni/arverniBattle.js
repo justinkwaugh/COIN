@@ -7,7 +7,6 @@ import EnemyFactionPriority from './enemyFactionPriority';
 import ArverniDevastate from './arverniDevastate';
 import ArverniEntreat from './arverniEntreat';
 import ArverniMarch from './arverniMarch';
-import CommandModifier from '../../commands/commandModifiers';
 import RemoveResources from '../../actions/removeResources';
 import FactionActions from '../../../common/factionActions';
 
@@ -26,7 +25,7 @@ class ArverniBattle {
         const arverni = state.arverni;
         if (prioritizedBattles.length === 0 || this.isVercingetorixInDangerWithoutBattle(state, importantBattleRegions, battlegrounds)) {
             if(!arverni.hasAvailableLeader()) {
-                return ArverniMarch.march(state, modifiers, 'threat');
+                modifiers.context.tryThreatMarch = true;
             }
             return false;
         }

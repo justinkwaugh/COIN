@@ -7,11 +7,20 @@ import AeduiMarch from './aeduiMarch';
 import AeduiBattle from './aeduiBattle';
 import AeduiEvent from './aeduiEvent';
 import FactionActions from '../../../common/factionActions';
-import CommandModifiers from '../../commands/commandModifiers';
 import CommandIDs from '../../config/commandIds';
 import MovePieces from '../../actions/movePieces';
 import RemovePieces from '../../actions/removePieces';
 import Pass from '../../commands/pass';
+
+const Checkpoints = {
+    PASS_CHECK : 1,
+    EVENT_CHECK : 2,
+    BATTLE_CHECK: 3,
+    RALLY_CHECK: 4,
+    FIRST_RAID_CHECK: 5,
+    MARCH_CHECK: 6,
+    SECOND_RAID_CHECK: 7
+};
 
 class AeduiBot extends Bot {
     constructor() {
@@ -23,17 +32,21 @@ class AeduiBot extends Bot {
     }
 
     takeTurn(state) {
-        const aeduiFaction = state.factionsById[this.factionId];
-
         let action = null;
-        if (this.shouldPassForNextCard(state)) {
+        const turn = state.turnHistory.currentTurn;
+
+        if (!turn.getCheckpoint(Checkpoints.PASS_CHECK) && this.shouldPassForNextCard(state)) {
             action = FactionActions.PASS;
         }
-        else if (this.canPlayEvent(state) && AeduiEvent.handleEvent(state)) {
+        turn.markCheckpoint(Checkpoints.PASS_CHECK);
+
+        if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !action && turn.getContext().isCommandAllowed(CommandIDs.EVENT) && this.canPlayEvent(state) && AeduiEvent.handleEvent(state)) {
             action = FactionActions.EVENT;
         }
-        else {
-            action = this.executeCommand(state, new CommandModifiers(), aeduiFaction);
+        turn.markCheckpoint(Checkpoints.EVENT_CHECK);
+
+        if(!action) {
+            action = this.executeCommand(state, turn);
         }
 
         if(action === FactionActions.PASS) {
@@ -44,40 +57,34 @@ class AeduiBot extends Bot {
         return action;
     }
 
-    executeCommand(state, modifiers) {
-        const aeduiFaction = state.factionsById[this.factionId];
+    executeCommand(state, turn) {
+        let commandAction = null;
+        const modifiers = turn.getContext();
 
-        let commandAction = FactionActions.PASS;
-        if(modifiers.isCommandAllowed(CommandIDs.BATTLE)) {
-            commandAction = AeduiBattle.battle(state, modifiers, this, aeduiFaction);
+        if(!turn.getCheckpoint(Checkpoints.BATTLE_CHECK) && modifiers.isCommandAllowed(CommandIDs.BATTLE)) {
+            commandAction = AeduiBattle.battle(state, modifiers);
         }
+        turn.markCheckpoint(Checkpoints.BATTLE_CHECK);
 
-        if(!commandAction && modifiers.isCommandAllowed(CommandIDs.RALLY)) {
-            commandAction = AeduiRally.rally(state, modifiers, this, aeduiFaction);
+        if(!turn.getCheckpoint(Checkpoints.RALLY_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.RALLY)) {
+            commandAction = AeduiRally.rally(state, modifiers);
         }
+        turn.markCheckpoint(Checkpoints.RALLY_CHECK);
 
-        let effectiveRaidRegions = null;
-        if(!commandAction && modifiers.isCommandAllowed(CommandIDs.RAID)) {
-            effectiveRaidRegions = AeduiRaid.getEffectiveRaidRegions(state, modifiers);
-            if (aeduiFaction.resources() < 4) {
-                if (effectiveRaidRegions.length > 0) {
-                    commandAction = AeduiRaid.raid(state, modifiers, this, aeduiFaction, effectiveRaidRegions);
-                }
-                else {
-                    commandAction = FactionActions.PASS;
-                }
-            }
+        if (!turn.getCheckpoint(Checkpoints.FIRST_RAID_CHECK) && !commandAction && state.aedui.resources() < 4 && modifiers.isCommandAllowed(CommandIDs.RAID)) {
+            commandAction = AeduiRaid.raid(state, modifiers) || FactionActions.PASS;
         }
+        turn.markCheckpoint(Checkpoints.FIRST_RAID_CHECK);
 
-        if(!commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
-            commandAction = AeduiMarch.march(state, modifiers, this, aeduiFaction);
+        if(!turn.getCheckpoint(Checkpoints.MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
+            commandAction = AeduiMarch.march(state, modifiers);
         }
+        turn.markCheckpoint(Checkpoints.MARCH_CHECK);
 
-        if(!commandAction && modifiers.isCommandAllowed(CommandIDs.RAID)) {
-            if (effectiveRaidRegions.length > 0) {
-                commandAction = AeduiRaid.raid(state, modifiers, this, aeduiFaction, effectiveRaidRegions);
-            }
+        if(!turn.getCheckpoint(Checkpoints.SECOND_RAID_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.RAID)) {
+            commandAction = AeduiRaid.raid(state, modifiers);
         }
+        turn.markCheckpoint(Checkpoints.SECOND_RAID_CHECK);
 
         commandAction = commandAction || FactionActions.PASS;
 
@@ -137,6 +144,7 @@ class AeduiBot extends Bot {
     }
 
     shouldPassForNextCard(currentState) {
+        console.log('*** Aedui should pass for next card? ***');
         return currentState.upcomingCard() && currentState.upcomingCard().type !== 'winter' && currentState.upcomingCard().initiativeOrder[0] === FactionIDs.AEDUI &&
                currentState.currentCard().initiativeOrder[0] !== FactionIDs.AEDUI &&
                _.random(1, 6) < 5;

@@ -1,6 +1,7 @@
 import _ from '../../../lib/lodash';
 import Command from '../command';
 import FactionIDs from '../../config/factionIds';
+import TradeResults from './tradeResults';
 
 class Trade extends Command {
 
@@ -26,11 +27,11 @@ class Trade extends Command {
                             }).length) * 2;
                 }
 
-                return {
-                    region: region,
-                    totalAedui: totalAedui,
-                    totalAeduiWithRoman: totalAeduiWithRoman
-                };
+                return new TradeResults({
+                    region,
+                    totalAedui,
+                    totalAeduiWithRoman
+                });
             }).filter(
             function (regionResult) {
                 return regionResult.totalAedui > 0 || regionResult.totalAeduiWithRoman > 0;

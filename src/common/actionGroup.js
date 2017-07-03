@@ -5,6 +5,7 @@ class ActionGroup {
         this.id = definition.id;
         this.actionStartIndex = definition.actionStartIndex;
         this.actionEndIndex = definition.actionEndIndex;
+        this.agreements = definition.agreements || [];
     }
 }
 

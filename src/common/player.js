@@ -1,10 +1,7 @@
 class Player {
-    constructor(definition) {
+    constructor(definition = {}) {
         this.isNonPlayer = definition.isNonPlayer;
-    }
-
-    willHarass(factionId) {
-        return true;
+        this.factionId = definition.factionId;
     }
 }
 

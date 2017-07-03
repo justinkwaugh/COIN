@@ -1,5 +1,6 @@
 import _ from '../lib/lodash';
 import Turn from './turn';
+import TurnContext from 'common/turnContext'
 
 
 class TurnHistory {
@@ -10,12 +11,28 @@ class TurnHistory {
     }
 
     startTurn(factionId) {
-        this.currentTurn = new Turn(this.state, { number: this.nextTurnNumber(), factionId: factionId, actionStartIndex: this.state.actionHistory.currentIndex()});
+        this.currentTurn = new Turn(this.state, {
+            number: this.nextTurnNumber(),
+            factionId: factionId,
+            actionStartIndex: this.state.actionHistory.currentIndex()
+        });
+        this.currentTurn.pushContext(new TurnContext());
+    }
+
+    rollbackTurn() {
+        if (this.currentTurn) {
+            this.currentTurn.undo();
+        }
+    }
+
+    rollbackCurrentAction() {
+        this.currentTurn.rollbackActionGroup();
     }
 
     commitTurn(action) {
         this.currentTurn.commandAction = action;
         this.currentTurn.actionEndIndex = this.state.actionHistory.currentIndex();
+        this.currentTurn.clearCheckpoints();
         this.turns.push(this.currentTurn);
         this.currentTurn = null;
     }

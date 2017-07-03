@@ -12,7 +12,7 @@ import PlaceAuxilia from 'fallingsky/actions/placeAuxilia'
 import PlaceLegions from 'fallingsky/actions/placeLegions'
 import RevealPieces from 'fallingsky/actions/revealPieces'
 import ArverniEntreat from 'fallingsky/bots/arverni/arverniEntreat';
-import CommandModifier from 'fallingsky/commands/commandModifiers';
+import TurnContext from 'common/turnContext';
 
 describe("Arverni entreat", function () {
     let state;
@@ -55,7 +55,7 @@ describe("Arverni entreat", function () {
         PlaceWarbands.execute(state, {factionId: arverni.id, regionId: biturigesRegion.id, count: 3});
         PlaceAlliedTribe.execute(state, {factionId: romans.id, regionId: biturigesRegion.id, tribeId: TribeIDs.BITURIGES});
 
-        expect(ArverniEntreat.entreat(state, new CommandModifier())).to.equal(true);
+        expect(ArverniEntreat.entreat(state, new TurnContext())).to.equal(true);
 
         let alliedTribe = mandubiiRegion.getAlliesForFaction(FactionIDs.ARVERNI)[0];
         expect(alliedTribe.tribeId).to.equal(TribeIDs.MANDUBII);
@@ -82,7 +82,7 @@ describe("Arverni entreat", function () {
         PlaceAlliedTribe.execute(state, {factionId: belgae.id, regionId: atrebatesRegion.id, tribeId: TribeIDs.ATREBATES});
         PlaceWarbands.execute(state, {factionId: aedui.id, regionId: atrebatesRegion.id, count: 1});
 
-        expect(ArverniEntreat.entreat(state, new CommandModifier())).to.equal(true);
+        expect(ArverniEntreat.entreat(state, new TurnContext())).to.equal(true);
 
         let alliedTribe = mandubiiRegion.getAlliesForFaction(FactionIDs.ARVERNI)[0];
         expect(alliedTribe.tribeId).to.equal(TribeIDs.MANDUBII);
@@ -115,7 +115,7 @@ describe("Arverni entreat", function () {
         PlaceWarbands.execute(state, {factionId: arverni.id, regionId: biturigesRegion.id, count: 1});
         PlaceWarbands.execute(state, {factionId: germanic.id, regionId: biturigesRegion.id, count: 1});
 
-        expect(ArverniEntreat.entreat(state, new CommandModifier())).to.equal(true);
+        expect(ArverniEntreat.entreat(state, new TurnContext())).to.equal(true);
 
         expect(mandubiiRegion.getMobilePiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);
         expect(mandubiiRegion.getMobilePiecesForFaction(FactionIDs.ARVERNI).length).to.equal(3);

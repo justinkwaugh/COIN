@@ -6,7 +6,7 @@ import GermanicRally from './germanicRally';
 import GermanicMarch from './germanicMarch';
 import GermanicRaid from './germanicRaid';
 import GermanicBattle from './germanicBattle';
-import CommandModifiers from '../../commands/commandModifiers';
+import TurnContext from 'common/turnContext'
 import MovePieces from '../../actions/movePieces';
 
 class GermanicBot extends Bot {
@@ -15,10 +15,10 @@ class GermanicBot extends Bot {
     }
 
     takeTurn(state) {
-        GermanicRally.rally(state, new CommandModifiers({winter: true}));
-        GermanicMarch.march(state, new CommandModifiers({winter: true}));
-        GermanicRaid.raid(state, new CommandModifiers({winter: true}));
-        GermanicBattle.battle(state, new CommandModifiers({winter: true}));
+        GermanicRally.rally(state, new TurnContext({winter: true}));
+        GermanicMarch.march(state, new TurnContext({winter: true}));
+        GermanicRaid.raid(state, new TurnContext({winter: true}));
+        GermanicBattle.battle(state, new TurnContext({winter: true}));
     }
 
     willHarass(factionId) {

@@ -5,7 +5,7 @@ import RemovePieces from '../../../actions/removePieces';
 import PlaceWarbands from '../../../actions/placeWarbands';
 import EnemyFactionPriority from '../enemyFactionPriority';
 import FactionActions from '../../../../common/factionActions';
-import CommandModifiers from '../../../commands/commandModifiers';
+import TurnContext from 'common/turnContext'
 
 class Event50 {
     static handleEvent(state) {
@@ -58,8 +58,10 @@ class Event50 {
             }
             effective = true;
         }
-
-        const commandAction = aeduiBot.executeCommand(state, new CommandModifiers({free: true}));
+        const turn = state.turnHistory.currentTurn;
+        turn.pushContext(new TurnContext({ id: 'e50', free: true}));
+        const commandAction = aeduiBot.executeCommand(state, turn);
+        turn.popContext();
 
         return effective || (commandAction && commandAction !== FactionActions.PASS);
     }

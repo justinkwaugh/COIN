@@ -10,84 +10,98 @@ import RemoveResources from '../../actions/removeResources';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
 
+const Checkpoints = {
+    MARCH_COMPLETE_CHECK : 'mcc'
+};
+
+
 class AeduiMarch {
 
-    static march(currentState, modifiers, bot, faction) {
-        if(currentState.frost()) {
-            return false;
-        }
+    static march(state, modifiers) {
+        const faction = state.aedui;
+        const turn = state.turnHistory.getCurrentTurn();
 
-        const effectiveMarch = this.findEffectiveMarch(currentState, modifiers, faction);
-        if (!effectiveMarch) {
-            return false;
-        }
-        currentState.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
-        const regionsMarched = {};
-
-        if (effectiveMarch.expansionMarchRegions.length > 0) {
-            console.log('*** Aedui march to expand ***');
-            if (!modifiers.free) {
-                RemoveResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: effectiveMarch.expansionMarchCost});
+        if(!turn.getCheckpoint(Checkpoints.MARCH_COMPLETE_CHECK)) {
+            if (state.frost()) {
+                return false;
             }
-            const expansionPieces = effectiveMarch.expansionMarchStartRegion.piecesByFaction()[FactionIDs.AEDUI];
-            const expansionWarbands = _.filter(expansionPieces, {type: 'warband'});
-            HidePieces.execute(
-                currentState, {
-                    factionId: faction.id,
-                    regionId: effectiveMarch.expansionMarchStartRegion.id
-                });
 
-            _.each(
-                effectiveMarch.expansionMarchRegions, function (destinationRegion) {
-                    const pieceToMove = expansionWarbands.shift();
-                    MovePieces.execute(
-                        currentState, {
-                            sourceRegionId: effectiveMarch.expansionMarchStartRegion.id,
-                            destRegionId: destinationRegion.id,
-                            pieces: [pieceToMove]
-                        });
-                });
-            regionsMarched[effectiveMarch.expansionMarchStartRegion.id] = true;
-        }
-
-        if (effectiveMarch.controlMarchRegion) {
-            console.log('*** Aedui march to control ***');
-            if (!modifiers.free) {
-                RemoveResources.execute(currentState, { factionId: FactionIDs.AEDUI, count: effectiveMarch.controlMarchCost});
+            const effectiveMarch = this.findEffectiveMarch(state, modifiers, faction);
+            if (!effectiveMarch) {
+                return false;
             }
-            const controlPieces = effectiveMarch.controlMarchStart.piecesByFaction()[FactionIDs.AEDUI];
-            const warbands = _(controlPieces).filter({type: 'warband'}).value();
-            const numWarbandsNeeded = Math.abs(effectiveMarch.controlMarchRegion.controllingMarginByFaction()[FactionIDs.AEDUI]) + 1;
-            const controlWarbands = _.take(warbands, numWarbandsNeeded);
-            if (!regionsMarched[effectiveMarch.controlMarchStart.id]) {
+            turn.startCommand(CommandIDs.MARCH);
+            const regionsMarched = {};
+
+            if (effectiveMarch.expansionMarchRegions.length > 0) {
+                console.log('*** Aedui march to expand ***');
+                if (!modifiers.free) {
+                    RemoveResources.execute(state,
+                                            {factionId: FactionIDs.AEDUI, count: effectiveMarch.expansionMarchCost});
+                }
+                const expansionPieces = effectiveMarch.expansionMarchStartRegion.piecesByFaction()[FactionIDs.AEDUI];
+                const expansionWarbands = _.filter(expansionPieces, {type: 'warband'});
                 HidePieces.execute(
-                    currentState, {
+                    state, {
                         factionId: faction.id,
-                        regionId: effectiveMarch.controlMarchStart.id
-                    })
+                        regionId: effectiveMarch.expansionMarchStartRegion.id
+                    });
+
+                _.each(
+                    effectiveMarch.expansionMarchRegions, function (destinationRegion) {
+                        const pieceToMove = expansionWarbands.shift();
+                        MovePieces.execute(
+                            state, {
+                                sourceRegionId: effectiveMarch.expansionMarchStartRegion.id,
+                                destRegionId: destinationRegion.id,
+                                pieces: [pieceToMove]
+                            });
+                    });
+                regionsMarched[effectiveMarch.expansionMarchStartRegion.id] = true;
             }
 
-            MovePieces.execute(
-                currentState, {
-                    sourceRegionId: effectiveMarch.controlMarchStart.id,
-                    destRegionId: effectiveMarch.controlMarchRegion.id,
-                    pieces: controlWarbands
-                });
+            if (effectiveMarch.controlMarchRegion) {
+                console.log('*** Aedui march to control ***');
+                if (!modifiers.free) {
+                    RemoveResources.execute(state,
+                                            {factionId: FactionIDs.AEDUI, count: effectiveMarch.controlMarchCost});
+                }
+                const controlPieces = effectiveMarch.controlMarchStart.piecesByFaction()[FactionIDs.AEDUI];
+                const warbands = _(controlPieces).filter({type: 'warband'}).value();
+                const numWarbandsNeeded = Math.abs(
+                        effectiveMarch.controlMarchRegion.controllingMarginByFaction()[FactionIDs.AEDUI]) + 1;
+                const controlWarbands = _.take(warbands, numWarbandsNeeded);
+                if (!regionsMarched[effectiveMarch.controlMarchStart.id]) {
+                    HidePieces.execute(
+                        state, {
+                            factionId: faction.id,
+                            regionId: effectiveMarch.controlMarchStart.id
+                        })
+                }
 
+                MovePieces.execute(
+                    state, {
+                        sourceRegionId: effectiveMarch.controlMarchStart.id,
+                        destRegionId: effectiveMarch.controlMarchRegion.id,
+                        pieces: controlWarbands
+                    });
+
+            }
+            turn.commitCommand();
         }
+        turn.markCheckpoint(Checkpoints.MARCH_COMPLETE_CHECK);
 
-        const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(currentState, modifiers, bot) || AeduiSuborn.suborn(currentState, modifiers));
-        currentState.turnHistory.getCurrentTurn().commitCommand();
+        const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state, modifiers) || AeduiSuborn.suborn(state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 
-    static findEffectiveMarch(currentState, modifiers, faction) {
+    static findEffectiveMarch(state, modifiers, faction) {
         const marchResults = _.filter(
-            March.test(currentState, {factionId: FactionIDs.AEDUI}), function (marchResult) {
+            March.test(state, {factionId: FactionIDs.AEDUI}), function (marchResult) {
                 return faction.resources() >= marchResult.cost || modifiers.free;
             });
 
-        const rankedEnemyFactions = _(currentState.factions).sortBy(
+        const rankedEnemyFactions = _(state.factions).sortBy(
             function (faction) {
                 return (99 - faction.numAlliedTribesAndCitadelsPlaced()) + (EnemyFactionPriority[faction.id]);
             }).reject({id: FactionIDs.AEDUI}).value();

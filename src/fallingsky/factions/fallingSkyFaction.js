@@ -60,7 +60,7 @@ class FallingSkyFaction extends Faction {
         const resourcesBeforeAdd = this.resources();
         const resourcesAfterAdd = Math.min(this.resources() + count, 45);
         if (resourcesBeforeAdd === resourcesAfterAdd) {
-            return;
+            return 0;
         }
         this.resources(resourcesAfterAdd);
         console.log(this.name + ' is adding ' + (resourcesAfterAdd - resourcesBeforeAdd) + ' resources.  Now at ' + resourcesAfterAdd);
@@ -71,7 +71,7 @@ class FallingSkyFaction extends Faction {
         const resourcesBeforeRemove = this.resources();
         const resourcesAfterRemove = Math.max(this.resources() - count, 0);
         if (resourcesBeforeRemove === resourcesAfterRemove) {
-            return;
+            return 0;
         }
         this.resources(resourcesAfterRemove);
         console.log(this.name + ' is removing ' + (resourcesBeforeRemove - resourcesAfterRemove) + ' resources.  Now at ' + resourcesAfterRemove);

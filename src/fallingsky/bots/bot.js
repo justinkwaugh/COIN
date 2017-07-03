@@ -1,4 +1,4 @@
-import Player from '../../common/player';
+import FallingSkyPlayer from '../player/fallingSkyPlayer';
 import _ from '../../lib/lodash';
 import FactionIDs from '../config/factionIds';
 import Battle from '../commands/battle';
@@ -7,47 +7,87 @@ import MovePieces from '../actions/movePieces';
 import PlaceLeader from '../actions/placeLeader';
 import Logging from '../util/logging';
 import FactionActions from '../../common/factionActions';
+import PlayerInteractionNeededError from '../../common/playerInteractionNeededError';
+import SupplyLineAgreement from 'fallingsky/interactions/supplyLineAgreement';
+import QuartersAgreement from 'fallingsky/interactions/quartersAgreement';
+import RetreatAgreement from 'fallingsky/interactions/retreatAgreement';
+import Harassment from 'fallingsky/interactions/harassment';
 
-class Bot extends Player {
+class Bot extends FallingSkyPlayer {
     constructor(definition) {
         super({isNonPlayer: true});
         this.factionId = definition.factionId;
     }
 
-    takeTurn(currentState) {
+    takeTurn(state) {
+
     }
 
-    quarters(currentState) {
+    resume(state) {
+        state.turnHistory.currentTurn.resume();
+        this.takeTurn(state)
+    }
+
+    quarters(state) {
 
     }
 
     placeLeader(state) {
         const faction = state.factionsById[this.factionId];
         if (faction.hasAvailableLeader()) {
-            const region = _(state.regions).map((region) =>{
+            const region = _(state.regions).map((region) => {
                 const pieces = region.piecesByFaction()[this.factionId] || [];
                 return {
                     region: region,
                     numPieces: pieces.length
                 }
             }).sortBy('numPieces').groupBy('numPieces').map(_.shuffle).flatten().map('region').reverse().first();
-            PlaceLeader.execute(state, { factionId: faction.id, regionId: region.id });
+            PlaceLeader.execute(state, {factionId: faction.id, regionId: region.id});
         }
     }
 
     canPlayEvent(currentState) {
+        console.log('*** Aedui allowed to play event by sequence of play? ***');
         return _.indexOf(currentState.sequenceOfPlay.availableActions(), FactionActions.EVENT) >= 0;
     }
 
+    willHarass(factionId, context) {
+        if (this.factionId === FactionIDs.ROMANS) {
+            throw new PlayerInteractionNeededError('Harassment possible for ' + factionId, new Harassment({
+                                                                                                              requestingFactionId: factionId,
+                                                                                                              respondingFactionId: this.factionId
+                                                                                                          }));
+        }
+        return true;
+    }
+
     willAgreeToQuarters(factionId) {
+        if (this.factionId === FactionIDs.ROMANS) {
+            throw new PlayerInteractionNeededError('Quarters requested by ' + factionId, new QuartersAgreement({
+                                                                                                                   requestingFactionId: factionId,
+                                                                                                                   respondingFactionId: this.factionId
+                                                                                                               }));
+        }
         return false;
     }
 
-    willAgreeToRetreat() {
+    willAgreeToRetreat(factionId) {
+        if (this.factionId === FactionIDs.ROMANS) {
+            throw new PlayerInteractionNeededError('Retreat requested by ' + factionId, new RetreatAgreement({
+                                                                                                                 requestingFactionId: factionId,
+                                                                                                                 respondingFactionId: this.factionId
+                                                                                                             }));
+        }
         return false;
     }
 
     willAgreeToSupplyLine(factionId) {
+        if (this.factionId === FactionIDs.ROMANS) {
+            throw new PlayerInteractionNeededError('Supply line requested by ' + factionId, new SupplyLineAgreement({
+                                                                                                                        requestingFactionId: factionId,
+                                                                                                                        respondingFactionId: this.factionId
+                                                                                                                    }));
+        }
         return false;
     }
 
@@ -152,7 +192,8 @@ class Bot extends Player {
         const counterAttackLossesTooFew = attackerLosses < (nonRetreatResults.removed.length / 2);
 
         if (!hasDefendingCitadelOrFort && counterAttackLossesTooFew) {
-            console.log(this.factionId + ' wants to retreat due to lack of citadel or fort and too few counterattack losses');
+            console.log(
+                this.factionId + ' wants to retreat due to lack of citadel or fort and too few counterattack losses');
             wantToRetreat = true;
         }
 
@@ -161,10 +202,10 @@ class Bot extends Player {
         }
 
         if (wantToRetreat && !hasSafeRetreatRegion) {
-            retreatResults.agreeingFaction = this.getRetreatAgreement(state, region);
+            retreatResults.agreeingFactionId = this.getRetreatAgreement(state, region);
         }
 
-        return wantToRetreat && (hasSafeRetreatRegion || retreatResults.agreeingFaction);
+        return wantToRetreat && (hasSafeRetreatRegion || retreatResults.agreeingFactionId);
     }
 
     getRetreatAgreement(state, region) {
@@ -180,14 +221,15 @@ class Bot extends Player {
 
         const factionsAsked = {};
         const agreeingRegion = _.find(
-            agreementRequiredRetreatRegions, function (agreementRequiredRegion) {
+            agreementRequiredRetreatRegions, (agreementRequiredRegion) => {
                 const regionFactionId = agreementRequiredRegion.controllingFactionId();
                 if (factionsAsked[regionFactionId]) {
                     return false;
                 }
                 console.log('Asking ' + regionFactionId + ' for region ' + agreementRequiredRegion.name);
                 factionsAsked[regionFactionId] = true;
-                return state.playersByFaction[regionFactionId].willAgreeToRetreat();
+                const existingAgreement = this.getExistingAgreement(state, regionFactionId, 'RetreatAgreement');
+                return existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[regionFactionId].willAgreeToRetreat();
             });
 
 
@@ -200,12 +242,20 @@ class Bot extends Player {
         return agreeingRegion ? agreeingRegion.controllingFactionId() : null;
     }
 
-    getSupplyLineAgreements(state, factionIds) {
+    getExistingAgreement(state, factionId, agreementType) {
+        return _.find(state.turnHistory.getCurrentTurn().getCurrentAgreements(),
+                      agreement => agreement.type === agreementType && agreement.respondingFactionId === factionId);
+    }
+
+    getSupplyLineAgreements(state, modifiers, factionIds) {
         const agreements = [];
         _.each(
             factionIds, (factionId) => {
-                const agreed = state.playersByFaction[factionId].willAgreeToSupplyLine(this.factionId);
-                console.log(this.factionId + ' asked ' + factionId + ' for supply line agreement -> ' + factionId + (agreed ? ' agreed' : ' denied'));
+                const existingAgreement = this.getExistingAgreement(state, factionId, 'SupplyLineAgreement');
+                const agreed = existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[factionId].willAgreeToSupplyLine(
+                    this.factionId);
+                console.log(
+                    this.factionId + ' asked ' + factionId + ' for supply line agreement -> ' + factionId + (agreed ? ' agreed' : ' denied'));
                 if (agreed) {
                     agreements.push(factionId);
                 }
@@ -254,7 +304,7 @@ class Bot extends Player {
         attackResults.removed = pieces.removed || [];
         attackResults.remaining.push.apply(attackResults.remaining, pieces.saved);
 
-        if(attackResults.removed.length > 0) {
+        if (attackResults.removed.length > 0) {
             RemovePieces.execute(
                 state, {
                     regionId: region.id,
@@ -288,7 +338,8 @@ class Bot extends Player {
                 return 'staying';
             });
 
-        let retreatRegion = this.retreatPieces(state, region, groupedPieces.leaving || [], attackResults.agreeingFactionId);
+        let retreatRegion = this.retreatPieces(state, region, groupedPieces.leaving || [],
+                                               attackResults.agreeingFactionId);
 
         if (groupedPieces.leader) {
             const sourceFriendlyPieces = region.piecesByFaction()[this.factionId];
@@ -304,8 +355,8 @@ class Bot extends Player {
         }
     }
 
-    retreatPieces( state, region, pieces, agreeingFactionId ) {
-        if(pieces.length === 0) {
+    retreatPieces(state, region, pieces, agreeingFactionId) {
+        if (pieces.length === 0) {
             return;
         }
 
@@ -331,21 +382,17 @@ class Bot extends Player {
     }
 
     findRetreatRegion(state, region, agreeingFactionId) {
-        let mostFriendly = 0;
-        let targetRegion = null;
-        _.each(
-            region.adjacent, (adjacentRegion) => {
-                if (adjacentRegion.controllingFactionId() !== this.factionId && adjacentRegion.controllingFactionId() !== agreeingFactionId) {
-                    return;
+        return _(region.adjacent).reject(
+            adjacent => (adjacent.controllingFactionId() !== this.factionId && adjacent.controllingFactionId() !== agreeingFactionId)).map(
+            (adjacent) => {
+                const friendlyPieces = adjacent.getPiecesForFaction(this.factionId);
+                return {
+                    numFriendly: friendlyPieces.length,
+                    region: adjacent
                 }
+            }).sortBy('numFriendly').groupBy('numFriendly').map(_.shuffle).flatten().reverse().map('region').first();
 
-                const friendlyPieces = adjacentRegion.piecesByFaction()[this.factionId];
-                if (friendlyPieces && friendlyPieces.length > mostFriendly) {
-                    mostFriendly = friendlyPieces.length;
-                    targetRegion = adjacentRegion;
-                }
-            });
-        return targetRegion;
     }
 }
+
 export default Bot;

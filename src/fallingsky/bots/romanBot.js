@@ -16,9 +16,9 @@ class RomanBot extends Bot {
         return factionId === FactionIDs.ARVERNI;
     }
 
-    willAgreeToSupplyLine(factionId) {
-        return factionId === FactionIDs.AEDUI;
-    }
+    // willAgreeToSupplyLine(factionId) {
+    //     return factionId === FactionIDs.AEDUI;
+    // }
 
     handleEvent(state, currentCard) {
 

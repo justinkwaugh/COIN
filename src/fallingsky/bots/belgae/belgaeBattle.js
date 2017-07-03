@@ -7,7 +7,6 @@ import EnemyFactionPriority from './enemyFactionPriority';
 import BelgaeRampage from './belgaeRampage';
 import BelgaeEnlist from './belgaeEnlist';
 import BelgaeMarch from './belgaeMarch';
-import CommandModifier from '../../commands/commandModifiers';
 import RemoveResources from '../../actions/removeResources';
 import FactionActions from '../../../common/factionActions';
 
@@ -24,7 +23,7 @@ class BelgaeBattle {
         const prioritizedBattles = this.prioritizeBattles(state, battlegrounds);
 
         if (prioritizedBattles.length === 0 || this.isAmbiorixInDangerWithoutBattle(state, importantBattleRegions, battlegrounds)) {
-            modifiers.commandSpecific.threatRegions = _.map(importantBattleRegions, importantRegion => importantRegion.region.id);
+            modifiers.context.threatRegions = _.map(importantBattleRegions, importantRegion => importantRegion.region.id);
             return BelgaeMarch.march(state, modifiers);
         }
 
@@ -36,19 +35,10 @@ class BelgaeBattle {
         const willAmbush = modifiers.canDoSpecial() && this.needAmbush(prioritizedBattles[0]);
         let didSpecial = willAmbush;
         if (!didSpecial && modifiers.canDoSpecial()) {
+            modifiers.context.battles = prioritizedBattles;
             didSpecial = BelgaeRampage.rampage(
-                    state, new CommandModifier(
-                        {
-                            commandSpecific: {
-                                battles: prioritizedBattles
-                            }
-                        })) || BelgaeEnlist.enlist(
-                    state, new CommandModifier(
-                        {
-                            commandSpecific: {
-                                battles: prioritizedBattles
-                            }
-                        }));
+                    state, modifiers) || BelgaeEnlist.enlist(state, modifiers);
+            modifiers.context.battles = null;
         }
 
         state.turnHistory.getCurrentTurn().startCommand(CommandIDs.BATTLE);
@@ -78,7 +68,7 @@ class BelgaeBattle {
 
         if (modifiers.canDoSpecial() && !didSpecial) {
             didSpecial = BelgaeEnlist.enlist(
-                state, new CommandModifier());
+                state, modifiers);
         }
 
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;

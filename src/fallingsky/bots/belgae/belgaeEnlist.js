@@ -16,7 +16,7 @@ class BelgaeEnlist {
         let effective = false;
 
         state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.ENLIST);
-        if(modifiers.commandSpecific.battles) {
+        if(modifiers.context.battles) {
             effective = this.enlistForBattle(state, modifiers, enlistResults);
         }
         else {
@@ -34,7 +34,7 @@ class BelgaeEnlist {
     }
 
     static enlistForBattle(state, modifiers, enlistResults) {
-        const battleResults = modifiers.commandSpecific.battles;
+        const battleResults = modifiers.context.battles;
         _.each(battleResults, battleResult => this.checkAndUpdateBattleResult(state, modifiers, enlistResults, battleResult));
         return _.find(battleResults, {canEnlistGermans: true});
     }
