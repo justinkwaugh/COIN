@@ -1,30 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 
-module.exports = {
-    entry: {
-        web: ['bootstrap-loader','./src/main.js'],
-        headless: ['./src/headless.js']
-    },
-    output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname, 'dist')
-    },
-    devtool: "cheap-module-eval-source-map",
-    devServer: {
-        contentBase: "./dist",
-        headers: {
-            'Access-Control-Allow-Origin': '*'
-        }
-    },
-
-    resolve: {
-        modules: [
-            "node_modules",
-            path.resolve('./src')
-        ]
-    },
-
+const common = {
     module: {
         loaders: [{
             test: /\.js$/,
@@ -38,11 +15,56 @@ module.exports = {
             {test: /\.(ttf|eot)$/, loader: 'file-loader'}
         ]
     },
+
     plugins: [
         new webpack.ProvidePlugin({
             $: 'jquery',
             jQuery: 'jquery'
         })
-    ]
+    ],
 
+    resolve: {
+        modules: [
+            "node_modules",
+            path.resolve('./src')
+        ]
+    },
+
+    devtool: "cheap-module-eval-source-map",
+    devServer: {
+        contentBase: "./dist",
+        headers: {
+            'Access-Control-Allow-Origin': '*'
+        }
+    }
 };
+
+const web = {
+    entry: {
+        web: ['bootstrap-loader','./src/main.js']
+    },
+
+    output: {
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'dist')
+    }
+};
+
+const headless = {
+    entry: {
+        headless: ['./src/headless.js']
+    },
+
+    target: 'node',
+
+    output: {
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'dist'),
+        libraryTarget: 'commonjs2'
+    }
+};
+
+module.exports = [
+    Object.assign({}, common, web),
+    Object.assign({}, common, headless)
+];
