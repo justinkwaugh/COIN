@@ -100,7 +100,7 @@ class FallingSkyGameState extends GameState {
     }
 
     removeCapability(capabilityId) {
-        this.capabilities.remove( function(item) { return item.id === capabilityId });
+        this.capabilities.remove( function(item) { return item.id === capabilityId; });
     }
 
     hasShadedCapability(capabilityId, factionId) {

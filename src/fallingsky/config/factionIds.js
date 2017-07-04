@@ -6,4 +6,4 @@ const FactionIDs = {
     GERMANIC_TRIBES: 'Germanic'
 };
 
-export default FactionIDs
+export default FactionIDs;
