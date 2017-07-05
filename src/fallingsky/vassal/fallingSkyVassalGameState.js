@@ -8,6 +8,7 @@ import Factions from '../config/factions';
 import FactionIDs from '../config/factionIds';
 import Tribes from '../config/tribes';
 import Regions from '../config/regions';
+import RegionIDs from '../config/regionIds';
 import SequenceOfPlay from '../../common/sequenceOfPlay';
 import AeduiBot from '../bots/aedui/aeduiBot';
 import ArverniBot from '../bots/arverni/arverniBot';
@@ -17,22 +18,167 @@ import GermanicBot from '../bots/germanic/germanicBot';
 import HumanPlayer from 'fallingsky/player/humanPlayer';
 import {CapabilityStates} from '../config/capabilities';
 
+import PlaceWarbands from '../actions/placeWarbands';
+import PlaceAlliedTribe from '../actions/placeAlliedTribe';
+import PlaceCitadel from '../actions/placeCitadel';
+import PlaceLeader from '../actions/placeLeader';
+import PlaceAuxilia from '../actions/placeAuxilia';
+import PlaceFort from '../actions/placeFort';
+import PlaceLegions from '../actions/placeLegions';
+import RevealPieces from '../actions/revealPieces';
+
 class FallingSkyVassalGameState extends FallingSkyGameState {
   constructor(json) {
     super();
 
     // utility variables
-    var startIndex;
-    var endIndex;
-    var pieceName;
-    var zone;
-    var p;
-    var z;
+
+    let startIndex;
+    let endIndex;
+    let pieceName;
+    let zone;
+    let p;
+    let z;
+
+    // define regions
+
+    this.vassalmap = {
+      AED: {
+        key: "AED",
+        name: "Aedui",
+        modname: "Celctica (Aedui)",
+        ally: 1,
+        citadel: 1,
+        id: RegionIDs.AEDUI
+      },
+      ARV: {
+        key: "ARV",
+        name: "Arverni",
+        modname: "Celtica (Arverni, Cadurci, Volcae)",
+        ally: 3,
+        citadel: 1,
+        id: RegionIDs.ARVERNI
+      },
+      ATR: {
+        key: "ATR",
+        name: "Atrebates",
+        modname: "Belcica (Atrebates, Bellovaci, Remi)",
+        ally: 3,
+        citadel: 0,
+        id: RegionIDs.ATREBATES
+      },
+      BIT: {
+        key: "BIT",
+        name: "Bituriges",
+        modname: "Celtica (Bituriges)",
+        ally: 1,
+        citadel: 1,
+        id: RegionIDs.BITURIGES
+      },
+      CAT: {
+        key: "CAT",
+        name: "Britannia",
+        modname: "Britannia",
+        ally: 1,
+        citadel: 0,
+        id: RegionIDs.BRITANNIA
+      },
+      CAR: {
+        key: "CAR",
+        name: "Carnutes",
+        modname: "Celtica (Aulerci, Carnutes)",
+        ally: 2,
+        citadel: 1,
+        id: RegionIDs.CARNUTES
+      },
+      HEL: {
+        key: "HEL",
+        name: "Provincia",
+        modname: "Provincia",
+        ally: 1,
+        citadel: 0,
+        id: RegionIDs.PROVINCIA
+      },
+      MAN: {
+        key: "MAN",
+        name: "Mandubii",
+        modname: "Celtica (Senones, Mandubii, Lingones)",
+        ally: 3,
+        citadel: 1,
+        id: RegionIDs.MANDUBII
+      },
+      MOR: {
+        key: "MOR",
+        name: "Morini",
+        modname: "Belgica (Morini, Menapii)",
+        ally: 2,
+        citadel: 0,
+        id: RegionIDs.MORINI
+      },
+      NER: {
+        key: "NER",
+        name: "Nervii",
+        modname: "Belgica (Nervii)",
+        ally: 2,
+        citadel: 0,
+        id: RegionIDs.NERVII
+      },
+      PIC: {
+        key: "PIC",
+        name: "Pictones",
+        modname: "Celctica (Pictones, Santones)",
+        ally: 2,
+        citadel: 0,
+        id: RegionIDs.PICTONES
+      },
+      SEQ: {
+        key: "SEQ",
+        name: "Sequani",
+        modname: "Celtica (Sequani, Helvetii)",
+        ally: 2,
+        citadel: 1,
+        id: RegionIDs.SEQUANI
+      },
+      SUG: {
+        key: "SUG",
+        name: "Sugambri",
+        modname: "Germania (Sugambri, Suebi)",
+        ally: 2,
+        citadel: 0,
+        id: RegionIDs.SUGAMBRI
+      },
+      TRE: {
+        key: "TRE",
+        name: "Treveri",
+        modname: "Celtica (Treveri)",
+        ally: 1,
+        citadel: 0,
+        id: RegionIDs.TREVERI
+      },
+      UBI: {
+        key: "UBI",
+        name: "Ubii",
+        modname: "Germania (Ubii, Suebi)",
+        ally: 2,
+        citadel: 0,
+        id: RegionIDs.UBII
+      },
+      VEN: {
+        key: "VEN",
+        name: "Veneti",
+        modname: "Celtica (Veneti, Namnetes)",
+        ally: 2,
+        citadel: 0,
+        id: RegionIDs.VENETI
+      }
+    };
 
     // the current action (state of the state machine)
+
     this.action = json.action;
 
     // set human players
+
     if (!json.npaedui)
       this.playersByFaction[FactionIDs.AEDUI] = new HumanPlayer({factionId: FactionIDs.AEDUI});
     if (!json.npaverni)
@@ -44,9 +190,9 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
     
     // resources
 
-    var eligible = [];
-    var ineligible = [];
-    var passed = [];
+    const eligible = [];
+    const ineligible = [];
+    const passed = [];
 
     for (z = 0; z < json.zones.length; z++) {
       zone = json.zones[z];
@@ -108,7 +254,46 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
     this.sequenceOfPlay.ineligibleFactions(ineligible);
     this.sequenceOfPlay.passedFactions(passed);
 
+    // go through regions to count pieces
+
+    for (let key in this.vassalmap) {
+      let vassalregion = this.vassalmap[key];
+      for (z = 0; z < json.zones.length; z++) {
+        zone = json.zones[z];
+        if (zone.name === vassalregion.modname) {
+          // init region
+          let region = this.regionsById[vassalregion.id];
+          let aedui = {
+            warbands: 0,
+            revealedwarbands: 0
+          };
+          
+          // special case, citadel of Aedui
+
+          // special case, citadel of Arverni
+
+          for (p = 0; p < zone.pieces.length; p++) {
+            let pieceName = zone.pieces[p].name;
+
+            // Aedui Warbands
+            if (pieceName === 'Aedui Warband')
+              aedui.warbands++;
+            if (pieceName === 'Aedui Warband Revealed') {
+              aedui.warbands++;
+              aedui.revealedwarbands++;
+            }
+          }
+
+          // apply counts
+
+          if (aedui.warbands > 0) PlaceWarbands.execute(this, { factionId: this.aedui.id, regionId: region.id, count: aedui.warbands});
+          if (aedui.revealedwarbands > 0) RevealPieces.execute(this, { factionId: this.aedui.id, regionId: region.id, count: aedui.revealedwarbands});
+        }
+      }
+    }
+
     // process offboard
+
     this.numberDiscards = 0;
     this.numberDeck = 0;
 
