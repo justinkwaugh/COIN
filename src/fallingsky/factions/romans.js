@@ -308,6 +308,7 @@ class Romans extends FallingSkyFaction {
         console.log('    Uproar Legions: ' + this.uproarLegions().length);
         console.log('    Intrigue Legions: ' + this.intrigueLegions().length);
         console.log('    Adulation Legions: ' + this.adulationLegions().length);
+        console.log('    Fallen Legions: ' + this.fallenLegions().length);
     }
 }
 
