@@ -20,7 +20,7 @@ import * as fs from 'fs';
 
 module.exports = {
   start: function(gameStateFile) {
-    console.log('Hello world: ' + gameStateFile);
+    console.log('Loading gamestate from: ' + gameStateFile);
 
     fs.readFile(gameStateFile, function (err, data) {
       if (err) {
@@ -34,7 +34,7 @@ module.exports = {
   }
 };
 
-console.log('bot script file loaded');
+console.log('JS Bot Engine Script Loaded');
 
 //const game = new Game({scenario: TheGreatRevolt});
 //game.start();
