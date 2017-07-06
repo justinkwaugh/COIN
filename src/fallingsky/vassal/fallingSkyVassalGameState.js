@@ -7,6 +7,7 @@ import FallingSkyGameState from 'fallingsky/state/fallingSkyGameState';
 import Factions from '../config/factions';
 import FactionIDs from '../config/factionIds';
 import Tribes from '../config/tribes';
+import TribeIDs from '../config/tribeIds';
 import Regions from '../config/regions';
 import RegionIDs from '../config/regionIds';
 import SequenceOfPlay from '../../common/sequenceOfPlay';
@@ -27,6 +28,11 @@ import PlaceFort from '../actions/placeFort';
 import PlaceLegions from '../actions/placeLegions';
 import RevealPieces from '../actions/revealPieces';
 
+import DisperseTribe from '../actions/disperseTribe';
+import SenateApprovalStates from '../config/senateApprovalStates';
+
+import FallingSkyVassal from './fallingSkyVassal';
+
 class FallingSkyVassalGameState extends FallingSkyGameState {
   constructor(json) {
     super();
@@ -40,138 +46,7 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
     let p;
     let z;
 
-    // define regions
-
-    this.vassalmap = {
-      AED: {
-        key: "AED",
-        name: "Aedui",
-        modname: "Celctica (Aedui)",
-        ally: 1,
-        citadel: 1,
-        id: RegionIDs.AEDUI
-      },
-      ARV: {
-        key: "ARV",
-        name: "Arverni",
-        modname: "Celtica (Arverni, Cadurci, Volcae)",
-        ally: 3,
-        citadel: 1,
-        id: RegionIDs.ARVERNI
-      },
-      ATR: {
-        key: "ATR",
-        name: "Atrebates",
-        modname: "Belcica (Atrebates, Bellovaci, Remi)",
-        ally: 3,
-        citadel: 0,
-        id: RegionIDs.ATREBATES
-      },
-      BIT: {
-        key: "BIT",
-        name: "Bituriges",
-        modname: "Celtica (Bituriges)",
-        ally: 1,
-        citadel: 1,
-        id: RegionIDs.BITURIGES
-      },
-      CAT: {
-        key: "CAT",
-        name: "Britannia",
-        modname: "Britannia",
-        ally: 1,
-        citadel: 0,
-        id: RegionIDs.BRITANNIA
-      },
-      CAR: {
-        key: "CAR",
-        name: "Carnutes",
-        modname: "Celtica (Aulerci, Carnutes)",
-        ally: 2,
-        citadel: 1,
-        id: RegionIDs.CARNUTES
-      },
-      HEL: {
-        key: "HEL",
-        name: "Provincia",
-        modname: "Provincia",
-        ally: 1,
-        citadel: 0,
-        id: RegionIDs.PROVINCIA
-      },
-      MAN: {
-        key: "MAN",
-        name: "Mandubii",
-        modname: "Celtica (Senones, Mandubii, Lingones)",
-        ally: 3,
-        citadel: 1,
-        id: RegionIDs.MANDUBII
-      },
-      MOR: {
-        key: "MOR",
-        name: "Morini",
-        modname: "Belgica (Morini, Menapii)",
-        ally: 2,
-        citadel: 0,
-        id: RegionIDs.MORINI
-      },
-      NER: {
-        key: "NER",
-        name: "Nervii",
-        modname: "Belgica (Nervii)",
-        ally: 2,
-        citadel: 0,
-        id: RegionIDs.NERVII
-      },
-      PIC: {
-        key: "PIC",
-        name: "Pictones",
-        modname: "Celctica (Pictones, Santones)",
-        ally: 2,
-        citadel: 0,
-        id: RegionIDs.PICTONES
-      },
-      SEQ: {
-        key: "SEQ",
-        name: "Sequani",
-        modname: "Celtica (Sequani, Helvetii)",
-        ally: 2,
-        citadel: 1,
-        id: RegionIDs.SEQUANI
-      },
-      SUG: {
-        key: "SUG",
-        name: "Sugambri",
-        modname: "Germania (Sugambri, Suebi)",
-        ally: 2,
-        citadel: 0,
-        id: RegionIDs.SUGAMBRI
-      },
-      TRE: {
-        key: "TRE",
-        name: "Treveri",
-        modname: "Celtica (Treveri)",
-        ally: 1,
-        citadel: 0,
-        id: RegionIDs.TREVERI
-      },
-      UBI: {
-        key: "UBI",
-        name: "Ubii",
-        modname: "Germania (Ubii, Suebi)",
-        ally: 2,
-        citadel: 0,
-        id: RegionIDs.UBII
-      },
-      VEN: {
-        key: "VEN",
-        name: "Veneti",
-        modname: "Celtica (Veneti, Namnetes)",
-        ally: 2,
-        citadel: 0,
-        id: RegionIDs.VENETI
-      }
-    };
+    this.vassal = new FallingSkyVassal();
 
     // the current action (state of the state machine)
 
@@ -201,7 +76,7 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
 
         // Aedui Resources
         if (pieceName.startsWith('Aedui Resources ('))
-          this.aedui.resources(parseInt(zone.name));
+          this.aedui.setResources(parseInt(zone.name));
         // Aedui Eligibility
         if (pieceName.startsWith('Aedui Eligibility')) {
           if (zone.name === 'Eligible Factions')
@@ -213,7 +88,7 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
         }
         // Arverni Resources
         if (pieceName.startsWith('Averni Resources ('))
-          this.arverni.resources(parseInt(zone.name));
+          this.arverni.setResources(parseInt(zone.name));
         // Arverni Eligibility
         if (pieceName.startsWith('Averni Eligibility')) {
           if (zone.name === 'Eligible Factions')
@@ -225,7 +100,7 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
         }
         // Belgic Resources
         if (pieceName.startsWith('Belgic Resources ('))
-          this.belgae.resources(parseInt(zone.name));
+          this.belgae.setResources(parseInt(zone.name));
         // Belgic Eligibility
         if (pieceName.startsWith('Belgic Eligibility')) {
           if (zone.name === 'Eligible Factions')
@@ -237,7 +112,7 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
         }
         // Roman Resources
         if (pieceName.startsWith('Roman Resources ('))
-          this.romans.resources(parseInt(zone.name));
+          this.romans.setResources(parseInt(zone.name));
         // Roman Eligibility
         if (pieceName.startsWith('Roman Eligibility')) {
           if (zone.name === 'Eligible Factions')
@@ -256,16 +131,37 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
 
     // go through regions to count pieces
 
-    for (let key in this.vassalmap) {
-      let vassalregion = this.vassalmap[key];
+    for (let key in this.vassal.regions) {
+      let vassalregion = this.vassal.regions[key];
+
       for (z = 0; z < json.zones.length; z++) {
         zone = json.zones[z];
+
+        // is zone a Region?
+
         if (zone.name === vassalregion.modname) {
           // init region
           let region = this.regionsById[vassalregion.id];
-          let aedui = {
+          let aeduiCount = {
             warbands: 0,
             revealedwarbands: 0
+          };
+          let arverniCount = {
+            warbands: 0,
+            revealedwarbands: 0
+          };
+          let belgaeCount = {
+            warbands: 0,
+            revealedwarbands: 0
+          };
+          let germanicCount = {
+            warbands: 0,
+            revealedwarbands: 0
+          };
+          let romanCount = {
+            auxilia: 0,
+            revealedauxilia: 0,
+            legion: 0
           };
           
           // special case, citadel of Aedui
@@ -274,23 +170,170 @@ class FallingSkyVassalGameState extends FallingSkyGameState {
 
           for (p = 0; p < zone.pieces.length; p++) {
             let pieceName = zone.pieces[p].name;
+            let pieceX = zone.pieces[p].x;
+            let pieceY = zone.pieces[p].y;
 
-            // Aedui Warbands
+            // Aedui
             if (pieceName === 'Aedui Warband')
-              aedui.warbands++;
+              aeduiCount.warbands++;
             if (pieceName === 'Aedui Warband Revealed') {
-              aedui.warbands++;
-              aedui.revealedwarbands++;
+              aeduiCount.warbands++;
+              aeduiCount.revealedwarbands++;
             }
+            if (pieceName === 'Aedui Ally')
+              PlaceAlliedTribe.execute(this, {factionId: this.aedui.id, regionId: region.id, tribeId: this.vassal.tribeId(pieceX, pieceY)});
+  					if (pieceName == 'Aedui Citadel')
+              PlaceCitadel.execute(this, {factionId: this.aedui.id, regionId: region.id, tribeId: this.vassal.tribeId(pieceX, pieceY)}, false);
+
+            // Arverni
+            if (pieceName == 'Vercingetorix' || pieceName == 'Arverni Successor') {
+              PlaceLeader.execute(this, { factionId: this.arverni.id, regionId: region.id});
+              if (pieceName == 'Arverni Successor') {
+                const arverniLeader = region.getLeaderForFaction(this.arverni.id);
+                arverniLeader.isSuccessor(true);
+              }
+            }
+            if (pieceName === 'Arverni Warband')
+              arverniCount.warbands++;
+            if (pieceName === 'Arverni Warband Revealed') {
+              arverniCount.warbands++;
+              arverniCount.revealedwarbands++;
+            }
+            if (pieceName === 'Arverni Ally')
+              PlaceAlliedTribe.execute(this, {factionId: this.arverni.id, regionId: region.id, tribeId: this.vassal.tribeId(pieceX, pieceY)});
+  					if (pieceName == 'Averni Citadel')
+              PlaceCitadel.execute(this, {factionId: this.arverni.id, regionId: region.id, tribeId: this.vassal.tribeId(pieceX, pieceY)}, false);
+
+            // Belgae
+            if (pieceName == 'Ambiorix' || pieceName == 'Belgic Successor') {
+              PlaceLeader.execute(this, { factionId: this.belgae.id, regionId: region.id});
+              if (pieceName == 'Belgic Successor') {
+                const belgicLeader = region.getLeaderForFaction(this.belgae.id);
+                belgicLeader.isSuccessor(true);
+              }
+            }
+            if (pieceName === 'Belgic Warband')
+              belgaeCount.warbands++;
+            if (pieceName === 'Belgic Warband Revealed') {
+              belgaeCount.warbands++;
+              belgaeCount.revealedwarbands++;
+            }
+            if (pieceName === 'Belgic Ally')
+              PlaceAlliedTribe.execute(this, {factionId: this.belgae.id, regionId: region.id, tribeId: this.vassal.tribeId(pieceX, pieceY)});
+  					if (pieceName == 'Belgic Citadel')
+              PlaceCitadel.execute(this, {factionId: this.belgae.id, regionId: region.id, tribeId: this.vassal.tribeId(pieceX, pieceY)}, false);
+
+            // Germanic
+            if (pieceName === 'Germanic Warband')
+              germanicCount.warbands++;
+            if (pieceName === 'Germanic Warband Revealed') {
+              germanicCount.warbands++;
+              germanicCount.revealedwarbands++;
+            }
+            if (pieceName === 'Germanic Ally')
+              PlaceAlliedTribe.execute(this, {factionId: this.germanic.id, regionId: region.id, tribeId: this.vassal.tribeId(pieceX, pieceY)});
+
+            // Roman
+            if (pieceName == 'Caesar' || pieceName == 'Roman Successor') {
+              PlaceLeader.execute(this, { factionId: this.romans.id, regionId: region.id});
+              if (pieceName == 'Roman Successor') {
+                const romanLeader = region.getLeaderForFaction(this.romans.id);
+                romanLeader.isSuccessor(true);
+              }
+            }
+            if (pieceName === 'Roman Auxilia')
+              romanCount.auxilia++;
+            if (pieceName === 'Roman Auxilia Revealed') {
+              romanCount.auxilia++;
+              romanCount.revealedauxilia++;
+            }
+            if (pieceName === 'Roman Legion')
+              romanCount.legion++;
+            if (pieceName === 'Roman Ally')
+              PlaceAlliedTribe.execute(this, {factionId: this.romans.id, regionId: region.id, tribeId: this.vassal.tribeId(pieceX, pieceY)});
+  					if (pieceName == 'Roman Fort')
+              PlaceFort.execute(this, {factionId: this.romans.id, regionId: region.id});
+
+            // TODO: dispersed tribe
+            // TODO: gathering tribe
+            // TODO: devastated
+            // TODO: Colony added
           }
 
           // apply counts
 
-          if (aedui.warbands > 0) PlaceWarbands.execute(this, { factionId: this.aedui.id, regionId: region.id, count: aedui.warbands});
-          if (aedui.revealedwarbands > 0) RevealPieces.execute(this, { factionId: this.aedui.id, regionId: region.id, count: aedui.revealedwarbands});
+          if (aeduiCount.warbands > 0) PlaceWarbands.execute(this, {factionId: this.aedui.id, regionId: region.id, count: aeduiCount.warbands});
+          if (aeduiCount.revealedwarbands > 0) RevealPieces.execute(this, {factionId: this.aedui.id, regionId: region.id, count: aeduiCount.revealedwarbands});
+          if (arverniCount.warbands > 0) PlaceWarbands.execute(this, {factionId: this.arverni.id, regionId: region.id, count: arverniCount.warbands});
+          if (arverniCount.revealedwarbands > 0) RevealPieces.execute(this, {factionId: this.arverni.id, regionId: region.id, count: arverniCount.revealedwarbands});
+          if (belgaeCount.warbands > 0) PlaceWarbands.execute(this, {factionId: this.belgae.id, regionId: region.id, count: belgaeCount.warbands});
+          if (belgaeCount.revealedwarbands > 0) RevealPieces.execute(this, {factionId: this.belgae.id, regionId: region.id, count: belgaeCount.revealedwarbands});
+          if (germanicCount.warbands > 0) PlaceWarbands.execute(this, {factionId: this.germanic.id, regionId: region.id, count: germanicCount.warbands});
+          if (germanicCount.revealedwarbands > 0) RevealPieces.execute(this, {factionId: this.germanic.id, regionId: region.id, count: germanicCount.revealedwarbands});
+
+          if (romanCount.auxilia > 0) PlaceAuxilia.execute(this, {factionId: this.romans.id, regionId: region.id, count: romanCount.auxilia});
+          if (romanCount.revealedauxilia > 0) RevealPieces.execute(this, {factionId: this.romans.id, regionId: region.id, count: romanCount.revealedauxilia});
+          if (romanCount.legion > 0) PlaceLegions.execute(this, {factionId: this.romans.id, regionId: region.id, count: romanCount.legion});
         }
       }
     }
+
+    // process other zones
+
+    let romanLegionsTrack = 0;
+    let romanLegionsFallen = 0;
+    for (z = 0; z < json.zones.length; z++) {
+        zone = json.zones[z];
+        console.log('OTHER ZONE: ' + zone.name);
+
+        for (p = 0; p < zone.pieces.length; p++) {
+          let pieceName = zone.pieces[p].name;
+
+          if (zone.name == 'Upcoming') {
+            // TODO: upcoming card
+            // game.upcomingcard = {name: pieceName, num: parseInt(pieceName.substring(0, 2))};
+            // if (game.upcomingcard.name.endsWith(' - Winter'))
+            //   game.frost = true;
+          }
+
+          if (zone.name == 'Current') {
+            // TODO: current card
+            // game.currentcard = {name: pieceName, num: parseInt(pieceName.substring(0, 2))};
+            // if (game.currentcard.name.endsWith(' - Winter'))
+            //   game.winter = true;
+          }
+
+          if (zone.name == 'Senate - Uproar')
+            if (pieceName == 'Roman Senate') {
+              console.log('UPROAR');
+              this.romans.setSenateApproval(SenateApprovalStates.UPROAR);
+            }
+          if (zone.name == 'Senate - Intrigue')
+            if (pieceName == 'Roman Senate')
+              this.romans.setSenateApproval(SenateApprovalStates.INTRIGUE);
+          if (zone.name == 'Senate - Adulation')
+            if (pieceName == 'Roman Senate')
+              this.romans.setSenateApproval(SenateApprovalStates.ADULATION);
+          if (zone.name == 'Legions')
+            if (pieceName == 'Roman Legion')
+              romanLegionsTrack++;
+          if (zone.name == 'Fallen Legions')
+            if (pieceName == 'Roman Legion')
+              romanLegionsFallen++;
+        }
+    }
+    console.log('legion track: ' + romanLegionsTrack);
+    if (romanLegionsTrack > 0)
+      this.romans.initializeLegionTrack(SenateApprovalStates.ADULATION, romanLegionsTrack > 4 ? 4 : romanLegionsTrack);
+    romanLegionsTrack -= 4;
+    if (romanLegionsTrack > 0)
+      this.romans.initializeLegionTrack(SenateApprovalStates.INTRIGUE, romanLegionsTrack > 4 ? 4 : romanLegionsTrack);
+    romanLegionsTrack -= 4;
+    if (romanLegionsTrack > 0)
+      this.romans.initializeLegionTrack(SenateApprovalStates.UPROAR, romanLegionsTrack);
+    
+    console.log('fallen: ' + romanLegionsFallen);
+    this.romans.returnLegions(this.romans.availableLegions().splice(0, romanLegionsFallen));
 
     // process offboard
 
