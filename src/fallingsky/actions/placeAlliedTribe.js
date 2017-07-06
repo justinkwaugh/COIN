@@ -17,6 +17,7 @@ class PlaceAlliedTribe extends Action {
 
         if (!tribe) {
             debugger;
+            throw 'Invalid PlaceAlliedTribe Action';
         }
 
         if (!region.inPlay() || !faction.hasAvailableAlliedTribe() || !tribe.isSubdued()) {
