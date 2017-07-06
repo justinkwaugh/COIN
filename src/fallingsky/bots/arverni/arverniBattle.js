@@ -87,7 +87,7 @@ class ArverniBattle {
                         region,
                         hasVercingetorix,
                         importantEnemies
-                    }
+                    };
                 }
             }).compact().value();
     }
@@ -135,7 +135,7 @@ class ArverniBattle {
                         hasVercingetorix,
                         potentialBattles,
                         importantEnemies
-                    }
+                    };
                 }
             }).compact().value();
     }
@@ -188,7 +188,7 @@ class ArverniBattle {
                     return {
                         priority,
                         bestBattle
-                    }
+                    };
                 }
             }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().map('bestBattle').value();
     }

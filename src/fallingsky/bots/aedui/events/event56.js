@@ -18,7 +18,7 @@ class Event56 {
                     return {
                         ambiorix,
                         region,
-                    }
+                    };
                 }
                 return null;
             }).compact().first();
