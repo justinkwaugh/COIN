@@ -3,6 +3,7 @@ import PlayerInteractionNeededError from 'common/playerInteractionNeededError';
 import SupplyLineAgreement from 'fallingsky/interactions/supplyLineAgreement';
 import QuartersAgreement from 'fallingsky/interactions/quartersAgreement';
 import RetreatAgreement from 'fallingsky/interactions/retreatAgreement';
+import RetreatDeclaration from 'fallingsky/interactions/retreatDeclaration';
 import Harassment from 'fallingsky/interactions/harassment';
 import Losses from 'fallingsky/interactions/losses';
 
@@ -45,7 +46,12 @@ class HumanPlayer extends FallingSkyPlayer {
     }
 
     willRetreat(state, region, attackingFaction, worstCaseAttackerLosses, noRetreatDefenderResults, retreatDefenderResults) {
-
+        throw new PlayerInteractionNeededError('Retreat from battle with ' + attackingFaction.id,
+                                               new RetreatDeclaration({
+                                                                          requestingFactionId: attackingFaction.id,
+                                                                          respondingFactionId: this.factionId,
+                                                                          regionId: region.id
+                                                                      }));
     }
 
     retreatFromBattle(state, region, attackingFaction, defenderResults) {

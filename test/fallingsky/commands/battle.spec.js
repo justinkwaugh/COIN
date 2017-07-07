@@ -203,4 +203,162 @@ describe("Battle", function () {
 
     });
 
+    it('asks player for retreat declaration and player says yes', function () {
+        state.playersByFaction[FactionIDs.ROMANS] = new HumanPlayer({factionId: FactionIDs.ROMANS});
+
+        const mandubii = state.regionsById[RegionIDs.MANDUBII];
+        const bituriges = state.regionsById[RegionIDs.BITURIGES];
+
+        // Aedui attackers with ambush
+        PlaceWarbands.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 8});
+        RevealPieces.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 6});
+
+        // Roman defenders
+        PlaceAuxilia.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.MANDUBII, count: 2});
+        PlaceLegions.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.MANDUBII, count: 1});
+
+        // Retreat possibility
+        PlaceAuxilia.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.BITURIGES, count: 1});
+
+        const battleResults = Battle.test(state, {
+            regionId: RegionIDs.MANDUBII,
+            attackingFactionId: FactionIDs.AEDUI,
+            defendingFactionId: FactionIDs.ROMANS
+        });
+
+        state.turnHistory.startTurn(FactionIDs.AEDUI);
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
+
+        let interaction = null;
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('RetreatDeclaration');
+            interaction = err.interaction;
+        }
+
+        interaction.status = 'agreed';
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('Losses');
+            interaction = err.interaction;
+        }
+
+        expect(interaction.losses).to.equal(2);
+
+        const toRemove = _.filter(interaction.targets, {type: 'auxilia'});
+
+        RemovePieces.execute(state, {
+            factionId: romans.id,
+            regionId: interaction.regionId,
+            pieces: toRemove
+        });
+
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        interaction.removed = toRemove;
+        interaction.caesarCanCounterattack = false;
+
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state,  {battleResults: battleResults});
+            expect(battleResults.complete).to.equal(true);
+        }
+        catch (err) {
+            throw err;
+        }
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(8);
+        expect(mandubii.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(2);
+
+    });
+
+    it('asks player for retreat declaration and player says no', function () {
+        state.playersByFaction[FactionIDs.ROMANS] = new HumanPlayer({factionId: FactionIDs.ROMANS});
+
+        const mandubii = state.regionsById[RegionIDs.MANDUBII];
+        const bituriges = state.regionsById[RegionIDs.BITURIGES];
+
+        // Aedui attackers with ambush
+        PlaceWarbands.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 8});
+        RevealPieces.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 6});
+
+        // Roman defenders
+        PlaceAuxilia.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.MANDUBII, count: 2});
+        PlaceLegions.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.MANDUBII, count: 1});
+
+        // Retreat possibility
+        PlaceAuxilia.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.BITURIGES, count: 1});
+
+        const battleResults = Battle.test(state, {
+            regionId: RegionIDs.MANDUBII,
+            attackingFactionId: FactionIDs.AEDUI,
+            defendingFactionId: FactionIDs.ROMANS
+        });
+
+        state.turnHistory.startTurn(FactionIDs.AEDUI);
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
+
+        let interaction = null;
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('RetreatDeclaration');
+            interaction = err.interaction;
+        }
+
+        interaction.status = 'denied';
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('Losses');
+            interaction = err.interaction;
+        }
+
+        expect(interaction.losses).to.equal(4);
+
+        const toRemove = _.filter(interaction.targets, {type: 'auxilia'});
+
+        RemovePieces.execute(state, {
+            factionId: romans.id,
+            regionId: interaction.regionId,
+            pieces: toRemove
+        });
+
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        interaction.removed = toRemove;
+        interaction.caesarCanCounterattack = false;
+
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state,  {battleResults: battleResults});
+            expect(battleResults.complete).to.equal(true);
+        }
+        catch (err) {
+            throw err;
+        }
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(7);
+        expect(mandubii.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);
+
+    });
+
 });

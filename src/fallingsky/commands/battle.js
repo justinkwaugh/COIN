@@ -170,8 +170,7 @@ class Battle extends Command {
 
         // THIS IS THE FIRST POINT OF NO RETURN
         if(!battleResults.committedDefenderResults) {
-            this.handleLosses(state, region, attackingFaction, defendingFaction, battleResults.calculatedDefenderResults,
-                              ambush, false);
+            this.handleLosses(state, battleResults, battleResults.calculatedDefenderResults, false);
             battleResults.committedDefenderResults = battleResults.calculatedDefenderResults;
         }
 
@@ -187,7 +186,7 @@ class Battle extends Command {
                 const orderedAttackingPieces = attackingPlayer.orderPiecesForRemoval(state, attackingPieces, false);
                 const counterattackResults = this.calculateAttackResults(orderedAttackingPieces, attackerLosses);
                 // ONCE WE PASS HERE WE WILL NOT BE INTERRUPTED
-                this.handleLosses(state, region, defendingFaction, attackingFaction, counterattackResults, false, true);
+                this.handleLosses(state, battleResults, counterattackResults, true);
             }
         }
 
@@ -215,28 +214,37 @@ class Battle extends Command {
     }
 
     static getRetreatDeclaration(state, region, attackingFaction, defendingFaction, worstCaseAttackerLosses, noRetreatDefenderResults, retreatDefenderResults) {
+
+        const existingRetreatDeclaration = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
+                                      interaction => interaction.type === 'RetreatDeclaration' && interaction.regionId === region.id && interaction.respondingFactionId === defendingFaction.id);
+
+        if(existingRetreatDeclaration) {
+            return existingRetreatDeclaration.status === 'agreed';
+        }
+
         return state.playersByFaction[defendingFaction.id].willRetreat(state, region, attackingFaction,
                                                                        worstCaseAttackerLosses,
                                                                        noRetreatDefenderResults,
                                                                        retreatDefenderResults);
-
     }
 
-    static handleLosses(state, region, attackingFaction, defendingFaction, attackResults, ambush, counterattack) {
+    static handleLosses(state, battleResults, attackResults, counterattack) {
+        const attacker = counterattack ? battleResults.defendingFaction : battleResults.attackingFaction;
+        const defender = counterattack ? battleResults.attackingFaction : battleResults.defendingFaction;
+
         const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                      interaction => interaction.type === 'Losses' && interaction.regionId === region.id && interaction.respondingFactionId === defendingFaction.id);
+                                      interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defender.id);
         if (existingLosses) {
             attackResults.removed = existingLosses.removed;
-            attackResults.remaining = _.concat(attackResults.remaining,
-                                               _.differenceWith(attackResults.targets, attackResults.removed,
+            attackResults.remaining = _.differenceWith(battleResults.region.getPiecesForFaction(defender.id), attackResults.removed,
                                                                 (val, other) => {
                                                                     return val.identifier() === other.identifier();
-                                                                }));
-            attackResults.counterattackPossible = !counterattack && (!ambush || existingLosses.caesarCanCounterattack);
+                                                                });
+            attackResults.counterattackPossible = !counterattack && (!battleResults.willAmbush || existingLosses.caesarCanCounterattack);
         }
         else {
-            state.playersByFaction[defendingFaction.id].takeLosses(state, region, attackingFaction,
-                                                                   attackResults, ambush, counterattack)
+            state.playersByFaction[defender.id].takeLosses(state, battleResults.region, attacker,
+                                                                   attackResults, battleResults.ambush, counterattack)
         }
     }
 
