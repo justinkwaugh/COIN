@@ -69,7 +69,7 @@ describe("Battle", function () {
         }
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(4);
         interaction.status = 'agreed';
-        turn.addAgreement(interaction);
+        turn.addInteraction(interaction);
 
         try {
             Battle.execute(state,  {battleResults: battleResults});
@@ -116,7 +116,7 @@ describe("Battle", function () {
         }
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(4);
         interaction.status = 'agreed';
-        turn.addAgreement(interaction);
+        turn.addInteraction(interaction);
 
         try {
             Battle.execute(state,  {battleResults: battleResults});

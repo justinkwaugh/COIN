@@ -4,6 +4,7 @@ import SupplyLineAgreement from 'fallingsky/interactions/supplyLineAgreement';
 import QuartersAgreement from 'fallingsky/interactions/quartersAgreement';
 import RetreatAgreement from 'fallingsky/interactions/retreatAgreement';
 import Harassment from 'fallingsky/interactions/harassment';
+import Losses from 'fallingsky/interactions/losses';
 
 class HumanPlayer extends FallingSkyPlayer {
     constructor(definition) {
@@ -41,6 +42,26 @@ class HumanPlayer extends FallingSkyPlayer {
                                                                            requestingFactionId: factionId,
                                                                            respondingFactionId: this.factionId
                                                                        }));
+    }
+
+    willRetreat(state, region, attackingFaction, worstCaseAttackerLosses, noRetreatDefenderResults, retreatDefenderResults) {
+
+    }
+
+    retreatFromBattle(state, region, attackingFaction, defenderResults) {
+
+    }
+
+    takeLosses(state, region, attackingFaction, attackResults, ambush) {
+        throw new PlayerInteractionNeededError('Losses must be taken from battle with ' + factionId,
+                                               new Losses({
+                                                              requestingFactionId: attackingFaction.factionId,
+                                                              respondingFactionId: this.factionId,
+                                                              ambush: ambush,
+                                                              regionId: region.id,
+                                                              losses: attackResults.losses,
+                                                              targets: attackResults.targets
+                                                          }));
     }
 }
 

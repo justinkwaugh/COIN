@@ -140,16 +140,16 @@ class Turn extends ActionGroup {
         this.checkpoints = [];
     }
 
-    addAgreement(agreement) {
+    addInteraction(interaction) {
         const actionGroup = _.last(this.inProgress);
         if(actionGroup) {
-            actionGroup.agreements.push(agreement);
+            actionGroup.interactions.push(interaction);
         }
     }
 
-    getCurrentAgreements() {
+    getCurrentInteractions() {
         const actionGroup = _.last(this.inProgress);
-        return actionGroup ? actionGroup.agreements : [];
+        return actionGroup ? actionGroup.interactions : [];
     }
 
     getInstructions(state) {

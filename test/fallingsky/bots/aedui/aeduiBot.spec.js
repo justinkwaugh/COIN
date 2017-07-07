@@ -1,6 +1,6 @@
 import _ from 'lib/lodash'
 import FallingSkyGameState from 'fallingsky/state/fallingSkyGameState'
-import CommandIDs from 'fallingsky/config/commandIDs'
+import CommandIDs from 'fallingsky/config/commandIds'
 import FactionIDs from 'fallingsky/config/factionIds'
 import RegionIDs from 'fallingsky/config/regionIds'
 import FactionActions from 'common/factionActions'
@@ -33,7 +33,7 @@ describe("Aedui Bot", function () {
         germanic = state.germanic;
     });
 
-    it.only('handles retreat request', function () {
+    it('handles retreat request', function () {
         state.playersByFaction[FactionIDs.ROMANS] = new HumanPlayer( {factionId: FactionIDs.ROMANS});
         state.playersByFaction[FactionIDs.ARVERNI] = new HumanPlayer( {factionId: FactionIDs.ARVERNI});
 
@@ -78,7 +78,7 @@ describe("Aedui Bot", function () {
 
 
         interaction.status = 'agreed';
-        turn.addAgreement(interaction);
+        turn.addInteraction(interaction);
 
         try {
             aeduiPlayer.resume(state);
@@ -94,7 +94,7 @@ describe("Aedui Bot", function () {
         expect(turn.getContext().context.battles[1].complete).to.not.equal(true);
 
         interaction.status = 'agreed';
-        turn.addAgreement(interaction);
+        turn.addInteraction(interaction);
 
         aeduiPlayer.resume(state);
         expect(turn.getContext().context.battles).to.equal(null);

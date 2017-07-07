@@ -5,7 +5,6 @@ import RegionIDs from 'fallingsky/config/regionIds';
 class TurnContext {
     constructor(definition = {}) {
         this.id = definition.id || '' + Math.random(); // need to make uuid
-        this.agreements = definition.agreements || [];
         this.limited = definition.limited;
         this.allowLimitedSpecial = definition.allowLimitedSpecial;
         this.noSpecial = definition.noSpecial;

@@ -72,7 +72,7 @@ describe("Aedui Battle", function () {
 
 
         interaction.status = 'agreed';
-        turn.addAgreement(interaction);
+        turn.addInteraction(interaction);
 
         try {
             AeduiBattle.battle(state, turn.getContext());
@@ -88,7 +88,7 @@ describe("Aedui Battle", function () {
         expect(turn.getContext().context.battles[1].complete).to.not.equal(true);
 
         interaction.status = 'agreed';
-        turn.addAgreement(interaction);
+        turn.addInteraction(interaction);
 
         AeduiBattle.battle(state, turn.getContext());
         expect(turn.getContext().context.battles).to.equal(null);

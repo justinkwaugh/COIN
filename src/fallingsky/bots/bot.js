@@ -174,8 +174,8 @@ class Bot extends FallingSkyPlayer {
 
         // 8.4.3 - If Roman, when needed to lower the number of forced Loss rolls against Legions
         if (this.factionId === FactionIDs.ROMANS) {
-            const nonRetreatLegionsRemoved = _.countBy(nonRetreatResults.removed, 'type').legion || 0;
-            const retreatLegionsRemoved = _.countBy(nonRetreatResults.removed, 'type').legion || 0;
+            const nonRetreatLegionsRemoved = _.countBy(nonRetreatResults.targets, 'type').legion || 0;
+            const retreatLegionsRemoved = _.countBy(nonRetreatResults.targets, 'type').legion || 0;
 
             if (retreatLegionsRemoved < nonRetreatLegionsRemoved) {
                 console.log(this.factionId + ' wants to retreat to lower legion losses');
@@ -189,7 +189,7 @@ class Bot extends FallingSkyPlayer {
         // Losses).
         const defendingPieces = region.piecesByFaction()[this.factionId];
         const hasDefendingCitadelOrFort = Battle.defenderHasCitadelOrFort(defendingPieces);
-        const counterAttackLossesTooFew = attackerLosses < (nonRetreatResults.removed.length / 2);
+        const counterAttackLossesTooFew = attackerLosses < (nonRetreatResults.losses / 2);
 
         if (!hasDefendingCitadelOrFort && counterAttackLossesTooFew) {
             console.log(
@@ -243,7 +243,7 @@ class Bot extends FallingSkyPlayer {
     }
 
     getExistingAgreement(state, factionId, agreementType) {
-        return _.find(state.turnHistory.getCurrentTurn().getCurrentAgreements(),
+        return _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
                       agreement => agreement.type === agreementType && agreement.respondingFactionId === factionId);
     }
 
@@ -282,38 +282,48 @@ class Bot extends FallingSkyPlayer {
             }
         }
 
-        const pieces = _.groupBy(
-            attackResults.removed, function (piece) {
-                let willRemove = true;
-                const canRollForLoss = piece.type === 'leader' || piece.type === 'citadel' || piece.type === 'legion' || piece.type === 'fort';
-                if (canRollForLoss && allowRolls) {
-                    const roll = _.random(1, 6);
-                    console.log('Rolling for loss of ' + piece.type + ', need 4-6 and got ' + roll);
-                    willRemove = roll < 4;
-                }
+        const targets = _.clone(attackResults.targets);
+        const losses = attackResults.losses;
 
-                if (willRemove) {
-                    return 'removed';
-                }
-                else {
-                    console.log(piece.type + ' saved!');
-                    return 'saved';
-                }
-            });
+        const removed = [];
+        const saved = [];
 
-        attackResults.removed = pieces.removed || [];
-        attackResults.remaining.push.apply(attackResults.remaining, pieces.saved);
+        _.each(_.range(0,losses), (index) => {
+            const piece = _.first(targets);
+            let willRemove = true;
+            const canRollForLoss = piece.type === 'leader' || piece.type === 'citadel' || piece.type === 'legion' || piece.type === 'fort';
+            if (canRollForLoss && allowRolls) {
+                const roll = _.random(1, 6);
+                console.log('Rolling for loss of ' + piece.type + ', need 4-6 and got ' + roll);
+                willRemove = roll < 4;
+            }
+
+            if (willRemove) {
+                removed.push(targets.shift());
+            }
+            else {
+                console.log(piece.type + ' saved!');
+                saved.push(targets.shift());
+            }
+
+            if(targets.length === 0) {
+                return false;
+            }
+        });
+
+        attackResults.removed = removed;
+        attackResults.remaining.push.apply(attackResults.remaining, saved);
 
         if (attackResults.removed.length > 0) {
             RemovePieces.execute(
                 state, {
                     regionId: region.id,
                     factionId: this.factionId,
-                    pieces: pieces.removed
+                    pieces: attackResults.removed
                 });
         }
 
-        return allowRolls;
+        return allowRolls && _.find(attackResults.remaining, {isMobile : true});
     }
 
     retreatFromBattle(state, region, attackingFaction, attackResults) {

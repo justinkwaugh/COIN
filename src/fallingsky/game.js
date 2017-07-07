@@ -58,7 +58,7 @@ class Game {
         console.log('Upcoming card is ' + (this.state().upcomingCard() ? this.state().upcomingCard().title : 'empty'));
     }
 
-    nextTurn(agreements) {
+    nextTurn() {
         if (this.endOfCard()) {
             this.state().sequenceOfPlay.updateEligibility();
             this.drawCard();
@@ -94,11 +94,11 @@ class Game {
         }
     }
 
-    resumeTurn(agreement) {
+    resumeTurn(interaction) {
         const nextFaction = this.state().sequenceOfPlay.nextFaction(this.state().currentCard());
         const player = this.state().playersByFaction[nextFaction];
         try {
-            this.state().turnHistory.getCurrentTurn().addAgreement(agreement);
+            this.state().turnHistory.getCurrentTurn().addInteraction(interaction);
             player.resume(this.state());
             this.lastTurn(this.state().turnHistory.lastTurn());
         } catch(err) {
