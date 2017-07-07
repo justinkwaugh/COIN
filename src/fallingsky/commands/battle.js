@@ -236,10 +236,7 @@ class Battle extends Command {
                                       interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defender.id);
         if (existingLosses) {
             attackResults.removed = existingLosses.removed;
-            attackResults.remaining = _.differenceWith(battleResults.region.getPiecesForFaction(defender.id), attackResults.removed,
-                                                                (val, other) => {
-                                                                    return val.identifier() === other.identifier();
-                                                                });
+            attackResults.remaining = battleResults.region.getPiecesForFaction(defender.id);
             attackResults.counterattackPossible = !counterattack && (!battleResults.willAmbush || existingLosses.caesarCanCounterattack);
         }
         else {
