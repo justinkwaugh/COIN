@@ -14,6 +14,10 @@ class Auxilia extends FactionPiece {
             return this.revealed() ? 'revealed' : 'hidden';
         });
     }
+
+    identifier() {
+        return super.identifier() + '|' + this.status();
+    }
 }
 
 export default Auxilia;

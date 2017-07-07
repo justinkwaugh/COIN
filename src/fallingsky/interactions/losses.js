@@ -7,7 +7,7 @@ class Losses extends PlayerInteraction {
 
         // This part is for the request
         this.ambush = false;
-        this.regionId = definition.region;
+        this.regionId = definition.regionId;
         this.losses = definition.losses;
         this.targets = definition.targets;
 

@@ -6,6 +6,10 @@ class AlliedTribe extends FactionPiece {
         super(definition);
         this.tribeId = null;
     }
+
+    identifier() {
+        return super.identifier() + '|' + (this.tribeId || '');
+    }
 }
 
 export default AlliedTribe;

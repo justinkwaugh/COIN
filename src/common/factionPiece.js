@@ -5,6 +5,10 @@ class FactionPiece {
         this.type = definition.type;
         this.isMobile = definition.isMobile;
     }
+
+    identifier() {
+        return this.factionId + '|' + this.type;
+    }
 }
 
 export default FactionPiece;
