@@ -229,7 +229,6 @@ class Battle extends Command {
     }
 
     static handleLosses(state, battleResults, attackResults, counterattack) {
-        const attacker = counterattack ? battleResults.defendingFaction : battleResults.attackingFaction;
         const defender = counterattack ? battleResults.attackingFaction : battleResults.defendingFaction;
 
         const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
@@ -240,8 +239,7 @@ class Battle extends Command {
             attackResults.counterattackPossible = !counterattack && (!battleResults.willAmbush || existingLosses.caesarCanCounterattack);
         }
         else {
-            state.playersByFaction[defender.id].takeLosses(state, battleResults.region, attacker,
-                                                                   attackResults, battleResults.ambush, counterattack)
+            state.playersByFaction[defender.id].takeLosses(state, battleResults, attackResults, counterattack)
         }
     }
 

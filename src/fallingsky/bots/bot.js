@@ -206,7 +206,11 @@ class Bot extends FallingSkyPlayer {
         return agreements;
     }
 
-    takeLosses(state, region, attackingFaction, attackResults, ambush, counterattack) {
+    takeLosses(state, battleResults, attackResults, counterattack) {
+        const region = battleResults.region;
+        const attackingFaction = counterattack ? battleResults.defendingFaction : battleResults.attackingFaction;
+        const ambush = battleResults.willAmbush;
+
         let allowRolls = !ambush && !counterattack;
 
         if (!allowRolls && !counterattack && this.factionId === FactionIDs.ROMANS) {

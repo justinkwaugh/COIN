@@ -58,14 +58,15 @@ class HumanPlayer extends FallingSkyPlayer {
 
     }
 
-    takeLosses(state, region, attackingFaction, attackResults, ambush, counterattack) {
-        throw new PlayerInteractionNeededError('Losses must be taken from battle with ' + attackingFaction.id,
+    takeLosses(state, battleResults, attackResults, counterattack) {
+        throw new PlayerInteractionNeededError('Losses must be taken from battle with ' + battleResults.attackingFaction.id,
                                                new Losses({
-                                                              requestingFactionId: attackingFaction.id,
+                                                              requestingFactionId: battleResults.attackingFaction.id,
                                                               respondingFactionId: this.factionId,
-                                                              ambush: ambush,
+                                                              ambush: !counterattack && battleResults.willAmbush,
+                                                              retreated: !counterattack && battleResults.willRetreat,
                                                               counterattack: counterattack,
-                                                              regionId: region.id,
+                                                              regionId: battleResults.region.id,
                                                               losses: attackResults.losses,
                                                               targets: attackResults.targets
                                                           }));
