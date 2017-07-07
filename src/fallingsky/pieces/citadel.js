@@ -8,6 +8,10 @@ class Citadel extends FactionPiece {
 
         this.tribeId = null;
     }
+
+    identifier() {
+        return super.identifier() + '|' + (this.tribeId || '');
+    }
 }
 
 export default Citadel;
