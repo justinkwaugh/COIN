@@ -83,7 +83,7 @@ class FallingSkyRegion extends Region {
 
     removePieces(pieces) {
         if(!pieces || pieces.length === 0) {
-            throw 'Trying to remove nothing from region'
+            throw 'Trying to remove nothing from region';
         }
         this.pieces.removeAll(pieces);
     }

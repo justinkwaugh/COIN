@@ -1,18 +1,18 @@
-import Scenario from '../../common/scenario'
-import FactionIDs from '../config/factionIds'
-import RegionIDs from '../config/regionIds'
-import TribeIDs from '../config/tribeIds'
-import Cards from '../config/cards'
+import Scenario from '../../common/scenario';
+import FactionIDs from '../config/factionIds';
+import RegionIDs from '../config/regionIds';
+import TribeIDs from '../config/tribeIds';
+import Cards from '../config/cards';
 
-import PlaceWarbands from '../actions/placeWarbands'
-import PlaceAlliedTribe from '../actions/placeAlliedTribe'
-import PlaceCitadel from '../actions/placeCitadel'
-import PlaceLeader from '../actions/placeLeader'
-import PlaceAuxilia from '../actions/placeAuxilia'
-import PlaceFort from '../actions/placeFort'
-import PlaceLegions from '../actions/placeLegions'
+import PlaceWarbands from '../actions/placeWarbands';
+import PlaceAlliedTribe from '../actions/placeAlliedTribe';
+import PlaceCitadel from '../actions/placeCitadel';
+import PlaceLeader from '../actions/placeLeader';
+import PlaceAuxilia from '../actions/placeAuxilia';
+import PlaceFort from '../actions/placeFort';
+import PlaceLegions from '../actions/placeLegions';
 
-import DisperseTribe from '../actions/disperseTribe'
+import DisperseTribe from '../actions/disperseTribe';
 import SenateApprovalStates from '../config/senateApprovalStates';
 
 class TheGreatRevolt extends Scenario {
