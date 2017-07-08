@@ -65,6 +65,12 @@ class FallingSkyRegion extends Region {
         return this.controllingFactionId() === factionId;
     }
 
+    addColony(colony) {
+        colony.regionId = this.id;
+        this.tribes.push(colony);
+        this.controlValue += 1;
+    }
+
     addPiece(piece) {
         this.addPieces([piece]);
     }

@@ -65,6 +65,12 @@ Definitions[TribeIDs.CATUVELLAUNI] = {
     name: 'Catuvellauni'
 };
 
+Definitions[TribeIDs.COLONY] = {
+    id: TribeIDs.COLONY,
+    regionId: null,
+    name: 'Colony'
+};
+
 Definitions[TribeIDs.EBURONES] = {
     id: TribeIDs.EBURONES,
     regionId: RegionIDs.NERVII,

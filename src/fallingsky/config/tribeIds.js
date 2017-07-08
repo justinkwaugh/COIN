@@ -8,6 +8,7 @@ const TribeIDs = {
     CADURCI: 'Cadurci',
     CARNUTES: 'Carnutes',
     CATUVELLAUNI: 'Catuvellauni',
+    COLONY: 'Colony',
     EBURONES: 'Eburones',
     HELVETII: 'Helvetii',
     HELVII: 'Helvii',
