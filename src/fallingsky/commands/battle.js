@@ -175,9 +175,10 @@ class Battle extends Command {
         }
 
 
-        if (battleResults.willRetreat) {
+        if (battleResults.willRetreat && !battleResults.retreated) {
             // THIS IS THE SECOND POINT OF NO RETURN
-            state.playersByFaction[defendingFaction.id].retreatFromBattle(state, region, attackingFaction, battleResults.committedDefenderResults);
+            this.handleRetreat(state, battleResults, battleResults.committedDefenderResults);
+            battleResults.retreated = true;
         }
 
         if (battleResults.committedDefenderResults.counterattackPossible && !battleResults.willRetreat) {
@@ -240,6 +241,16 @@ class Battle extends Command {
         }
         else {
             state.playersByFaction[defender.id].takeLosses(state, battleResults, attackResults, counterattack)
+        }
+    }
+
+    static handleRetreat(state, battleResults, attackResults) {
+        const defender = battleResults.defendingFaction;
+
+        const existingRetreat = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
+                                      interaction => interaction.type === 'Retreat' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defender.id);
+        if (!existingRetreat) {
+            state.playersByFaction[defender.id].retreatFromBattle(state, battleResults, attackResults);
         }
     }
 

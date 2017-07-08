@@ -1,6 +1,6 @@
 import _ from 'lib/lodash';
 import FallingSkyGameState from 'fallingsky/state/fallingSkyGameState';
-import CommandIDs from 'fallingsky/config/commandIDs';
+import CommandIDs from 'fallingsky/config/commandIds';
 import FactionIDs from 'fallingsky/config/factionIds';
 import RegionIDs from 'fallingsky/config/regionIds';
 import FactionActions from 'common/factionActions';

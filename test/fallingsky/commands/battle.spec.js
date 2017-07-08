@@ -16,6 +16,7 @@ import PlaceAuxilia from 'fallingsky/actions/placeAuxilia'
 import PlaceLegions from 'fallingsky/actions/placeLegions'
 import RevealPieces from 'fallingsky/actions/revealPieces'
 import RemovePieces from 'fallingsky/actions/removePieces'
+import MovePieces from 'fallingsky/actions/movePieces';
 
 describe("Battle", function () {
     let state;
@@ -270,6 +271,25 @@ describe("Battle", function () {
         turn.addInteraction(interaction);
 
         try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('Retreat');
+            interaction = err.interaction;
+        }
+
+        MovePieces.execute(state, {
+            factionId: romans.id,
+            sourceRegionId: interaction.regionId,
+            destRegionId: bituriges.id,
+            pieces: mandubii.getMobilePiecesForFaction(FactionIDs.ROMANS)
+        });
+
+
+        turn.addInteraction(interaction);
+
+        try {
             Battle.execute(state,  {battleResults: battleResults});
             expect(battleResults.complete).to.equal(true);
         }
@@ -277,6 +297,7 @@ describe("Battle", function () {
             throw err;
         }
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        expect(mandubii.getLegions().length).to.equal(0);
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(8);
         expect(mandubii.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(2);
 

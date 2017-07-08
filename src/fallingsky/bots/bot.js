@@ -272,7 +272,9 @@ class Bot extends FallingSkyPlayer {
         attackResults.counterattackPossible = allowRolls && _.find(attackResults.remaining, {isMobile : true});
     }
 
-    retreatFromBattle(state, region, attackingFaction, attackResults) {
+    retreatFromBattle(state, battleResults, attackResults) {
+        const region = battleResults.region;
+        const attackingFaction = battleResults.attackingFaction;
         const canRetreatInPlace = attackingFaction.id === FactionIDs.ROMANS &&
                                   this.factionId !== FactionIDs.GERMANIC_TRIBES;
 

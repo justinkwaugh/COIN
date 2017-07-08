@@ -4,6 +4,8 @@ class Retreat extends PlayerInteraction {
     constructor(definition) {
         definition.type = 'Retreat';
         super(definition);
+
+        this.regionId = definition.regionId;
     }
 }
 
