@@ -61,7 +61,7 @@ class Bot extends FallingSkyPlayer {
         return true;
     }
 
-    willAgreeToQuarters(factionId) {
+    willAgreeToQuarters(state, factionId) {
         if (this.factionId === FactionIDs.ROMANS) {
             throw new PlayerInteractionNeededError('Quarters requested by ' + factionId, new QuartersAgreement({
                                                                                                                    requestingFactionId: factionId,
@@ -71,11 +71,11 @@ class Bot extends FallingSkyPlayer {
         return false;
     }
 
-    willAgreeToRetreat(factionId) {
+    willAgreeToRetreat(state, factionId) {
         return false;
     }
 
-    willAgreeToSupplyLine(factionId) {
+    willAgreeToSupplyLine(state, factionId) {
         if (this.factionId === FactionIDs.ROMANS) {
             throw new PlayerInteractionNeededError('Supply line requested by ' + factionId, new SupplyLineAgreement({
                                                                                                                         requestingFactionId: factionId,
@@ -165,7 +165,7 @@ class Bot extends FallingSkyPlayer {
                 console.log('Asking ' + regionFactionId + ' for region ' + agreementRequiredRegion.name);
                 factionsAsked[regionFactionId] = true;
                 const existingAgreement = this.getExistingAgreement(state, regionFactionId, 'RetreatAgreement');
-                return existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[regionFactionId].willAgreeToRetreat();
+                return existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[regionFactionId].willAgreeToRetreat(state, regionFactionId);
             });
 
 
@@ -188,7 +188,7 @@ class Bot extends FallingSkyPlayer {
         _.each(
             factionIds, (factionId) => {
                 const existingAgreement = this.getExistingAgreement(state, factionId, 'SupplyLineAgreement');
-                const agreed = existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[factionId].willAgreeToSupplyLine(
+                const agreed = existingAgreement ? existingAgreement.status === 'agreed' : state.playersByFaction[factionId].willAgreeToSupplyLine(state,
                     this.factionId);
                 console.log(
                     this.factionId + ' asked ' + factionId + ' for supply line agreement -> ' + factionId + (agreed ? ' agreed' : ' denied'));

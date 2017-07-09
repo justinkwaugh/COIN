@@ -134,25 +134,25 @@ describe("Belgae Battle", function () {
 
     it('battles with ambushes', function () {
 
-            const biturigesRegion = state.regionsById[RegionIDs.BITURIGES];
-            PlaceLeader.execute(state, {factionId: belgae.id, regionId: biturigesRegion.id});
+        const biturigesRegion = state.regionsById[RegionIDs.BITURIGES];
+        PlaceLeader.execute(state, {factionId: belgae.id, regionId: biturigesRegion.id});
 
-            const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-            PlaceWarbands.execute(state, {factionId: belgae.id, regionId: mandubiiRegion.id, count: 7});
-            PlaceAuxilia.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 5});
+        const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
+        PlaceWarbands.execute(state, {factionId: belgae.id, regionId: mandubiiRegion.id, count: 7});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 5});
 
-            const arverniRegion = state.regionsById[RegionIDs.ARVERNI];
-            PlaceWarbands.execute(state, {factionId: belgae.id, regionId: arverniRegion.id, count: 7});
-            PlaceWarbands.execute(state, {factionId: aedui.id, regionId: arverniRegion.id, count: 5});
+        const arverniRegion = state.regionsById[RegionIDs.ARVERNI];
+        PlaceWarbands.execute(state, {factionId: belgae.id, regionId: arverniRegion.id, count: 7});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: arverniRegion.id, count: 5});
 
-            const aeduiRegion = state.regionsById[RegionIDs.AEDUI];
-            PlaceAuxilia.execute(state, {factionId: romans.id, regionId: aeduiRegion.id, count: 2});
+        const aeduiRegion = state.regionsById[RegionIDs.AEDUI];
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: aeduiRegion.id, count: 2});
 
-            const context = turn.getContext();
-            BelgaeBattle.battle(state,context);
-            expect(mandubiiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(2);
-            expect(aeduiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(2);
-            expect(arverniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(2);
+        const context = turn.getContext();
+        BelgaeBattle.battle(state, context);
+        expect(mandubiiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(2);
+        expect(aeduiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(2);
+        expect(arverniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(2);
 
     });
 
@@ -172,7 +172,7 @@ describe("Belgae Battle", function () {
         const biturigesRegion = state.regionsById[RegionIDs.BITURIGES];
         PlaceAuxilia.execute(state, {factionId: romans.id, regionId: biturigesRegion.id, count: 2});
 
-        BelgaeBattle.battle(state,turn.getContext());
+        BelgaeBattle.battle(state, turn.getContext());
         expect(mandubiiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(0);
         expect(aeduiRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(2);
         expect(arverniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
@@ -182,7 +182,8 @@ describe("Belgae Battle", function () {
 
     it('battles against legions', function () {
         const treveriRegion = state.regionsById[RegionIDs.TREVERI];
-        PlaceAlliedTribe.execute(state, { factionId: germanic.id, regionId: treveriRegion.id, tribeId: TribeIDs.TREVERI});
+        PlaceAlliedTribe.execute(state,
+                                 {factionId: germanic.id, regionId: treveriRegion.id, tribeId: TribeIDs.TREVERI});
         PlaceLeader.execute(state, {factionId: belgae.id, regionId: treveriRegion.id});
         PlaceWarbands.execute(state, {factionId: belgae.id, regionId: treveriRegion.id, count: 8});
         PlaceWarbands.execute(state, {factionId: aedui.id, regionId: treveriRegion.id, count: 1});

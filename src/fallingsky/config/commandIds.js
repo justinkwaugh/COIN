@@ -4,7 +4,7 @@ const CommandIDs = {
     RAID: 'Raid',
     RALLY: 'Rally',
     RECRUIT: 'Recruit',
-    SIEZE: 'Sieze'
+    SEIZE: 'Seize'
 };
 
 export default CommandIDs;

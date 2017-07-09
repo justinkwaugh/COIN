@@ -13,7 +13,7 @@ import RegionIDs from '../config/regionIds';
 import SequenceOfPlay from '../../common/sequenceOfPlay';
 import AeduiBot from '../bots/aedui/aeduiBot';
 import ArverniBot from '../bots/arverni/arverniBot';
-import RomanBot from '../bots/romanBot';
+import RomanBot from '../bots/romans/romanBot';
 import BelgaeBot from '../bots/belgae/belgaeBot';
 import GermanicBot from '../bots/germanic/germanicBot';
 import HumanPlayer from 'fallingsky/player/humanPlayer';

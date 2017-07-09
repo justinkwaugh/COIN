@@ -21,7 +21,7 @@ class HumanPlayer extends FallingSkyPlayer {
                                                               }));
     }
 
-    willAgreeToQuarters(factionId) {
+    willAgreeToQuarters(state, factionId) {
         throw new PlayerInteractionNeededError('Quarters requested by ' + factionId,
                                                new QuartersAgreement({
                                                                          requestingFactionId: factionId,
@@ -29,7 +29,7 @@ class HumanPlayer extends FallingSkyPlayer {
                                                                      }));
     }
 
-    willAgreeToRetreat(factionId) {
+    willAgreeToRetreat(state, factionId) {
 
         throw new PlayerInteractionNeededError('Retreat requested by ' + factionId,
                                                new RetreatAgreement({
@@ -38,7 +38,7 @@ class HumanPlayer extends FallingSkyPlayer {
                                                                     }));
     }
 
-    willAgreeToSupplyLine(factionId) {
+    willAgreeToSupplyLine(state, factionId) {
         throw new PlayerInteractionNeededError('Supply line requested by ' + factionId,
                                                new SupplyLineAgreement({
                                                                            requestingFactionId: factionId,

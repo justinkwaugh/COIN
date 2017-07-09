@@ -12,7 +12,13 @@ class BelgaeEvent {
 
     static handleEvent(state) {
         const currentCard = state.currentCard();
+        console.log('*** Is Belgae No Event? ***');
         if (_.indexOf(NoEvents, currentCard.id) >= 0) {
+            return false;
+        }
+
+        console.log('*** Is Capability in final year? ***');
+        if(state.isLastYear() && _.indexOf(CapabilityEvents, currentCard.id) >= 0) {
             return false;
         }
 

@@ -10,15 +10,15 @@ class FallingSkyPlayer extends Player {
         return true;
     }
 
-    willAgreeToQuarters(factionId) {
+    willAgreeToQuarters(state, factionId) {
         return false;
     }
 
-    willAgreeToRetreat() {
+    willAgreeToRetreat(state, factionId) {
         return false;
     }
 
-    willAgreeToSupplyLine(factionId) {
+    willAgreeToSupplyLine(state, factionId) {
         return false;
     }
 

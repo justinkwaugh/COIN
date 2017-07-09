@@ -124,7 +124,7 @@ class AeduiBot extends Bot {
 
             let moved = false;
             _.each(adjacentLocations, (location) => {
-                if(location.factionId === this.factionId || state.playersByFaction[location.factionId].willAgreeToQuarters(this.factionId)) {
+                if(location.factionId === this.factionId || state.playersByFaction[location.factionId].willAgreeToQuarters(state, this.factionId)) {
                     MovePieces.execute(state, {sourceRegionId: relocation.region.id, destRegionId: location.destination.id, pieces: relocation.pieces});
                     moved = true;
                     return false;

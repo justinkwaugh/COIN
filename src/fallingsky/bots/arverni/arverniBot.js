@@ -36,7 +36,7 @@ class ArverniBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.BATTLE_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.THREAT_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH) && modifiers.tryThreatMarch) {
+        if(!turn.getCheckpoint(Checkpoints.THREAT_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH) && modifiers.context.tryThreatMarch) {
             commandAction = ArverniMarch.march(state, modifiers, 'threat');
         }
         turn.markCheckpoint(Checkpoints.THREAT_MARCH_CHECK);

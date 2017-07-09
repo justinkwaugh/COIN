@@ -1,19 +1,15 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 
-
 const NoEvents = [];
 const CapabilityEvents = [8,10,12,13,15,25,27,30,38,39,43,55,59,63];
-const Auto1to4 = [];
-const EventHandlers = {
+const EventHandlers = {};
 
-};
-
-class ArverniEvent {
+class RomanEvent {
 
     static handleEvent(state) {
         const currentCard = state.currentCard();
-        console.log('*** Is Arverni No Event? ***');
+        console.log('*** Is Roman No Event? ***');
         if (_.indexOf(NoEvents, currentCard.id) >= 0) {
             return false;
         }
@@ -23,10 +19,7 @@ class ArverniEvent {
             return false;
         }
 
-        if (_.indexOf(Auto1to4, currentCard.id) < 0 && _.random(1,6) > 4) {
-            return false;
-        }
-
+        console.log('*** Is Event effective? ***');
         const eventHandler = EventHandlers[currentCard.id];
         if (!eventHandler) {
             return false;
@@ -46,4 +39,4 @@ class ArverniEvent {
 
 }
 
-export default ArverniEvent;
+export default RomanEvent;

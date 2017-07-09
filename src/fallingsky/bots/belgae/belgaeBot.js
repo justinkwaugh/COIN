@@ -35,7 +35,7 @@ class BelgaeBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.BATTLE_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.THREAT_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH) && modifiers.tryThreatMarch) {
+        if(!turn.getCheckpoint(Checkpoints.THREAT_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH) && modifiers.context.tryThreatMarch) {
             commandAction = BelgaeMarch.march(state, modifiers);
         }
         turn.markCheckpoint(Checkpoints.THREAT_MARCH_CHECK);
