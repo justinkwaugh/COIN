@@ -14,7 +14,7 @@ class Enlist extends Command {
         }
 
         const validGermanicRegionIds = this.findValidGermanicRegions(state);
-        const leader = leaderRegion.getLeaderForFaction(FactionIDs.ARVERNI);
+        const leader = leaderRegion.getLeaderForFaction(FactionIDs.BELGAE);
         const isAmbiorix = leader && !leader.isSuccessor();
         const validRegionIds = isAmbiorix ? _(leaderRegion.adjacent).concat([leaderRegion]).map('id').value() : [leaderRegion];
 

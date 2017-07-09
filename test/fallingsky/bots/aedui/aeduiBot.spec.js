@@ -39,6 +39,7 @@ describe("Aedui Bot", function () {
 
         const aeduiPlayer = state.playersByFaction[FactionIDs.AEDUI];
         aedui.setResources(20);
+        romans.setResources(20);
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
         PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 8});

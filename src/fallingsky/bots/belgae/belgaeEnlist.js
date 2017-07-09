@@ -36,7 +36,7 @@ class BelgaeEnlist {
     static enlistForBattle(state, modifiers, enlistResults) {
         const battleResults = modifiers.context.battles;
         _.each(battleResults, battleResult => this.checkAndUpdateBattleResult(state, modifiers, enlistResults, battleResult));
-        return _.find(battleResults, {canEnlistGermans: true});
+        return _.find(battleResults, {willEnlistGermans: true});
     }
 
     static enlistForCommand(state, modifiers, enlistResults) {
@@ -59,7 +59,7 @@ class BelgaeEnlist {
 
             if (enlistedBattleResults.worstCaseAttackerLosses.normal < battleResults.worstCaseAttackerLosses.normal ||
                 enlistedBattleResults.worstCaseDefenderLosses.normal > battleResults.worstCaseDefenderLosses.normal) {
-                battleResults.canEnlistGermans = true;
+                battleResults.willEnlistGermans = true;
             }
         }
     }

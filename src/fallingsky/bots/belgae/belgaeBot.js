@@ -9,6 +9,17 @@ import CommandIDs from '../../config/commandIds';
 import FactionActions from '../../../common/factionActions';
 import Pass from '../../commands/pass';
 
+const Checkpoints = {
+    BATTLE_CHECK : 'battle',
+    THREAT_MARCH_CHECK : 'threat-march',
+    PASS_CHECK: 'pass',
+    EVENT_CHECK : 'event',
+    RALLY_CHECK : 'rally',
+    CONTROL_MARCH_CHECK : 'control-march',
+    FIRST_RAID_CHECK : 'first-raid',
+    SECOND_RAID_CHECK : 'second-raid'
+};
+
 class BelgaeBot extends Bot {
     constructor() {
         super({factionId: FactionIDs.BELGAE});
@@ -19,33 +30,45 @@ class BelgaeBot extends Bot {
         const turn = state.turnHistory.currentTurn;
         const modifiers = turn.getContext();
 
-        if (modifiers.isCommandAllowed(CommandIDs.BATTLE)) {
+        if (!turn.getCheckpoint(Checkpoints.BATTLE_CHECK) && modifiers.isCommandAllowed(CommandIDs.BATTLE)) {
             commandAction = BelgaeBattle.battle(state, modifiers);
         }
+        turn.markCheckpoint(Checkpoints.BATTLE_CHECK);
 
-        if (!commandAction && this.shouldPassForNextCard(state)) {
-            commandAction = FactionActions.PASS;
-        }
-
-        if (!commandAction && this.canPlayEvent(state) && BelgaeEvent.handleEvent(state)) {
-            commandAction = FactionActions.EVENT;
-        }
-
-        if (!commandAction && modifiers.isCommandAllowed(CommandIDs.RALLY)) {
-            commandAction = BelgaeRally.rally(state, modifiers);
-        }
-
-        if (!commandAction && state.belgae.resources() < 4 && modifiers.isCommandAllowed(CommandIDs.RAID)) {
-            commandAction = BelgaeRaid.raid(state, modifiers) || FactionActions.PASS;
-        }
-
-        if (!commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
+        if(!turn.getCheckpoint(Checkpoints.THREAT_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH) && modifiers.tryThreatMarch) {
             commandAction = BelgaeMarch.march(state, modifiers);
         }
+        turn.markCheckpoint(Checkpoints.THREAT_MARCH_CHECK);
 
-        if (!commandAction && modifiers.isCommandAllowed(CommandIDs.RAID)) {
+        if(!turn.getCheckpoint(Checkpoints.PASS_CHECK) && !commandAction && this.shouldPassForNextCard(state)) {
+            commandAction = FactionActions.PASS;
+        }
+        turn.markCheckpoint(Checkpoints.PASS_CHECK);
+
+        if(!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && this.canPlayEvent(state) && BelgaeEvent.handleEvent(state)) {
+            commandAction = FactionActions.EVENT;
+        }
+        turn.markCheckpoint(Checkpoints.EVENT_CHECK);
+
+        if(!turn.getCheckpoint(Checkpoints.RALLY_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.RALLY)) {
+            commandAction = BelgaeRally.rally(state, modifiers);
+        }
+        turn.markCheckpoint(Checkpoints.RALLY_CHECK);
+
+        if(!turn.getCheckpoint(Checkpoints.FIRST_RAID_CHECK) && !commandAction && state.belgae.resources() < 4 && modifiers.isCommandAllowed(CommandIDs.RAID)) {
+            commandAction = BelgaeRaid.raid(state, modifiers) || FactionActions.PASS;
+        }
+        turn.markCheckpoint(Checkpoints.FIRST_RAID_CHECK);
+
+        if(!turn.getCheckpoint(Checkpoints.CONTROL_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
+            commandAction = BelgaeMarch.march(state, modifiers);
+        }
+        turn.markCheckpoint(Checkpoints.CONTROL_MARCH_CHECK);
+
+        if(!turn.getCheckpoint(Checkpoints.SECOND_RAID_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.RAID)) {
             commandAction = BelgaeRaid.raid(state, modifiers);
         }
+        turn.markCheckpoint(Checkpoints.SECOND_RAID_CHECK);
 
         commandAction = commandAction || FactionActions.PASS;
 

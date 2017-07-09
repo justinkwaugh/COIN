@@ -9,7 +9,8 @@ import FactionActions from '../../../common/factionActions';
 import RemoveResources from '../../actions/removeResources';
 
 const Checkpoints = {
-    BATTLE_COMPLETE_CHECK: 'battle-complete'
+    BATTLE_COMPLETE_CHECK: 'battle-complete',
+    SPECIAL_CHECK: 'special-check'
 };
 
 
@@ -35,26 +36,30 @@ class AeduiBattle {
             modifiers.context.battles = battles;
 
             const ambushed = _.find(battles, {willAmbush: true});
-            if (ambushed) {
+            if (!turn.getCheckpoint(Checkpoints.SPECIAL_CHECK) && ambushed) {
                 turn.startSpecialAbility(SpecialAbilityIDs.AMBUSH);
                 turn.commitSpecialAbility();
+                turn.markCheckpoint(Checkpoints.SPECIAL_CHECK)
             }
 
             _.each(battles, (battle) => {
                 if(!battle.complete) {
+                    if(!battle.paid && !modifiers.free) {
+                        RemoveResources.execute(state, {factionId: FactionIDs.AEDUI, count: battle.cost});
+                        battle.paid = true;
+                    }
                     Battle.execute(state, { battleResults: battle });
                 }
             });
 
             turn.commitCommand();
+            turn.markCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK);
             modifiers.context.battles = null;
 
             if (ambushed) {
                 return FactionActions.COMMAND_AND_SPECIAL;
             }
         }
-
-        turn.markCheckpoint(Checkpoints.BATTLE_COMPLETE_CHECK);
 
         const usedSpecialAbility = modifiers.canDoSpecial() && AeduiTrade.trade(state, modifiers);
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;

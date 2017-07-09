@@ -72,12 +72,6 @@ class Bot extends FallingSkyPlayer {
     }
 
     willAgreeToRetreat(factionId) {
-        if (this.factionId === FactionIDs.ROMANS) {
-            throw new PlayerInteractionNeededError('Retreat requested by ' + factionId, new RetreatAgreement({
-                                                                                                                 requestingFactionId: factionId,
-                                                                                                                 respondingFactionId: this.factionId
-                                                                                                             }));
-        }
         return false;
     }
 
@@ -341,7 +335,7 @@ class Bot extends FallingSkyPlayer {
 
     findRetreatRegion(state, region, agreeingFactionId) {
         return _(region.adjacent).reject(
-            adjacent => (adjacent.controllingFactionId() !== this.factionId && adjacent.controllingFactionId() !== agreeingFactionId)).map(
+            adjacent => (!adjacent.controllingFactionId() || (adjacent.controllingFactionId() !== this.factionId && adjacent.controllingFactionId() !== agreeingFactionId))).map(
             (adjacent) => {
                 const friendlyPieces = adjacent.getPiecesForFaction(this.factionId);
                 return {

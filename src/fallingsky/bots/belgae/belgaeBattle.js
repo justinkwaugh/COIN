@@ -10,9 +10,66 @@ import BelgaeMarch from './belgaeMarch';
 import RemoveResources from '../../actions/removeResources';
 import FactionActions from '../../../common/factionActions';
 
+const Checkpoints = {
+    PRE_BATTLE_SPECIAL_CHECK: 'pre-battle-special'
+};
+
 class BelgaeBattle {
 
     static battle(state, modifiers) {
+        const belgae = state.belgae;
+        const turn = state.turnHistory.getCurrentTurn();
+
+        if (belgae.resources() === 0 && !modifiers.free) {
+            return false;
+        }
+
+        const battles = modifiers.context.battles || this.getBattleList(state, modifiers);
+        if (battles.length === 0) {
+            return false;
+        }
+
+        turn.startCommand(CommandIDs.BATTLE);
+        modifiers.context.battles = battles;
+
+        if (!turn.getCheckpoint(Checkpoints.PRE_BATTLE_SPECIAL_CHECK)) {
+            const ambushed = _.find(battles, {willAmbush: true});
+            if (ambushed) {
+                turn.startSpecialAbility(SpecialAbilityIDs.AMBUSH);
+                turn.commitSpecialAbility();
+                modifiers.context.didPreBattleSpecial = true;
+            }
+            else if (!ambushed && modifiers.canDoSpecial()) {
+                modifiers.context.didPreBattleSpecial = BelgaeRampage.rampage(state, modifiers) ||
+                                                        BelgaeEnlist.enlist(state, modifiers);
+            }
+            turn.markCheckpoint(Checkpoints.PRE_BATTLE_SPECIAL_CHECK);
+        }
+
+        _.each(battles, (battle) => {
+            if (!battle.complete) {
+                if (!battle.paid && !modifiers.free) {
+                    RemoveResources.execute(state, {factionId: FactionIDs.BELGAE, count: battle.cost});
+                    battle.paid = true;
+                }
+                Battle.execute(state, {battleResults: battle});
+            }
+        });
+
+        turn.commitCommand();
+        modifiers.context.battles = null;
+
+        let didSpecial = modifiers.context.didPreBattleSpecial;
+        if (modifiers.canDoSpecial() && !didSpecial) {
+            didSpecial = BelgaeEnlist.enlist(state, modifiers);
+        }
+
+        return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
+    }
+
+    static getBattleList(state, modifiers) {
+        const belgae = state.belgae;
+        console.log('*** Are there any effective Belgae Battles? ***');
 
         const importantBattleRegions = this.findImportantBattleRegions(state, modifiers);
         if (importantBattleRegions.length === 0) {
@@ -24,54 +81,32 @@ class BelgaeBattle {
 
         if (prioritizedBattles.length === 0 || this.isAmbiorixInDangerWithoutBattle(state, importantBattleRegions, battlegrounds)) {
             modifiers.context.threatRegions = _.map(importantBattleRegions, importantRegion => importantRegion.region.id);
-            return BelgaeMarch.march(state, modifiers);
+            modifiers.context.tryThreatMarch = true;
+            return [];
         }
 
-        const belgae = state.belgae;
-        if (belgae.resources() < (prioritizedBattles[0].region.devastated() ? 2 : 1)) {
-            return false;
+        let battles = modifiers.free ? prioritizedBattles : _.reduce(prioritizedBattles, (accumulator, battle) => {
+            if (accumulator.resourcesRemaining >= battle.cost) {
+                accumulator.resourcesRemaining -= battle.cost;
+                accumulator.battles.push(battle);
+            }
+            return accumulator
+        }, {resourcesRemaining: belgae.resources(), battles: []}).battles;
+
+        if (battles.length > 0) {
+            if (modifiers.limited) {
+                battles = _.take(battles, 1);
+            }
+
+            if (modifiers.canDoSpecial() && this.needAmbush(battles[0])) {
+                _.each(battles, (battle) => {
+                    battle.willAmbush = true;
+                });
+
+            }
         }
 
-        const willAmbush = modifiers.canDoSpecial() && this.needAmbush(prioritizedBattles[0]);
-        let didSpecial = willAmbush;
-        if (!didSpecial && modifiers.canDoSpecial()) {
-            modifiers.context.battles = prioritizedBattles;
-            didSpecial = BelgaeRampage.rampage(
-                    state, modifiers) || BelgaeEnlist.enlist(state, modifiers);
-            modifiers.context.battles = null;
-        }
-
-        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.BATTLE);
-        _.each(
-            prioritizedBattles, (battle,index) => {
-                const cost = battle.region.devastated() ? 2 : 1;
-                if (belgae.resources() < cost) {
-                    return false;
-                }
-
-                if(index===0 && willAmbush) {
-                    state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.AMBUSH);
-                    state.turnHistory.getCurrentTurn().commitSpecialAbility();
-                }
-
-                Battle.execute(
-                    state, {
-                        region: battle.region,
-                        attackingFaction: battle.attackingFaction,
-                        defendingFaction: battle.defendingFaction,
-                        ambush: willAmbush,
-                        enlistGermans: battle.canEnlistGermans
-                    });
-                RemoveResources.execute(state, { factionId: FactionIDs.BELGAE, count: cost});
-            });
-        state.turnHistory.getCurrentTurn().commitCommand();
-
-        if (modifiers.canDoSpecial() && !didSpecial) {
-            didSpecial = BelgaeEnlist.enlist(
-                state, modifiers);
-        }
-
-        return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
+        return battles;
     }
 
     static findImportantBattleRegions(state, modifiers) {

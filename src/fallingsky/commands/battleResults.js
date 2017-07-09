@@ -24,6 +24,7 @@ class BattleResults {
         this.willAmbush = definition.willAmbush;
         this.willEnlistGermans = definition.willEnlistGermans;
 
+        this.paid = definition.paid;
         this.willRetreat = definition.willRetreat;
         this.retreated = definition.retreated;
         this.calculatedDefenderResults = definition.calculatedDefenderResults;
