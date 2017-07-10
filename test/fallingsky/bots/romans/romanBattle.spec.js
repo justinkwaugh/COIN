@@ -347,4 +347,38 @@ describe("Roman Battle", function () {
         const command = RomanBattle.battle(state, context);
         expect(command).to.equal(FactionActions.COMMAND);
     });
+
+    it('does not ignore threat', function () {
+        const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
+        PlaceFort.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id});
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 8});
+        PlaceAlliedTribe.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.LINGONES});
+        PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.SENONES});
+        PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 2});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, count: 16});
+        PlaceLeader.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id});
+
+        const context = turn.getContext();
+        const command = RomanBattle.battle(state, context);
+        expect(command).to.equal(false);
+        expect(context.context.tryThreatMarch).to.equal(true);
+        expect(context.context.threatRegions[0]).to.equal(mandubiiRegion.id);
+    });
+
+    // This rule is unclear
+    // it('does not ignore double threat', function () {
+    //     const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
+    //     PlaceLegions.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 8});
+    //     PlaceAlliedTribe.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.LINGONES});
+    //     PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.SENONES});
+    //     PlaceWarbands.execute(state, {factionId: aedui.id, regionId: mandubiiRegion.id, count: 2});
+    //     PlaceWarbands.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, count: 16});
+    //     PlaceLeader.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id});
+    //
+    //     const context = turn.getContext();
+    //     const command = RomanBattle.battle(state, context);
+    //     expect(command).to.equal(false);
+    //     expect(context.context.tryThreatMarch).to.equal(true);
+    //     expect(context.context.threatRegions[0]).to.equal(mandubiiRegion.id);
+    // });
 });

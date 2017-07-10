@@ -102,7 +102,6 @@ class RomanBattle {
                     return;
                 }
 
-
                 const numNonCriticalPieces = region.getPiecesForFaction(
                         FactionIDs.ROMANS).length - numLegions - (hasCaesar ? 1 : 0);
                 const importantEnemyData = _(EnemyFactionPriority).keys().map(
@@ -164,22 +163,39 @@ class RomanBattle {
         return _(state.regions).map(
             (region) => {
                 const importantRegionData = _.find(importantRegions, regionData => regionData.region.id === region.id);
-                if (!importantRegionData) {
+                const importantEnemyData = importantRegionData ? _.keyBy(importantRegionData.importantEnemyData, 'factionId') : {};
+
+                if (!importantEnemyData) {
+                    return;
+                }
+
+                const numCriticalEnemies = _.reduce(importantEnemyData, (sum, enemyData, factionId) => {
+                    return enemyData.willInflictCriticalLoss ? sum + 1 : sum;
+                    }, 0 );
+
+                if(numCriticalEnemies > 1) {
                     return;
                 }
 
                 const potentialBattles = _(EnemyFactionPriority).keys().map(
                     (factionId) => {
+
                         const enemyPieces = region.getPiecesForFaction(factionId);
                         if (enemyPieces.length === 0) {
                             return;
                         }
+
+                        if(!importantEnemyData[factionId]) {
+                            return;
+                        }
+
                         const battleResult = Battle.test(
                             state, {
                                 region: region,
                                 attackingFactionId: FactionIDs.ROMANS,
                                 defendingFactionId: factionId
                             });
+
                         if (!this.isEffectiveBattle(battleResult)) {
                             return;
                         }
@@ -187,8 +203,6 @@ class RomanBattle {
                         return battleResult;
                     }).compact().value();
 
-                const importantEnemyData = importantRegionData ? _.keyBy(importantRegionData.importantEnemyData,
-                                                                         'factionId') : {};
                 if (potentialBattles.length) {
                     return {
                         region,
@@ -226,14 +240,13 @@ class RomanBattle {
             (potentialBattle) => {
                 let priority;
                 const enemyData = battleground.importantEnemyData[potentialBattle.defendingFaction.id];
-                if(enemyData) {
-                    if (enemyData.hasLeader) {
-                        priority = 'a-';
-                    }
 
-                    if (enemyData.numAlliesAndCitadels > 0) {
-                        priority += 'b' + (99 - enemyData.numAlliesAndCitadels) + '-';
-                    }
+                if (enemyData.hasLeader) {
+                    priority = 'a-';
+                }
+
+                if (enemyData.numAlliesAndCitadels > 0) {
+                    priority += 'b' + (99 - enemyData.numAlliesAndCitadels) + '-';
                 }
 
                 priority += 'c' + (99 - potentialBattle.region.getWarbandsOrAuxiliaForFaction(
@@ -246,7 +259,7 @@ class RomanBattle {
                     battle: potentialBattle,
                     priority
                 }
-            }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
+            }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
     }
 
 }
