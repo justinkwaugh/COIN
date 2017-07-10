@@ -21,7 +21,7 @@ class PlaceCitadel extends Action {
             throw 'Invalid PlaceCitadel Action';
         }
 
-        const removedAlliedTribe = region.removeAlliedTribe(region.id, tribe.id);
+        const removedAlliedTribe = region.removeAlliedTribe(faction.id, tribe.id);
         if(removedAlliedTribe) {
             this.hadAlly = true;
             faction.returnAlliedTribe(removedAlliedTribe);
