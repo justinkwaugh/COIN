@@ -224,7 +224,7 @@ class Bot extends FallingSkyPlayer {
             }
         }
 
-        const targets = _.clone(this.orderPiecesForRemoval(state, region.getPiecesForFaction(this.factionId)), battleResults.willRetreat);
+        const targets = _.clone(this.orderPiecesForRemoval(state, region.getPiecesForFaction(this.factionId), battleResults.willRetreat));
         const losses = attackResults.losses;
 
         const removed = [];

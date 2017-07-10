@@ -228,19 +228,19 @@ class Battle extends Command {
             battleResults.committedDefenderResults = battleResults.calculatedDefenderResults;
         }
 
-        if (battleResults.willRetreat && !battleResults.retreated) {
-            this.handleRetreat(state, battleResults, battleResults.committedDefenderResults);
-            battleResults.retreated = true;
-        }
 
         if (battleResults.committedDefenderResults.counterattackPossible && !battleResults.willRetreat) {
             const attackerLosses = Math.floor(this.calculateUnmodifiedLosses(battleResults.committedDefenderResults.remaining, true));
             if (attackerLosses > 0) {
                 const orderedAttackingPieces = attackingPlayer.orderPiecesForRemoval(state, attackingPieces, false);
                 const counterattackResults = this.calculateAttackResults(orderedAttackingPieces, attackerLosses);
-                // ONCE WE PASS HERE WE WILL NOT BE INTERRUPTED
                 this.handleLosses(state, battleResults, counterattackResults, true);
             }
+        }
+
+        if (battleResults.willRetreat && !battleResults.retreated) {
+            this.handleRetreat(state, battleResults, battleResults.committedDefenderResults);
+            battleResults.retreated = true;
         }
 
         if (!battleResults.willRetreat) {

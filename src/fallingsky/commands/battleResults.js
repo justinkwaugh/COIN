@@ -149,7 +149,7 @@ class BattleResults {
             }
 
             return prefix + (piece.type === type ? 2 : 1);
-        }).take(this.defenderLosses.normal).value();
+        }).take(retreat ? this.defenderLosses.retreat : this.defenderLosses.normal).value();
 
         const index = _.findIndex(normalOrderedLossTargets, {type:type});
 
@@ -157,10 +157,6 @@ class BattleResults {
         let noLossesAfterFirst = false;
 
         if(!rollsFail && (!ambush || hasCaesar)) {
-            if(index < 0) {
-                noLosses = true;
-            }
-
             if(index > 0) {
                 const earlierPieces = _.take(normalOrderedLossTargets, index);
                 if (_.find(earlierPieces, {canRoll: true})) {
@@ -177,9 +173,21 @@ class BattleResults {
             if(piece.type !== type) {
                 return;
             }
+
+            let numLosses = pieceIndex < (retreat ? this.defenderLosses.retreat : this.defenderLosses.normal) ? 1 : 0;
+            if(noLosses) {
+                numLosses = 0
+            }
+            else if(noLossesAfterFirst && pieceIndex > index) {
+                numLosses = 0;
+            }
+            else if(noLossesAfterFirst && pieceIndex === index) {
+                numLosses = this.defenderLosses.normal - pieceIndex;
+            }
+
             return {
                 piece,
-                numLosses: noLosses ? 0 : (noLossesAfterFirst && pieceIndex > index) ? 0 : (this.defenderLosses.normal - pieceIndex)
+                numLosses
             }
         }).compact().value();
     }

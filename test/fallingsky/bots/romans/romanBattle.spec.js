@@ -327,9 +327,9 @@ describe("Roman Battle", function () {
 
     it('besieges ally', function () {
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
-        PlaceLegions.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 2});
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 1});
         PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
-        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, count: 2});
+        PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.SENONES});
 
         const context = turn.getContext();
         const command = RomanBattle.battle(state, context);
