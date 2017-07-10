@@ -10,7 +10,6 @@ class Losses extends PlayerInteraction {
         this.retreated = false;
         this.regionId = definition.regionId;
         this.losses = definition.losses;
-        this.targets = definition.targets;
 
         // This part is for the response
         this.caesarCanCounterattack = false;

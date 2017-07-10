@@ -102,8 +102,8 @@ class Bot extends FallingSkyPlayer {
                 }) || !hasLossesFromRetreat;
 
 
-        const noRetreatOrderedPieces = this.orderPiecesForRemoval(state, defendingPieces, false);
-        const retreatOrderedPieces = this.orderPiecesForRemoval(state, defendingPieces, false);
+        const noRetreatOrderedPieces = Losses.orderPiecesForRemoval(state, defendingPieces, false);
+        const retreatOrderedPieces = Losses.orderPiecesForRemoval(state, defendingPieces, false);
 
         const noRetreatRemoved = _.take(noRetreatOrderedPieces, noRetreatLosses);
         const noRetreatRemaining = _.drop(noRetreatOrderedPieces, noRetreatLosses);
@@ -238,7 +238,7 @@ class Bot extends FallingSkyPlayer {
             }
         }
 
-        const targets = _.clone(this.orderPiecesForRemoval(state, region.getPiecesForFaction(this.factionId), battleResults.willRetreat));
+        const targets = _.clone(Losses.orderPiecesForRemoval(state, region.getPiecesForFaction(this.factionId), battleResults.willRetreat));
         const losses = attackResults.losses;
 
         const removed = [];

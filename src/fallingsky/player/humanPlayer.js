@@ -73,8 +73,7 @@ class HumanPlayer extends FallingSkyPlayer {
                                                               retreated: !counterattack && battleResults.willRetreat,
                                                               counterattack: counterattack,
                                                               regionId: battleResults.region.id,
-                                                              losses: attackResults.losses,
-                                                              targets: attackResults.targets
+                                                              losses: attackResults.losses
                                                           }));
     }
 }

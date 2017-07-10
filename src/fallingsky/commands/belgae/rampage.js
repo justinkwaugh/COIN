@@ -3,6 +3,7 @@ import Command from '../command';
 import FactionIDs from '../../config/factionIds';
 import RampageResults from './rampageResults';
 import RevealPieces from '../../actions/revealPieces';
+import Losses from 'fallingsky/util/losses';
 
 class Rampage extends Command {
 
@@ -41,7 +42,7 @@ class Rampage extends Command {
         const rampage = args.rampage;
         const mobileEnemyPieces = rampage.region.getMobilePiecesForFaction(rampage.chosenFaction);
         const enemyPlayer = state.playersByFaction[rampage.chosenFaction];
-        const piecesToRetreatOrRemove = _.take(enemyPlayer.orderPiecesForRemoval(state, mobileEnemyPieces, false), rampage.count);
+        const piecesToRetreatOrRemove = _.take(Losses.orderPiecesForRemoval(state, mobileEnemyPieces, false), rampage.count);
 
         console.log('*** Belgae Rampaging in ' + rampage.region.name);
 

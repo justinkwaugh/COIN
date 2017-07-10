@@ -100,6 +100,43 @@ class Losses {
         }
         return piecesForRemoval;
     }
+
+    static orderPiecesRollsFirst(pieces, retreat) {
+        const alliesFortsAndCitadels = _(pieces).filter(
+            (piece) => {
+                return piece.type === 'alliedtribe' || piece.type === 'fort' || piece.type === 'citadel';
+            }).sortBy(
+            (piece) => {
+                if (piece.type === 'fort' || piece.type === 'citadel') {
+                    return 'a';
+                }
+                else {
+                    return 'b';
+                }
+            }).value();
+
+        const warbandsAuxiliaLegionsAndLeader = _(pieces).filter(
+            (piece) => {
+                return piece.type === 'warband' || piece.type === 'auxilia' || piece.type === 'legion' || piece.type === 'leader';
+            }).sortBy(
+            (piece) => {
+                if (piece.type === 'legion' || piece.type === 'leader') {
+                    return 'a';
+                }
+                else {
+                    return 'b';
+                }
+            }).value();
+
+        let piecesForRemoval = [];
+        if (retreat) {
+            piecesForRemoval = _.concat(alliesFortsAndCitadels, warbandsAuxiliaLegionsAndLeader);
+        }
+        else {
+            piecesForRemoval = _.concat(warbandsAuxiliaLegionsAndLeader, alliesFortsAndCitadels);
+        }
+        return piecesForRemoval;
+    }
 }
 
 export default Losses;

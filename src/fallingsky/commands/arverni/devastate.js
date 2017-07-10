@@ -3,6 +3,7 @@ import Command from '../command';
 import FactionIDs from '../../config/factionIds';
 import RemovePieces from '../../actions/removePieces';
 import DevastateResults from './devastateResults';
+import Losses from 'fallingsky/util/losses';
 
 class Devastate extends Command {
 
@@ -59,9 +60,8 @@ class Devastate extends Command {
         return _(state.factions).map(
             (faction) => {
                 const mobilePieces = _.reject(region.getMobilePiecesForFaction(faction.id), {type: 'leader'});
-                const player = state.playersByFaction[faction.id];
                 const numPiecesToRemove = mobilePieces.length === 0 ? 0 : Math.floor(mobilePieces.length / (faction.id === FactionIDs.ARVERNI ? 4 : 3));
-                const piecesToRemove = _.take(player.orderPiecesForRemoval(state.mobilePieces, false), numPiecesToRemove);
+                const piecesToRemove = _.take(Losses.orderPiecesForRemoval(state.mobilePieces, false), numPiecesToRemove);
                 return {
                     id: faction.id,
                     piecesToRemove

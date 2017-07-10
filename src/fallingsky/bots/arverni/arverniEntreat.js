@@ -4,6 +4,7 @@ import RemoveResources from '../../actions/removeResources';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionIDs from '../../config/factionIds';
 import SpecialAbilityIDs from '../../config/specialAbilityIds';
+import Losses from 'fallingsky/util/losses';
 
 class ArverniEntreat {
 
@@ -61,7 +62,7 @@ class ArverniEntreat {
 
             const bot = state.playersByFaction[FactionIDs.ARVERNI];
             const warbands = possibleEntreat.region.getWarbandsOrAuxiliaForFaction(chosenMobileFaction);
-            const chosenWarband = _(bot.orderPiecesForRemoval(state, warbands, false)).reverse().first();
+            const chosenWarband = _(Losses.orderPiecesForRemoval(state, warbands, false)).reverse().first();
 
             if(!chosenAlly) {
                 priority = 'b' + EnemyFactionPriority[chosenMobileFaction];
