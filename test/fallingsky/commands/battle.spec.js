@@ -17,6 +17,7 @@ import PlaceLegions from 'fallingsky/actions/placeLegions'
 import RevealPieces from 'fallingsky/actions/revealPieces'
 import RemovePieces from 'fallingsky/actions/removePieces'
 import MovePieces from 'fallingsky/actions/movePieces';
+import Losses from 'fallingsky/util/losses';
 
 describe("Battle", function () {
     let state;
@@ -119,15 +120,15 @@ describe("Battle", function () {
         }
 
         expect(interaction.losses).to.equal(4);
-
+        const piecesToRemove = _.take(Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id), interaction.retreated), interaction.losses);
         RemovePieces.execute(state, {
             factionId: romans.id,
             regionId: interaction.regionId,
-            pieces: interaction.targets
+            pieces: piecesToRemove
         });
 
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(2);
-        interaction.removed = interaction.targets;
+        interaction.removed = piecesToRemove;
         interaction.caesarCanCounterattack = false;
 
         turn.addInteraction(interaction);
@@ -178,16 +179,17 @@ describe("Battle", function () {
 
         expect(interaction.losses).to.equal(4);
 
-        const toRemove = _.filter(interaction.targets, {type: 'auxilia'});
+        const pieces = Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id), interaction.retreated)
+        const piecesToRemove = _(pieces).take(interaction.losses).reject({type : 'legion'}).value();
 
         RemovePieces.execute(state, {
             factionId: romans.id,
             regionId: interaction.regionId,
-            pieces: toRemove
+            pieces: piecesToRemove
         });
 
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
-        interaction.removed = toRemove;
+        interaction.removed = piecesToRemove;
         interaction.caesarCanCounterattack = false;
 
         turn.addInteraction(interaction);
@@ -256,16 +258,15 @@ describe("Battle", function () {
 
         expect(interaction.losses).to.equal(2);
 
-        const toRemove = _.filter(interaction.targets, {type: 'auxilia'});
-
+        const piecesToRemove = _.take(Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id), interaction.retreated), interaction.losses);
         RemovePieces.execute(state, {
             factionId: romans.id,
             regionId: interaction.regionId,
-            pieces: toRemove
+            pieces: piecesToRemove
         });
 
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
-        interaction.removed = toRemove;
+        interaction.removed = piecesToRemove;
         interaction.caesarCanCounterattack = false;
 
         turn.addInteraction(interaction);
@@ -355,16 +356,17 @@ describe("Battle", function () {
 
         expect(interaction.losses).to.equal(4);
 
-        const toRemove = _.filter(interaction.targets, {type: 'auxilia'});
+        const pieces = Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id), interaction.retreated);
+        const piecesToRemove = _(pieces).take(interaction.losses).reject({type : 'legion'}).value();
 
         RemovePieces.execute(state, {
             factionId: romans.id,
             regionId: interaction.regionId,
-            pieces: toRemove
+            pieces: piecesToRemove
         });
 
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
-        interaction.removed = toRemove;
+        interaction.removed = piecesToRemove;
         interaction.caesarCanCounterattack = false;
 
         turn.addInteraction(interaction);

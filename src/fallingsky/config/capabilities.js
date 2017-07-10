@@ -12,7 +12,8 @@ const CapabilityIDs = {
     GERMANIC_HORSE: 59,
     LEGIO_X: 15,
     MASSED_GALLIC_ARCHERS: 27,
-    TITUS_LABIENUS: 12
+    TITUS_LABIENUS: 12,
+    VERCINGETORIXS_ELITE: 30
 };
 
 const CapabilityTitles = {
@@ -24,7 +25,8 @@ const CapabilityTitles = {
     [CapabilityIDs.GERMANIC_HORSE]: 'Germanic Horse',
     [CapabilityIDs.LEGIO_X]: 'Legio X',
     [CapabilityIDs.MASSED_GALLIC_ARCHERS]: 'Massed Gallic Archers',
-    [CapabilityIDs.TITUS_LABIENUS]: 'Titus Labienus'
+    [CapabilityIDs.TITUS_LABIENUS]: 'Titus Labienus',
+    [CapabilityIDs.VERCINGETORIXS_ELITE]: 'Vercingetorix\'s Elite'
 };
 
 export {

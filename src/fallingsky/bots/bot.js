@@ -12,6 +12,7 @@ import SupplyLineAgreement from 'fallingsky/interactions/supplyLineAgreement';
 import QuartersAgreement from 'fallingsky/interactions/quartersAgreement';
 import RetreatAgreement from 'fallingsky/interactions/retreatAgreement';
 import Harassment from 'fallingsky/interactions/harassment';
+import Losses from 'fallingsky/util/losses';
 
 class Bot extends FallingSkyPlayer {
     constructor(definition) {
@@ -85,16 +86,14 @@ class Bot extends FallingSkyPlayer {
         return false;
     }
 
-    willRetreat(state, region, attackingFaction, attackerLosses, nonRetreatResults, retreatResults) {
+    willRetreat(state, region, attackingFaction, noRetreatLosses, retreatLosses) {
         let wantToRetreat = false;
+        const defendingPieces = region.getPiecesForFaction(this.factionId);
 
         // 3.2.4 - The defender may opt to have any Retreating Leader and/or Hidden Warbands stay put.
         const canRetreatInPlace = attackingFaction.id === FactionIDs.ROMANS &&
                                   this.factionId !== FactionIDs.GERMANIC_TRIBES;
-        const hasRevealedPieces = _.find(
-            defendingPieces, function (piece) {
-                return piece.revealed();
-            });
+        const hasRevealedPieces = _.find(defendingPieces, piece => (piece.type === 'warband' || piece.type === 'auxilia') &&  piece.revealed());
         const hasLossesFromRetreat = !canRetreatInPlace || (!hasSafeRetreatRegion && hasRevealedPieces);
 
         const hasSafeRetreatRegion = _.find(
@@ -102,16 +101,27 @@ class Bot extends FallingSkyPlayer {
                     return adjacentRegion.controllingFactionId() && adjacentRegion.controllingFactionId() === this.factionId;
                 }) || !hasLossesFromRetreat;
 
+
+        const noRetreatOrderedPieces = this.orderPiecesForRemoval(state, defendingPieces, false);
+        const retreatOrderedPieces = this.orderPiecesForRemoval(state, defendingPieces, false);
+
+        const noRetreatRemoved = _.take(noRetreatOrderedPieces, noRetreatLosses);
+        const noRetreatRemaining = _.drop(noRetreatOrderedPieces, noRetreatLosses);
+        const retreatRemoved = _.take(retreatOrderedPieces, retreatLosses);
+        const retreatRemaining = _.drop(retreatOrderedPieces, retreatLosses);
+
+        const worstCaseAttackerLosses = Math.floor(Losses.calculateUnmodifiedLosses(state, noRetreatRemaining, true));
+
         // 8.4.3 - When needed to ensure the survival off their last Defending piece.
-        if (nonRetreatResults.remaining.length === 0 && retreatResults.remaining.length > 0) {
+        if (noRetreatRemaining.length === 0 && retreatRemaining.length > 0) {
             console.log(this.factionId + ' wants to retreat to save last piece');
             wantToRetreat = true;
         }
 
         // 8.4.3 - If Roman, when needed to lower the number of forced Loss rolls against Legions
         if (this.factionId === FactionIDs.ROMANS) {
-            const nonRetreatLegionsRemoved = _.countBy(nonRetreatResults.targets, 'type').legion || 0;
-            const retreatLegionsRemoved = _.countBy(nonRetreatResults.targets, 'type').legion || 0;
+            const nonRetreatLegionsRemoved = _.countBy(noRetreatRemoved, 'type').legion || 0;
+            const retreatLegionsRemoved = _.countBy(retreatRemoved, 'type').legion || 0;
 
             if (retreatLegionsRemoved < nonRetreatLegionsRemoved) {
                 console.log(this.factionId + ' wants to retreat to lower legion losses');
@@ -123,9 +133,8 @@ class Bot extends FallingSkyPlayer {
         // defending pieces, when they cannot guarantee inflicting at least half the Losses against
         // the Attacker that they will suffer (regardless of how many pieces might be removed by the
         // Losses).
-        const defendingPieces = region.piecesByFaction()[this.factionId];
         const hasDefendingCitadelOrFort = Battle.defenderHasCitadelOrFort(defendingPieces);
-        const counterAttackLossesTooFew = attackerLosses < (nonRetreatResults.losses / 2);
+        const counterAttackLossesTooFew = worstCaseAttackerLosses < (noRetreatLosses / 2);
 
         if (!hasDefendingCitadelOrFort && counterAttackLossesTooFew) {
             console.log(
@@ -137,11 +146,16 @@ class Bot extends FallingSkyPlayer {
             console.log(this.factionId + ' will be able to retreat safely');
         }
 
+        let agreeingFactionId;
         if (wantToRetreat && !hasSafeRetreatRegion) {
-            retreatResults.agreeingFactionId = this.getRetreatAgreement(state, region);
+            agreeingFactionId = this.getRetreatAgreement(state, region);
         }
 
-        return wantToRetreat && (hasSafeRetreatRegion || retreatResults.agreeingFactionId);
+        const willRetreat = wantToRetreat && (hasSafeRetreatRegion || agreeingFactionId);
+        return {
+            willRetreat,
+            agreeingFactionId
+        };
     }
 
     getRetreatAgreement(state, region) {

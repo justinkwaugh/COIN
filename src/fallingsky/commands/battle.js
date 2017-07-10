@@ -6,6 +6,7 @@ import BattleResults from './battleResults';
 import RevealPieces from '../actions/revealPieces';
 import RemovePieces  from '../actions/removePieces';
 import {CapabilityIDs} from '../config/capabilities';
+import Losses from 'fallingsky/util/losses';
 
 class Battle extends Command {
 
@@ -29,7 +30,7 @@ class Battle extends Command {
         const defenderCanRetreat = this.canRetreat(attackingFaction, defendingFaction, region);
 
         // Base Losses
-        let unmodifiedDefenderLosses = this.calculateUnmodifiedLosses(attackingPieces);
+        let unmodifiedDefenderLosses = Losses.calculateUnmodifiedLosses(state, attackingPieces);
         if (attackingFaction.id === FactionIDs.ARVERNI && state.hasUnshadedCapability(
                 CapabilityIDs.MASSED_GALLIC_ARCHERS)) {
             unmodifiedDefenderLosses = Math.max(0, unmodifiedDefenderLosses - 1);
@@ -42,34 +43,38 @@ class Battle extends Command {
         }
         noRetreatDefenderLosses = Math.floor(noRetreatDefenderLosses);
 
+
         const minNoRetreatDefenderLosses = Math.min(Math.floor(noRetreatDefenderLosses), defendingPieces.length);
         const noRetreatRollOrderedDefendingPieces = this.orderPiecesRollsFirst(state, defendingPieces, false);
         const worstCaseNoRetreatDefenderResults = this.calculateLeastAttackResults(noRetreatRollOrderedDefendingPieces,
-                                                                          minNoRetreatDefenderLosses, false);
-        const worstCaseNoRetreatDefenderResultsWithAmbush = this.calculateLeastAttackResults(noRetreatRollOrderedDefendingPieces,
-                                                                                minNoRetreatDefenderLosses, true);
+                                                                                   minNoRetreatDefenderLosses, false);
+        const worstCaseNoRetreatDefenderResultsWithAmbush = this.calculateLeastAttackResults(
+            noRetreatRollOrderedDefendingPieces,
+            minNoRetreatDefenderLosses, true);
 
         // Counterattack
         const defenderCanCounterattack = this.canCounterattack(false, minNoRetreatDefenderLosses, defendingPieces);
         const defenderCanCounterattackAmbush = this.canCounterattack(true, minNoRetreatDefenderLosses, defendingPieces);
 
         const worstCaseAttackerLosses = Math.min(
-            Math.floor(this.calculateUnmodifiedLosses(worstCaseNoRetreatDefenderResults.remaining, true)),
+            Math.floor(Losses.calculateUnmodifiedLosses(state, worstCaseNoRetreatDefenderResults.remaining, true)),
             attackingPieces.length);
         const worstCaseAttackerLossesAmbush = defenderCanCounterattackAmbush ? worstCaseAttackerLosses : 0;
 
         const orderedAttackingPieces = attackingPlayer.orderPiecesForRemoval(state, attackingPieces, false);
-        const worstCaseCounterattackResults = this.calculateAttackResults(orderedAttackingPieces, worstCaseAttackerLosses,
-                                                                 false);
+        const worstCaseCounterattackResults = this.calculateAttackResults(orderedAttackingPieces,
+                                                                          worstCaseAttackerLosses,
+                                                                          false);
         const worstCaseCounterattackResultsWithAmbush = this.calculateAttackResults(orderedAttackingPieces,
-                                                                       worstCaseAttackerLossesAmbush, false);
+                                                                                    worstCaseAttackerLossesAmbush,
+                                                                                    false);
 
         // Retreat
         const retreatDefenderLosses = Math.floor(unmodifiedDefenderLosses / 2);
         const minRetreatDefenderLosses = Math.min(retreatDefenderLosses, defendingPieces.length);
         const retreatOrderedDefendingPieces = this.orderPiecesRollsFirst(state, defendingPieces, true);
         const worstCaseRetreatDefenderResults = this.calculateLeastAttackResults(retreatOrderedDefendingPieces,
-                                                                        minRetreatDefenderLosses, false);
+                                                                                 minRetreatDefenderLosses, false);
 
         const worstCaseDefenderLosses = _.min(
             [(defenderCanRetreat ? worstCaseRetreatDefenderResults.targets.length : worstCaseNoRetreatDefenderResults.targets.length), worstCaseNoRetreatDefenderResults.targets.length, defendingPieces.length]);
@@ -91,7 +96,7 @@ class Battle extends Command {
                 defenderCanRetreat: defenderCanRetreat,
                 defenderCanCounterattack: {normal: defenderCanCounterattack, ambush: defenderCanCounterattackAmbush},
 
-                defenderLosses: { normal: noRetreatDefenderLosses, retreat:retreatDefenderLosses },
+                defenderLosses: {normal: noRetreatDefenderLosses, retreat: retreatDefenderLosses},
 
                 worstCaseRetreatDefenderResults: worstCaseRetreatDefenderResults,
                 worstCaseNoRetreatDefenderResults: {
@@ -100,9 +105,13 @@ class Battle extends Command {
                 },
                 worstCaseDefenderLosses: {normal: worstCaseDefenderLosses, ambush: worstCaseDefenderLossesAmbush},
                 worstCaseAttackerLosses: {normal: worstCaseAttackerLosses, ambush: worstCaseAttackerLossesAmbush},
-                worstCaseCounterattackResults: {normal: worstCaseCounterattackResults, ambush: worstCaseCounterattackResultsWithAmbush}
+                worstCaseCounterattackResults: {
+                    normal: worstCaseCounterattackResults,
+                    ambush: worstCaseCounterattackResultsWithAmbush
+                }
             });
     }
+
 
     static orderPiecesRollsFirst(state, pieces, retreat) {
         const alliesFortsAndCitadels = _(pieces).filter(
@@ -166,10 +175,10 @@ class Battle extends Command {
             attackingPieces = _.concat(attackingPieces, germanicPieces);
         }
 
-        if(!battleResults.calculatedDefenderResults) {
+        if (!battleResults.calculatedDefenderResults) {
             const defendingPieces = region.piecesByFaction()[defendingFaction.id];
 
-            let unmodifiedDefenderLosses = this.calculateUnmodifiedLosses(attackingPieces);
+            let unmodifiedDefenderLosses = Losses.calculateUnmodifiedLosses(state, attackingPieces);
             if (attackingFaction.id === FactionIDs.ARVERNI && state.hasUnshadedCapability(
                     CapabilityIDs.MASSED_GALLIC_ARCHERS)) {
                 unmodifiedDefenderLosses = Math.max(0, unmodifiedDefenderLosses - 1);
@@ -180,38 +189,48 @@ class Battle extends Command {
                 noRetreatDefenderLosses /= 2;
             }
             noRetreatDefenderLosses = Math.floor(noRetreatDefenderLosses);
-            const noRetreatOrderedDefendingPieces = defendingPlayer.orderPiecesForRemoval(state, defendingPieces,
-                                                                                          false);
-            const noRetreatDefenderResults = this.calculateAttackResults(noRetreatOrderedDefendingPieces,
-                                                                         noRetreatDefenderLosses);
 
-            const worstCaseAttackerLosses = Math.floor(
-                this.calculateUnmodifiedLosses(noRetreatDefenderResults.remaining, true));
+            if (this.partyHasUnshadedLegioX(state, region, defendingFaction)) {
+                noRetreatDefenderLosses -= 1;
+            }
+            if (this.partyHasUnshadedLegioX(state, region, attackingFaction)) {
+                noRetreatDefenderLosses += 2;
+            }
 
-            let defenderResults = noRetreatDefenderResults;
+            let defenderResults = {
+                losses: noRetreatDefenderLosses,
+                targets: [],
+                remaining: []
+            };
+
             if (!ambush && this.canRetreat(attackingFaction, defendingFaction, region)) {
-                const retreatDefenderLosses = Math.floor(unmodifiedDefenderLosses / 2);
-                const retreatOrderedDefendingPieces = defendingPlayer.orderPiecesForRemoval(state, defendingPieces,
-                                                                                            true);
-                const retreatDefenderResults = this.calculateAttackResults(retreatOrderedDefendingPieces,
-                                                                           retreatDefenderLosses);
+                let retreatDefenderLosses = Math.floor(unmodifiedDefenderLosses / 2);
+                if (this.partyHasUnshadedLegioX(state, region, defendingFaction)) {
+                    retreatDefenderLosses -= 1;
+                }
+                if (this.partyHasUnshadedLegioX(state, region, attackingFaction)) {
+                    retreatDefenderLosses += 2;
+                }
 
-                battleResults.willRetreat = this.getRetreatDeclaration(state, region, attackingFaction,
-                                                                       defendingFaction, worstCaseAttackerLosses,
-                                                                       noRetreatDefenderResults,
-                                                                       retreatDefenderResults);
-                if (battleResults.willRetreat) {
+                const retreatDeclaration = this.getRetreatDeclaration(state, region, attackingFaction,
+                                                                       defendingFaction,
+                                                                       noRetreatDefenderLosses,
+                                                                       retreatDefenderLosses);
+                if (retreatDeclaration.willRetreat) {
                     console.log(defendingFaction.name + ' is retreating!');
-                    defenderResults = retreatDefenderResults;
+                    battleResults.willRetreat = true;
+                    defenderResults.losses = retreatDefenderLosses;
+                    defenderResults.agreeingFactionId = retreatDeclaration.agreeingFactionId;
                 }
             }
-            battleResults.calculatedDefenderResults = defenderResults;
+
+            battleResults.calculatedDefenderResults = defenderResults
         }
 
-        if(battleResults.willBesiege && !battleResults.besieged) {
-            const pieceToRemove = _.find(battleResults.defendingPieces, { type : 'citadel' }) ||
-                                  _.find(battleResults.defendingPieces, { type : 'alliedtribe' });
-            if(pieceToRemove) {
+        if (battleResults.willBesiege && !battleResults.besieged) {
+            const pieceToRemove = _.find(battleResults.defendingPieces, {type: 'citadel'}) ||
+                                  _.find(battleResults.defendingPieces, {type: 'alliedtribe'});
+            if (pieceToRemove) {
                 console.log('*** Attacker is Besieging ***');
                 RemovePieces.execute(state,
                                      {
@@ -223,17 +242,27 @@ class Battle extends Command {
             battleResults.besieged = true;
         }
 
-        if(!battleResults.committedDefenderResults) {
+        if (!battleResults.committedDefenderResults) {
             this.handleLosses(state, battleResults, battleResults.calculatedDefenderResults, false);
             battleResults.committedDefenderResults = battleResults.calculatedDefenderResults;
         }
 
 
         if (battleResults.committedDefenderResults.counterattackPossible && !battleResults.willRetreat) {
-            const attackerLosses = Math.floor(this.calculateUnmodifiedLosses(battleResults.committedDefenderResults.remaining, true));
+            let attackerLosses = Math.floor(
+                Losses.calculateUnmodifiedLosses(state, battleResults.committedDefenderResults.remaining, true));
+            if (this.partyHasUnshadedLegioX(state, region, attackingFaction)) {
+                attackerLosses -= 1;
+            }
+            if (this.partyHasUnshadedLegioX(state, region, defendingFaction)) {
+                attackerLosses += 2;
+            }
             if (attackerLosses > 0) {
-                const orderedAttackingPieces = attackingPlayer.orderPiecesForRemoval(state, attackingPieces, false);
-                const counterattackResults = this.calculateAttackResults(orderedAttackingPieces, attackerLosses);
+                const counterattackResults = {
+                    losses: attackerLosses,
+                    targets: [],
+                    remaining: []
+                };
                 this.handleLosses(state, battleResults, counterattackResults, true);
             }
         }
@@ -249,7 +278,8 @@ class Battle extends Command {
         }
 
         if (ambush && state.hasShadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id)) {
-            const citadelOrFort = _.find(region.getPiecesForFaction(defendingFaction.id), (piece) => piece.type === 'citadel' || piece.type === 'fort');
+            const citadelOrFort = _.find(region.getPiecesForFaction(defendingFaction.id),
+                                         (piece) => piece.type === 'citadel' || piece.type === 'fort');
             if (citadelOrFort) {
                 console.log('*** Attacker is using Ballistae ***');
                 RemovePieces.execute(state,
@@ -261,30 +291,40 @@ class Battle extends Command {
             }
         }
         battleResults.complete = true;
-        // region.logState();
         console.log('Battle complete');
 
     }
 
-    static getRetreatDeclaration(state, region, attackingFaction, defendingFaction, worstCaseAttackerLosses, noRetreatDefenderResults, retreatDefenderResults) {
+    static partyHasUnshadedLegioX(state, region, faction) {
+        if (faction.id !== FactionIDs.ROMANS) {
+            return false;
+        }
+
+        if (!region.getLeaderForFaction(FactionIDs.ROMANS) || region.getLegions().length === 0) {
+            return false;
+        }
+
+        return state.hasUnshadedCapability(CapabilityIDs.LEGIO_X);
+    }
+
+    static getRetreatDeclaration(state, region, attackingFaction, defendingFaction, noRetreatLosses, retreatLosses) {
 
         const existingRetreatDeclaration = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                      interaction => interaction.type === 'RetreatDeclaration' && interaction.regionId === region.id && interaction.respondingFactionId === defendingFaction.id);
+                                                  interaction => interaction.type === 'RetreatDeclaration' && interaction.regionId === region.id && interaction.respondingFactionId === defendingFaction.id);
 
-        if(existingRetreatDeclaration) {
-            return existingRetreatDeclaration.status === 'agreed';
+        if (existingRetreatDeclaration) {
+            return { willRetreat : existingRetreatDeclaration.status === 'agreed' }
         }
 
         return state.playersByFaction[defendingFaction.id].willRetreat(state, region, attackingFaction,
-                                                                       worstCaseAttackerLosses,
-                                                                       noRetreatDefenderResults,
-                                                                       retreatDefenderResults);
+                                                                       noRetreatLosses,
+                                                                       retreatLosses);
     }
 
     static handleLosses(state, battleResults, attackResults, counterattack) {
         const defender = counterattack ? battleResults.attackingFaction : battleResults.defendingFaction;
 
-        if(battleResults.region.getPiecesForFaction(defender.id).length === 0) {
+        if (battleResults.region.getPiecesForFaction(defender.id).length === 0) {
             return;
         }
 
@@ -304,7 +344,7 @@ class Battle extends Command {
         const defender = battleResults.defendingFaction;
 
         const existingRetreat = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                      interaction => interaction.type === 'Retreat' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defender.id);
+                                       interaction => interaction.type === 'Retreat' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defender.id);
         if (!existingRetreat) {
             state.playersByFaction[defender.id].retreatFromBattle(state, battleResults, attackResults);
         }
@@ -343,38 +383,6 @@ class Battle extends Command {
         }
 
         return true;
-    }
-
-    static calculateUnmodifiedLosses(attackingPieces, counterattack) {
-        let losses = 0;
-        const leader = _.find(attackingPieces, {type: 'leader'});
-        _.each(
-            attackingPieces, function (piece) {
-                if (piece.type === 'warband') {
-                    if (!counterattack && leader && !leader.isSuccessor() && piece.factionId === FactionIDs.BELGAE) {
-                        losses += 1;
-                    }
-                    else {
-                        losses += 0.5;
-                    }
-                }
-                else if (piece.type === 'auxilia') {
-                    losses += 0.5;
-                }
-                else if (piece.type === 'legion') {
-                    if (!counterattack && leader && !leader.isSuccessor() && piece.factionId === FactionIDs.ROMANS) {
-                        losses += 2;
-                    }
-                    else {
-                        losses += 1;
-                    }
-                }
-                else if (piece.type === 'leader') {
-                    losses += 1;
-                }
-            });
-
-        return losses;
     }
 
     static calculateLeastAttackResults(orderedFactionPieces, calculatedLosses, ambush) {
