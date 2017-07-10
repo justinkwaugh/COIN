@@ -6,7 +6,6 @@ import BattleResults from './battleResults';
 import RevealPieces from '../actions/revealPieces';
 import RemovePieces  from '../actions/removePieces';
 import {CapabilityIDs} from '../config/capabilities';
-import Bot from '../bots/bot';
 
 class Battle extends Command {
 
@@ -41,38 +40,40 @@ class Battle extends Command {
         if (this.defenderHasCitadelOrFort(defendingPieces)) {
             noRetreatDefenderLosses /= 2;
         }
+        noRetreatDefenderLosses = Math.floor(noRetreatDefenderLosses);
 
-        noRetreatDefenderLosses = Math.min(Math.floor(noRetreatDefenderLosses), defendingPieces.length);
-        const noRetreatOrderedDefendingPieces = defendingPlayer.orderPiecesForRemoval(state, defendingPieces, false);
-        const noRetreatDefenderResults = this.calculateLeastAttackResults(noRetreatOrderedDefendingPieces,
-                                                                          noRetreatDefenderLosses, false);
-        const noRetreatDefenderResultsAmbush = this.calculateLeastAttackResults(noRetreatOrderedDefendingPieces,
-                                                                                noRetreatDefenderLosses, true);
+        const minNoRetreatDefenderLosses = Math.min(Math.floor(noRetreatDefenderLosses), defendingPieces.length);
+        const noRetreatRollOrderedDefendingPieces = this.orderPiecesRollsFirst(state, defendingPieces, false);
+        const worstCaseNoRetreatDefenderResults = this.calculateLeastAttackResults(noRetreatRollOrderedDefendingPieces,
+                                                                          minNoRetreatDefenderLosses, false);
+        const worstCaseNoRetreatDefenderResultsWithAmbush = this.calculateLeastAttackResults(noRetreatRollOrderedDefendingPieces,
+                                                                                minNoRetreatDefenderLosses, true);
 
         // Counterattack
-        const defenderCanCounterattack = this.canCounterattack(false, noRetreatDefenderLosses, defendingPieces);
-        const defenderCanCounterattackAmbush = this.canCounterattack(true, noRetreatDefenderLosses, defendingPieces);
+        const defenderCanCounterattack = this.canCounterattack(false, minNoRetreatDefenderLosses, defendingPieces);
+        const defenderCanCounterattackAmbush = this.canCounterattack(true, minNoRetreatDefenderLosses, defendingPieces);
 
         const worstCaseAttackerLosses = Math.min(
-            Math.floor(this.calculateUnmodifiedLosses(noRetreatDefenderResults.remaining, true)),
+            Math.floor(this.calculateUnmodifiedLosses(worstCaseNoRetreatDefenderResults.remaining, true)),
             attackingPieces.length);
         const worstCaseAttackerLossesAmbush = defenderCanCounterattackAmbush ? worstCaseAttackerLosses : 0;
 
         const orderedAttackingPieces = attackingPlayer.orderPiecesForRemoval(state, attackingPieces, false);
-        const counterattackResults = this.calculateAttackResults(orderedAttackingPieces, worstCaseAttackerLosses,
+        const worstCaseCounterattackResults = this.calculateAttackResults(orderedAttackingPieces, worstCaseAttackerLosses,
                                                                  false);
-        const counterattackResultsAmbush = this.calculateAttackResults(orderedAttackingPieces,
+        const worstCaseCounterattackResultsWithAmbush = this.calculateAttackResults(orderedAttackingPieces,
                                                                        worstCaseAttackerLossesAmbush, false);
 
         // Retreat
-        const retreatDefenderLosses = Math.min(Math.floor(unmodifiedDefenderLosses / 2), defendingPieces.length);
-        const retreatOrderedDefendingPieces = defendingPlayer.orderPiecesForRemoval(state, defendingPieces, true);
-        const retreatDefenderResults = this.calculateLeastAttackResults(retreatOrderedDefendingPieces,
-                                                                        retreatDefenderLosses, false);
+        const retreatDefenderLosses = Math.floor(unmodifiedDefenderLosses / 2);
+        const minRetreatDefenderLosses = Math.min(retreatDefenderLosses, defendingPieces.length);
+        const retreatOrderedDefendingPieces = this.orderPiecesRollsFirst(state, defendingPieces, true);
+        const worstCaseRetreatDefenderResults = this.calculateLeastAttackResults(retreatOrderedDefendingPieces,
+                                                                        minRetreatDefenderLosses, false);
 
         const worstCaseDefenderLosses = _.min(
-            [(defenderCanRetreat ? retreatDefenderResults.targets.length : noRetreatDefenderResults.targets.length), noRetreatDefenderResults.targets.length, defendingPieces.length]);
-        const worstCaseDefenderLossesAmbush = noRetreatDefenderResultsAmbush.targets.length;
+            [(defenderCanRetreat ? worstCaseRetreatDefenderResults.targets.length : worstCaseNoRetreatDefenderResults.targets.length), worstCaseNoRetreatDefenderResults.targets.length, defendingPieces.length]);
+        const worstCaseDefenderLossesAmbush = worstCaseNoRetreatDefenderResultsWithAmbush.targets.length;
 
         return new BattleResults(
             {
@@ -90,15 +91,54 @@ class Battle extends Command {
                 defenderCanRetreat: defenderCanRetreat,
                 defenderCanCounterattack: {normal: defenderCanCounterattack, ambush: defenderCanCounterattackAmbush},
 
-                worstCaseRetreatDefenderResults: retreatDefenderResults,
+                defenderLosses: { normal: noRetreatDefenderLosses, retreat:retreatDefenderLosses },
+
+                worstCaseRetreatDefenderResults: worstCaseRetreatDefenderResults,
                 worstCaseNoRetreatDefenderResults: {
-                    normal: noRetreatDefenderResults,
-                    ambush: noRetreatDefenderResultsAmbush
+                    normal: worstCaseNoRetreatDefenderResults,
+                    ambush: worstCaseNoRetreatDefenderResultsWithAmbush
                 },
                 worstCaseDefenderLosses: {normal: worstCaseDefenderLosses, ambush: worstCaseDefenderLossesAmbush},
                 worstCaseAttackerLosses: {normal: worstCaseAttackerLosses, ambush: worstCaseAttackerLossesAmbush},
-                worstCaseCounterattackResults: {normal: counterattackResults, ambush: counterattackResultsAmbush}
+                worstCaseCounterattackResults: {normal: worstCaseCounterattackResults, ambush: worstCaseCounterattackResultsWithAmbush}
             });
+    }
+
+    static orderPiecesRollsFirst(state, pieces, retreat) {
+        const alliesFortsAndCitadels = _(pieces).filter(
+            (piece) => {
+                return piece.type === 'alliedtribe' || piece.type === 'fort' || piece.type === 'citadel';
+            }).sortBy(
+            (piece) => {
+                if (piece.type === 'fort' || piece.type === 'citadel') {
+                    return 'a';
+                }
+                else {
+                    return 'b';
+                }
+            }).value();
+
+        const warbandsAuxiliaLegionsAndLeader = _(pieces).filter(
+            (piece) => {
+                return piece.type === 'warband' || piece.type === 'auxilia' || piece.type === 'legion' || piece.type === 'leader';
+            }).sortBy(
+            (piece) => {
+                if (piece.type === 'legion' || piece.type === 'leader') {
+                    return 'a';
+                }
+                else {
+                    return 'b';
+                }
+            }).value();
+
+        let piecesForRemoval = [];
+        if (retreat) {
+            piecesForRemoval = _.concat(alliesFortsAndCitadels, warbandsAuxiliaLegionsAndLeader);
+        }
+        else {
+            piecesForRemoval = _.concat(warbandsAuxiliaLegionsAndLeader, alliesFortsAndCitadels);
+        }
+        return piecesForRemoval;
     }
 
     static doExecute(state, args) {

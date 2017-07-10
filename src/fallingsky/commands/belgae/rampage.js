@@ -9,7 +9,7 @@ class Rampage extends Command {
     static doTest(state, args) {
         const leaderRegion = this.findLeaderRegion(state);
         if (!leaderRegion) {
-            return false;
+            return [];
         }
 
         const leader = leaderRegion.getLeaderForFaction(FactionIDs.BELGAE);

@@ -185,7 +185,11 @@ class ArverniBattle {
     }
 
     static isEffectiveBattle(battleResult) {
-        return this.willCauseEnoughDefenderLosses(battleResult);
+        return this.isLossInflictedOnLegion(battleResult) || this.willCauseEnoughDefenderLosses(battleResult);
+    }
+
+    static isLossInflictedOnLegion(battleResult) {
+        return battleResult.willInflictLossAgainstLegion(battleResult.canAmbush);
     }
 
     static willCauseEnoughDefenderLosses(battleResult) {

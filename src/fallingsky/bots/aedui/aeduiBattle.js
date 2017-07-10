@@ -190,10 +190,10 @@ class AeduiBattle {
     }
 
     static isHighlyEffectiveBattle(battleResult) {
-        return battleResult.willCauseLeaderLoss(battleResult.canAmbush) ||
-               battleResult.willCauseAllyLoss(battleResult.canAmbush) ||
-               battleResult.willCauseCitadelLoss(battleResult.canAmbush) ||
-               battleResult.willCauseLegionLoss(battleResult.canAmbush);
+        return battleResult.willCauseLeaderRemoval(battleResult.canAmbush) ||
+               battleResult.willCauseAllyRemoval(battleResult.canAmbush) ||
+               battleResult.willCauseCitadelRemoval(battleResult.canAmbush) ||
+               battleResult.willCauseLegionRemoval(battleResult.canAmbush);
     }
 
     static isEffectiveBattle(battleResult) {
@@ -219,16 +219,16 @@ class AeduiBattle {
 
     static getBattlePriority(battleResult) {
         const enemyPriority = EnemyFactionPriority[battleResult.defendingFaction.id];
-        if (battleResult.willCauseLeaderLoss(battleResult.canAmbush)) {
+        if (battleResult.willCauseLeaderRemoval(battleResult.canAmbush)) {
             return 'a' + enemyPriority;
         }
-        else if (battleResult.willCauseAllyLoss(battleResult.canAmbush)) {
+        else if (battleResult.willCauseAllyRemoval(battleResult.canAmbush)) {
             return 'b' + enemyPriority;
         }
-        else if (battleResult.willCauseCitadelLoss(battleResult.canAmbush)) {
+        else if (battleResult.willCauseCitadelRemoval(battleResult.canAmbush)) {
             return 'c' + enemyPriority;
         }
-        else if (battleResult.willCauseLegionLoss(battleResult.canAmbush)) {
+        else if (battleResult.willCauseLegionRemoval(battleResult.canAmbush)) {
             return 'd';
         }
         else if (this.willCauseEnoughDefenderLosses(battleResult)) {
@@ -243,16 +243,16 @@ class AeduiBattle {
         if (!battleResult.canAmbush) {
             return false;
         }
-        if (!battleResult.willCauseLeaderLoss() && battleResult.willCauseLeaderLoss(true)) {
+        if (!battleResult.willCauseLeaderRemoval() && battleResult.willCauseLeaderRemoval(true)) {
             return true;
         }
-        if (!battleResult.willCauseAllyLoss() && battleResult.willCauseAllyLoss(true)) {
+        if (!battleResult.willCauseAllyRemoval() && battleResult.willCauseAllyRemoval(true)) {
             return true;
         }
-        if (!battleResult.willCauseCitadelLoss() && battleResult.willCauseCitadelLoss(true)) {
+        if (!battleResult.willCauseCitadelRemoval() && battleResult.willCauseCitadelRemoval(true)) {
             return true;
         }
-        if (!battleResult.willCauseLegionLoss() && battleResult.willCauseLegionLoss(true)) {
+        if (!battleResult.willCauseLegionRemoval() && battleResult.willCauseLegionRemoval(true)) {
             return true;
         }
         if (battleResult.worstCaseDefenderLosses.normal < battleResult.worstCaseDefenderLosses.ambush) {

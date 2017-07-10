@@ -2,7 +2,7 @@ import _ from 'lib/lodash';
 import Bot from '../bot';
 import FactionIDs from '../../config/factionIds';
 import RomanEvent from './romanEvent';
-// import RomanBattle from './romanBattle';
+import RomanBattle from './romanBattle';
 // import RomanRecruit from './romanRecruit';
 // import RomanSeize from './romanSeize';
 // import RomanMarch from './romanMarch';
@@ -30,13 +30,13 @@ class RomanBot extends Bot {
         super({factionId: FactionIDs.ROMANS});
     }
 
-    takeTurn(currentState) {
+    takeTurn(state) {
         let commandAction = null;
         const turn = state.turnHistory.currentTurn;
         const modifiers = turn.getContext();
 
         if (!turn.getCheckpoint(Checkpoints.BATTLE_CHECK) && modifiers.isCommandAllowed(CommandIDs.BATTLE)) {
-            // commandAction = RomanBattle.battle(state, modifiers);
+            commandAction = RomanBattle.battle(state, modifiers);
         }
         turn.markCheckpoint(Checkpoints.BATTLE_CHECK);
 
