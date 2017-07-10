@@ -101,6 +101,7 @@ class RomanBattle {
                     return;
                 }
 
+
                 const numNonCriticalPieces = region.getPiecesForFaction(
                         FactionIDs.ROMANS).length - numLegions - (hasCaesar ? 1 : 0);
                 const importantEnemyData = _(EnemyFactionPriority).keys().map(
@@ -161,11 +162,8 @@ class RomanBattle {
     static findBattlegrounds(state, modifiers, importantRegions) {
         return _(state.regions).map(
             (region) => {
-                const leader = region.getLeaderForFaction(FactionIDs.ROMANS);
-                const hasCaesar = leader && !leader.isSuccessor();
-                const numLegions = region.getLegions().length;
-
-                if (!hasCaesar && numLegions === 0) {
+                const importantRegionData = _.find(importantRegions, regionData => regionData.region.id === region.id);
+                if (!importantRegionData) {
                     return;
                 }
 
@@ -181,7 +179,6 @@ class RomanBattle {
                                 attackingFactionId: FactionIDs.ROMANS,
                                 defendingFactionId: factionId
                             });
-
                         if (!this.isEffectiveBattle(battleResult)) {
                             return;
                         }
@@ -189,10 +186,8 @@ class RomanBattle {
                         return battleResult;
                     }).compact().value();
 
-                const importantRegionData = _.find(importantRegions, regionData => regionData.region.id === region.id);
                 const importantEnemyData = importantRegionData ? _.keyBy(importantRegionData.importantEnemyData,
                                                                          'factionId') : {};
-
                 if (potentialBattles.length) {
                     return {
                         region,
@@ -213,7 +208,9 @@ class RomanBattle {
     }
 
     static willCauseEnoughDefenderLosses(battleResult) {
-        return battleResult.worstCaseDefenderLosses.normal > 0 && battleResult.worstCaseAttackerLosses.normal < (battleResult.worstCaseDefenderLosses.normal / 2);
+        // 8.8.1 They do so only in Regions where the Defender would inflict less than half the Losses (as distinct from removals) on the Romans
+        // as the Romans would inflict
+        return battleResult.defenderLosses.normal > 0 && battleResult.worstCaseAttackerLosses.normal < (battleResult.defenderLosses.normal / 2);
     }
 
     static prioritizeBattles(state, battlegrounds) {
@@ -224,23 +221,23 @@ class RomanBattle {
     }
 
     static getBestBattleForBattleground(state, battleground) {
-
         return _(battleground.potentialBattles).map(
             (potentialBattle) => {
                 let priority;
                 const enemyData = battleground.importantEnemyData[potentialBattle.defendingFaction.id];
-                if (enemyData) {
+                if(enemyData) {
                     if (enemyData.hasLeader) {
-                        priority = 'a';
+                        priority = 'a-';
                     }
-                    else if (enemyData.numAlliesAndCitadels > 0) {
-                        priority = 'b' + (99 - enemyData.numAlliesAndCitadels);
+
+                    if (enemyData.numAlliesAndCitadels > 0) {
+                        priority += 'b' + (99 - enemyData.numAlliesAndCitadels) + '-';
                     }
                 }
-                if (!priority) {
-                    priority = 'c' + (99 - potentialBattle.region.getWarbandsOrAuxiliaForFaction(
-                            potentialBattle.defendingFaction.id));
-                }
+
+                priority += 'c' + (99 - potentialBattle.region.getWarbandsOrAuxiliaForFaction(
+                        potentialBattle.defendingFaction.id).length);
+
                 const faction = state.factionsById[potentialBattle.defendingFaction.id];
                 const player = state.playersByFaction[potentialBattle.defendingFaction.id];
                 priority += '-' + (50 - faction.victoryMargin(state)) + '-' + (player.isNonPlayer ? 'b' : 'a');

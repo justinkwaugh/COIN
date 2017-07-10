@@ -97,7 +97,7 @@ class BattleResults {
             return prefix + (piece.type === type ? 2 : 1);
         }).take(counterattack ? this.worstCaseAttackerLosses.normal : this.defenderLosses.normal).value();
 
-        inflictedLoss &= _.find(normalOrderedLossTargets, {type: type});
+        inflictedLoss = inflictedLoss && !_.isUndefined(_.find(normalOrderedLossTargets, {type: type}));
 
         if (this.defenderCanRetreat && !counterattack && !ambush) {
             const retreatOrderedLossTargets = _(pieces).sortBy((piece) => {
@@ -112,7 +112,7 @@ class BattleResults {
 
                 return prefix + (piece.type === type ? 2 : 1);
             }).take(this.defenderLosses.retreat).value();
-            inflictedLoss &= _.find(retreatOrderedLossTargets, {type: type});
+            inflictedLoss = inflictedLoss && !_.isUndefined(_.find(retreatOrderedLossTargets, {type: type}));
         }
 
         return inflictedLoss;
