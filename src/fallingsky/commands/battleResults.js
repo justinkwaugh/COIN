@@ -1,4 +1,5 @@
 import _ from '../../lib/lodash';
+import FactionIDs from 'fallingsky/config/factionIds'
 import Logging from '../util/logging';
 
 class BattleResults {
@@ -26,10 +27,12 @@ class BattleResults {
 
         this.willAmbush = definition.willAmbush;
         this.willEnlistGermans = definition.willEnlistGermans;
+        this.willBesiege = definition.willBesiege;
 
         this.paid = definition.paid;
         this.willRetreat = definition.willRetreat;
         this.retreated = definition.retreated;
+        this.besieged = definition.besieged;
         this.calculatedDefenderResults = definition.calculatedDefenderResults;
         this.committedDefenderResults = definition.committedDefenderResults;
         this.complete = definition.complete;
@@ -116,6 +119,69 @@ class BattleResults {
         }
 
         return inflictedLoss;
+    }
+
+    getNumLossesAgainstPiecesOfType(type, ambush = false, rollsFail = false) {
+        const normalResults = this.calcNumLossesAgainstPiecesOfType(type, ambush, false, rollsFail);
+        let worstResults = normalResults;
+        if(normalResults.length > 0 && this.defenderCanRetreat && !ambush) {
+            const retreatResults = this.calcNumLossesAgainstPiecesOfType(type, false, true, rollsFail);
+            if(retreatResults[0].numLosses < normalResults[0].numLosses) {
+                worstResults = retreatResults;
+            }
+        }
+
+        return worstResults;
+    }
+
+    calcNumLossesAgainstPiecesOfType(type, ambush=false, retreat=false, rollsFail = false) {
+        const leader = _.find(this.defendingPieces, {type : 'leader'});
+        const hasCaesar = leader && leader.factionId === FactionIDs.ROMANS && !leader.isSuccessor();
+
+        const normalOrderedLossTargets = _(this.defendingPieces).sortBy((piece) => {
+            let prefix;
+
+            if (piece.type === 'alliedtribe' || piece.type === 'fort' || piece.type === 'citadel') {
+                prefix = retreat ? 'a' :'b';
+            }
+            else {
+                prefix = retreat ? 'b' :'a';
+            }
+
+            return prefix + (piece.type === type ? 2 : 1);
+        }).take(this.defenderLosses.normal).value();
+
+        const index = _.findIndex(normalOrderedLossTargets, {type:type});
+
+        let noLosses = false;
+        let noLossesAfterFirst = false;
+
+        if(!rollsFail && (!ambush || hasCaesar)) {
+            if(index < 0) {
+                noLosses = true;
+            }
+
+            if(index > 0) {
+                const earlierPieces = _.take(normalOrderedLossTargets, index);
+                if (_.find(earlierPieces, {canRoll: true})) {
+                    noLosses = true;
+                }
+            }
+
+            if(index === 0 && normalOrderedLossTargets[0].canRoll) {
+                noLossesAfterFirst = true;
+            }
+        }
+
+        return _(this.defendingPieces).map((piece, pieceIndex) => {
+            if(piece.type !== type) {
+                return;
+            }
+            return {
+                piece,
+                numLosses: noLosses ? 0 : (noLossesAfterFirst && pieceIndex > index) ? 0 : (this.defenderLosses.normal - pieceIndex)
+            }
+        }).compact().value();
     }
 
     logResults() {

@@ -5,6 +5,7 @@ class Leader extends FactionPiece {
     constructor(definition) {
         definition.type = 'leader';
         definition.isMobile = true;
+        definition.canRoll = true;
         super(definition);
         this.name = definition.name;
         this.isSuccessor = ko.observable(false);

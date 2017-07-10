@@ -224,37 +224,37 @@ class Bot extends FallingSkyPlayer {
             }
         }
 
-        const targets = _.clone(attackResults.targets);
+        const targets = _.clone(this.orderPiecesForRemoval(state, region.getPiecesForFaction(this.factionId)), battleResults.willRetreat);
         const losses = attackResults.losses;
 
         const removed = [];
-        const saved = [];
 
-        _.each(_.range(0, losses), (index) => {
-            const piece = _.first(targets);
-            let willRemove = true;
-            const canRollForLoss = piece.type === 'leader' || piece.type === 'citadel' || piece.type === 'legion' || piece.type === 'fort';
-            if (canRollForLoss && allowRolls) {
-                const roll = _.random(1, 6);
-                console.log('Rolling for loss of ' + piece.type + ', need 4-6 and got ' + roll);
-                willRemove = roll < 4;
-            }
+        if(targets.length > 0) {
+            _.each(_.range(0, losses), (index) => {
+                const piece = _.first(targets);
+                let willRemove = true;
+                const canRollForLoss = piece.type === 'leader' || piece.type === 'citadel' || piece.type === 'legion' || piece.type === 'fort';
+                if (canRollForLoss && allowRolls) {
+                    const roll = _.random(1, 6);
+                    console.log('Rolling for loss of ' + piece.type + ', need 4-6 and got ' + roll);
+                    willRemove = roll < 4;
+                }
 
-            if (willRemove) {
-                removed.push(targets.shift());
-            }
-            else {
-                console.log(piece.type + ' saved!');
-                saved.push(targets.shift());
-            }
+                if (willRemove) {
+                    removed.push(targets.shift());
+                }
+                else {
+                    console.log(piece.type + ' saved!');
+                }
 
-            if (targets.length === 0) {
-                return false;
-            }
-        });
+                if (targets.length === 0) {
+                    return false;
+                }
+            });
+        }
 
         attackResults.removed = removed;
-        attackResults.remaining.push.apply(attackResults.remaining, saved);
+        attackResults.remaining = targets;
 
         if (attackResults.removed.length > 0) {
             RemovePieces.execute(

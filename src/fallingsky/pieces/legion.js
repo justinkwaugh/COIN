@@ -5,6 +5,7 @@ class Legion extends FactionPiece {
 
         definition.type = 'legion';
         definition.isMobile = true;
+        definition.canRoll = true;
         super(definition);
     }
 }

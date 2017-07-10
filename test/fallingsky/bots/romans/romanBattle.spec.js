@@ -312,4 +312,39 @@ describe("Roman Battle", function () {
         }
 
     });
+
+    it('besieges citadel', function () {
+        const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 2});
+        PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
+        PlaceCitadel.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
+
+        const context = turn.getContext();
+        const command = RomanBattle.battle(state, context);
+        expect(command).to.equal(FactionActions.COMMAND_AND_SPECIAL);
+        expect(mandubiiRegion.getCitadelForFaction(FactionIDs.ARVERNI)).to.be.null;
+    });
+
+    it('besieges ally', function () {
+        const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 2});
+        PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
+        PlaceWarbands.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, count: 2});
+
+        const context = turn.getContext();
+        const command = RomanBattle.battle(state, context);
+        expect(command).to.equal(FactionActions.COMMAND_AND_SPECIAL);
+        expect(mandubiiRegion.getAlliesForFaction(FactionIDs.ARVERNI).length).to.equal(0);
+    });
+
+    it('does not besiege citadel', function () {
+        const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
+        PlaceLegions.execute(state, {factionId: romans.id, regionId: mandubiiRegion.id, count: 6});
+        PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
+        PlaceCitadel.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
+
+        const context = turn.getContext();
+        const command = RomanBattle.battle(state, context);
+        expect(command).to.equal(FactionActions.COMMAND);
+    });
 });

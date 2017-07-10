@@ -208,15 +208,27 @@ class Battle extends Command {
             battleResults.calculatedDefenderResults = defenderResults;
         }
 
-        // THIS IS THE FIRST POINT OF NO RETURN
+        if(battleResults.willBesiege && !battleResults.besieged) {
+            const pieceToRemove = _.find(battleResults.defendingPieces, { type : 'citadel' }) ||
+                                  _.find(battleResults.defendingPieces, { type : 'alliedtribe' });
+            if(pieceToRemove) {
+                console.log('*** Attacker is Besieging ***');
+                RemovePieces.execute(state,
+                                     {
+                                         factionId: defendingFaction.id,
+                                         regionId: region.id,
+                                         pieces: [pieceToRemove]
+                                     });
+            }
+            battleResults.besieged = true;
+        }
+
         if(!battleResults.committedDefenderResults) {
             this.handleLosses(state, battleResults, battleResults.calculatedDefenderResults, false);
             battleResults.committedDefenderResults = battleResults.calculatedDefenderResults;
         }
 
-
         if (battleResults.willRetreat && !battleResults.retreated) {
-            // THIS IS THE SECOND POINT OF NO RETURN
             this.handleRetreat(state, battleResults, battleResults.committedDefenderResults);
             battleResults.retreated = true;
         }
@@ -271,6 +283,10 @@ class Battle extends Command {
 
     static handleLosses(state, battleResults, attackResults, counterattack) {
         const defender = counterattack ? battleResults.attackingFaction : battleResults.defendingFaction;
+
+        if(battleResults.region.getPiecesForFaction(defender.id).length === 0) {
+            return;
+        }
 
         const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
                                       interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defender.id);

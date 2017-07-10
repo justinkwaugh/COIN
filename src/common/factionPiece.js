@@ -4,6 +4,7 @@ class FactionPiece {
         this.factionId = definition.factionId;
         this.type = definition.type;
         this.isMobile = definition.isMobile;
+        this.canRoll = definition.canRoll;
     }
 
     identifier() {

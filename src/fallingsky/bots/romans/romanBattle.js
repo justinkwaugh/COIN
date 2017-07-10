@@ -6,6 +6,7 @@ import Battle from '../../commands/battle';
 import EnemyFactionPriority from './enemyFactionPriority';
 import RemoveResources from '../../actions/removeResources';
 import FactionActions from '../../../common/factionActions';
+import RomanBesiege from 'fallingsky/bots/romans/romanBesiege';
 import Enlist from 'fallingsky/commands/belgae/enlist';
 import Rampage from 'fallingsky/commands/belgae/rampage';
 
@@ -32,7 +33,7 @@ class RomanBattle {
         modifiers.context.battles = battles;
 
         if (!turn.getCheckpoint(Checkpoints.PRE_BATTLE_SPECIAL_CHECK) && modifiers.canDoSpecial()) {
-            // modifiers.context.didPreBattleSpecial = RomanBesiege.besiege(state, modifiers);
+            modifiers.context.didPreBattleSpecial = RomanBesiege.besiege(state, modifiers);
             turn.markCheckpoint(Checkpoints.PRE_BATTLE_SPECIAL_CHECK);
         }
 
