@@ -122,7 +122,9 @@ describe("Battle", function () {
         }
 
         expect(interaction.losses).to.equal(4);
-        const piecesToRemove = _.take(Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id), interaction.retreated), interaction.losses);
+        const piecesToRemove = _.take(
+            Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id),
+                                         interaction.retreated), interaction.losses);
         RemovePieces.execute(state, {
             factionId: romans.id,
             regionId: interaction.regionId,
@@ -136,7 +138,7 @@ describe("Battle", function () {
         turn.addInteraction(interaction);
 
         try {
-            Battle.execute(state,  {battleResults: battleResults});
+            Battle.execute(state, {battleResults: battleResults});
             expect(battleResults.complete).to.equal(true);
         }
         catch (err) {
@@ -181,8 +183,9 @@ describe("Battle", function () {
 
         expect(interaction.losses).to.equal(4);
 
-        const pieces = Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id), interaction.retreated)
-        const piecesToRemove = _(pieces).take(interaction.losses).reject({type : 'legion'}).value();
+        const pieces = Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(
+            romans.id), interaction.retreated)
+        const piecesToRemove = _(pieces).take(interaction.losses).reject({type: 'legion'}).value();
 
         RemovePieces.execute(state, {
             factionId: romans.id,
@@ -197,7 +200,7 @@ describe("Battle", function () {
         turn.addInteraction(interaction);
 
         try {
-            Battle.execute(state,  {battleResults: battleResults});
+            Battle.execute(state, {battleResults: battleResults});
             expect(battleResults.complete).to.equal(true);
         }
         catch (err) {
@@ -260,7 +263,9 @@ describe("Battle", function () {
 
         expect(interaction.losses).to.equal(2);
 
-        const piecesToRemove = _.take(Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id), interaction.retreated), interaction.losses);
+        const piecesToRemove = _.take(
+            Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id),
+                                         interaction.retreated), interaction.losses);
         RemovePieces.execute(state, {
             factionId: romans.id,
             regionId: interaction.regionId,
@@ -293,7 +298,7 @@ describe("Battle", function () {
         turn.addInteraction(interaction);
 
         try {
-            Battle.execute(state,  {battleResults: battleResults});
+            Battle.execute(state, {battleResults: battleResults});
             expect(battleResults.complete).to.equal(true);
         }
         catch (err) {
@@ -358,8 +363,9 @@ describe("Battle", function () {
 
         expect(interaction.losses).to.equal(4);
 
-        const pieces = Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id), interaction.retreated);
-        const piecesToRemove = _(pieces).take(interaction.losses).reject({type : 'legion'}).value();
+        const pieces = Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(
+            romans.id), interaction.retreated);
+        const piecesToRemove = _(pieces).take(interaction.losses).reject({type: 'legion'}).value();
 
         RemovePieces.execute(state, {
             factionId: romans.id,
@@ -374,7 +380,7 @@ describe("Battle", function () {
         turn.addInteraction(interaction);
 
         try {
-            Battle.execute(state,  {battleResults: battleResults});
+            Battle.execute(state, {battleResults: battleResults});
             expect(battleResults.complete).to.equal(true);
         }
         catch (err) {
@@ -404,11 +410,11 @@ describe("Battle", function () {
         });
 
         AddCapability.execute(state,
-            {
-                id: CapabilityIDs.BALEARIC_SLINGERS,
-                state: CapabilityStates.UNSHADED,
-                factionId: FactionIDs.ROMANS
-            });
+                              {
+                                  id: CapabilityIDs.BALEARIC_SLINGERS,
+                                  state: CapabilityStates.UNSHADED,
+                                  factionId: FactionIDs.ROMANS
+                              });
 
         state.turnHistory.startTurn(FactionIDs.AEDUI);
         const turn = state.turnHistory.getCurrentTurn();
@@ -435,6 +441,36 @@ describe("Battle", function () {
             throw err;
         }
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(0);
+    });
+
+    it('handles balearic slingers by Roman attackers', function () {
+
+        const mandubii = state.regionsById[RegionIDs.MANDUBII];
+
+        PlaceWarbands.execute(state, {factionId: FactionIDs.ARVERNI, regionId: RegionIDs.MANDUBII, count: 8});
+        PlaceAuxilia.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.MANDUBII, count: 8});
+
+        AddCapability.execute(state,
+                              {
+                                  id: CapabilityIDs.BALEARIC_SLINGERS,
+                                  state: CapabilityStates.UNSHADED,
+                                  factionId: FactionIDs.ROMANS
+                              });
+
+        const battleResults = Battle.test(state, {
+            regionId: RegionIDs.MANDUBII,
+            attackingFactionId: FactionIDs.ROMANS,
+            defendingFactionId: FactionIDs.ARVERNI
+        });
+
+        battleResults.willApplyBalearicSlingers = true;
+        state.turnHistory.startTurn(FactionIDs.ROMANS);
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
+
+        Battle.execute(state, {battleResults: battleResults});
+
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(2);
     });
 
 });

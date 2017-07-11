@@ -315,6 +315,7 @@ class Battle extends Command {
     }
 
     static handleBalearicSlingers(state, battleResults, region, attackingFaction, defendingFaction) {
+
         if (state.hasUnshadedCapability(CapabilityIDs.BALEARIC_SLINGERS) && attackingFaction.id !== FactionIDs.ROMANS) {
             const existingBalearicSlingersDeclaration = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
                                                            interaction => interaction.type === 'BalearicSlingersDeclaration' && interaction.regionId === region.id && interaction.respondingFactionId === FactionIDs.ROMANS);
