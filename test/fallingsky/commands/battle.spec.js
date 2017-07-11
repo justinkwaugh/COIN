@@ -18,6 +18,8 @@ import RevealPieces from 'fallingsky/actions/revealPieces'
 import RemovePieces from 'fallingsky/actions/removePieces'
 import MovePieces from 'fallingsky/actions/movePieces';
 import Losses from 'fallingsky/util/losses';
+import AddCapability from 'fallingsky/actions/addCapability';
+import {CapabilityIDs, CapabilityStates} from 'fallingsky/config/capabilities';
 
 describe("Battle", function () {
     let state;
@@ -382,6 +384,57 @@ describe("Battle", function () {
         expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(7);
         expect(mandubii.getHiddenPiecesForFaction(FactionIDs.AEDUI).length).to.equal(0);
 
+    });
+
+    it('asks third party for balearic slingers', function () {
+        state.playersByFaction[FactionIDs.ROMANS] = new HumanPlayer({factionId: FactionIDs.ROMANS});
+
+        const mandubii = state.regionsById[RegionIDs.MANDUBII];
+        const bituriges = state.regionsById[RegionIDs.BITURIGES];
+
+
+        PlaceWarbands.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 8});
+        PlaceWarbands.execute(state, {factionId: FactionIDs.ARVERNI, regionId: RegionIDs.MANDUBII, count: 8});
+        PlaceAuxilia.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.MANDUBII, count: 8});
+
+        const battleResults = Battle.test(state, {
+            regionId: RegionIDs.MANDUBII,
+            attackingFactionId: FactionIDs.AEDUI,
+            defendingFactionId: FactionIDs.ARVERNI
+        });
+
+        AddCapability.execute(state,
+            {
+                id: CapabilityIDs.BALEARIC_SLINGERS,
+                state: CapabilityStates.UNSHADED,
+                factionId: FactionIDs.ROMANS
+            });
+
+        state.turnHistory.startTurn(FactionIDs.AEDUI);
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
+
+        let interaction = null;
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('BalearicSlingersDeclaration');
+            interaction = err.interaction;
+        }
+
+        interaction.status = 'agreed';
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+            expect(battleResults.complete).to.equal(true);
+        }
+        catch (err) {
+            throw err;
+        }
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(0);
     });
 
 });

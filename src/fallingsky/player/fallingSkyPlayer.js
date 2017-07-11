@@ -6,19 +6,27 @@ class FallingSkyPlayer extends Player {
         super(definition);
     }
 
-    willHarass(factionId) {
+    willHarass() {
         return true;
     }
 
-    willAgreeToQuarters(state, factionId) {
+    willAgreeToQuarters() {
         return false;
     }
 
-    willAgreeToRetreat(state, factionId) {
+    willAgreeToRetreat() {
         return false;
     }
 
-    willAgreeToSupplyLine(state, factionId) {
+    willRetreat() {
+        return false;
+    }
+
+    willAgreeToSupplyLine() {
+        return false;
+    }
+
+    willUseBalearicSlingers() {
         return false;
     }
 

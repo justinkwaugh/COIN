@@ -6,6 +6,7 @@ const CapabilityStates = {
 const CapabilityIDs = {
     AQUITANI: 25,
     BAGGAGE_TRAINS: 8,
+    BALEARIC_SLINGERS: 13,
     BALLISTAE: 10,
     COMMIUS: 55,
     CONVICTOLITAVIS: 43,
@@ -19,6 +20,7 @@ const CapabilityIDs = {
 const CapabilityTitles = {
     [CapabilityIDs.AQUITANI] : 'Aquitani',
     [CapabilityIDs.BAGGAGE_TRAINS]: 'Baggage Trains',
+    [CapabilityIDs.BALEARIC_SLINGERS]: 'Balearic Slingers',
     [CapabilityIDs.BALLISTAE]: 'Ballistae',
     [CapabilityIDs.COMMIUS]: 'Commius',
     [CapabilityIDs.CONVICTOLITAVIS]: 'Convictolitavis',

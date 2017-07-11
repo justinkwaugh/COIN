@@ -32,6 +32,7 @@ class BattleResults {
         this.willApplyBalearicSlingers = definition.willApplyBalearicSlingers;
 
         this.paid = definition.paid;
+        this.handledBalearicSlingers = definition.handledBalearicSlingers;
         this.willRetreat = definition.willRetreat;
         this.retreated = definition.retreated;
         this.besieged = definition.besieged;

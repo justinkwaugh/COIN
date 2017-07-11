@@ -3,10 +3,10 @@ import FactionIDs from 'fallingsky/config/factionIds';
 import {CapabilityIDs} from 'fallingsky/config/capabilities';
 class Losses {
 
-    static calculateUnmodifiedLosses(state, attackingPieces, counterattack) {
+    static calculateUnmodifiedLosses(state, attackingPieces, counterattack=false, germanicHorse=false) {
         let losses = 0;
         const leader = _.find(attackingPieces, {type: 'leader'});
-
+        let usedLegioXLegion = false;
         _.each(
             attackingPieces, function (piece) {
                 if (piece.type === 'warband') {
@@ -18,11 +18,14 @@ class Losses {
                     }
                 }
                 else if (piece.type === 'auxilia') {
-                    losses += 0.5;
+                    losses += germanicHorse && state.hasUnshadedCapability(CapabilityIDs.GERMANIC_HORSE, FactionIDs.ROMANS) ? 1 : 0.5;
                 }
                 else if (piece.type === 'legion') {
-                    if (!counterattack && leader && !leader.isSuccessor() && piece.factionId === FactionIDs.ROMANS) {
+                    if (!counterattack && leader && !leader.isSuccessor() && piece.factionId === FactionIDs.ROMANS && !usedLegioXLegion) {
                         losses += 2;
+                        if(state.hasShadedCapability(CapabilityIDs.LEGIO_X)) {
+                            usedLegioXLegion = true;
+                        }
                     }
                     else {
                         losses += 1;

@@ -13,6 +13,7 @@ import QuartersAgreement from 'fallingsky/interactions/quartersAgreement';
 import RetreatAgreement from 'fallingsky/interactions/retreatAgreement';
 import Harassment from 'fallingsky/interactions/harassment';
 import Losses from 'fallingsky/util/losses';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 
 class Bot extends FallingSkyPlayer {
     constructor(definition) {
@@ -133,7 +134,7 @@ class Bot extends FallingSkyPlayer {
         // defending pieces, when they cannot guarantee inflicting at least half the Losses against
         // the Attacker that they will suffer (regardless of how many pieces might be removed by the
         // Losses).
-        const hasDefendingCitadelOrFort = Battle.defenderHasCitadelOrFort(defendingPieces);
+        const hasDefendingCitadelOrFort = _.find(defendingPieces, piece => piece.type === 'citadel' || piece.type === 'fort');
         const counterAttackLossesTooFew = worstCaseAttackerLosses < (noRetreatLosses / 2);
 
         if (!hasDefendingCitadelOrFort && counterAttackLossesTooFew) {
@@ -216,12 +217,13 @@ class Bot extends FallingSkyPlayer {
         return agreements;
     }
 
-    takeLosses(state, battleResults, attackResults, counterattack) {
+    takeLosses(state, battleResults, attackResults, counterattack, balearic) {
         const region = battleResults.region;
         const attackingFaction = counterattack ? battleResults.defendingFaction : battleResults.attackingFaction;
-        const ambush = battleResults.willAmbush;
+        const ambush = battleResults.willAmbush && !balearic;
+        const ballistae = state.hasUnshadedCapability(CapabilityIDs.BALLISTAE) && this.factionId === FactionIDs.ROMANS;
 
-        let allowRolls = !ambush && !counterattack;
+        let allowRolls = balearic || (!ambush && !counterattack);
 
         if (!allowRolls && !counterattack && this.factionId === FactionIDs.ROMANS) {
             const defendingLeader = _.find(region.piecesByFaction()[this.factionId], {type: 'leader'});
@@ -251,7 +253,7 @@ class Bot extends FallingSkyPlayer {
                 if (canRollForLoss && allowRolls) {
                     const roll = _.random(1, 6);
                     console.log('Rolling for loss of ' + piece.type + ', need 4-6 and got ' + roll);
-                    willRemove = roll < 4;
+                    willRemove = roll < ((piece.type === 'fort' && ballistae) ? 3 : 4);
                 }
 
                 if (willRemove) {
