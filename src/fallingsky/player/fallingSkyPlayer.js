@@ -26,7 +26,11 @@ class FallingSkyPlayer extends Player {
         return false;
     }
 
-    willUseBalearicSlingers() {
+    willApplyBalearicSlingers() {
+        return false;
+    }
+
+    willApplyGermanicHorse() {
         return false;
     }
 

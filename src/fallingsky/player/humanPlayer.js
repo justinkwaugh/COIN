@@ -5,6 +5,7 @@ import QuartersAgreement from 'fallingsky/interactions/quartersAgreement';
 import RetreatAgreement from 'fallingsky/interactions/retreatAgreement';
 import RetreatDeclaration from 'fallingsky/interactions/retreatDeclaration';
 import BalearicSlingersDeclaration from 'fallingsky/interactions/balearicSlingersDeclaration';
+import GermanicHorseDeclaration from 'fallingsky/interactions/germanicHorseDeclaration';
 import Harassment from 'fallingsky/interactions/harassment';
 import Losses from 'fallingsky/interactions/losses';
 import Retreat from 'fallingsky/interactions/retreat';
@@ -48,7 +49,16 @@ class HumanPlayer extends FallingSkyPlayer {
                                                                        }));
     }
 
-    willUseBalearicSlingers(state, region, attackingFaction, defendingFaction) {
+    willApplyGermanicHorse(state, region, attackingFaction, defendingFaction) {
+        throw new PlayerInteractionNeededError('Use Germanic Horse Capability?',
+                                               new GermanicHorseDeclaration({
+                                                                                   requestingFactionId: attackingFaction.id,
+                                                                                   respondingFactionId: this.factionId,
+                                                                                   regionId: region.id
+                                                                               }));
+    }
+
+    willApplyBalearicSlingers(state, region, attackingFaction, defendingFaction) {
         throw new PlayerInteractionNeededError('Use Balearic Slingers Capability?',
                                                new BalearicSlingersDeclaration({
                                                                                    requestingFactionId: attackingFaction.id,

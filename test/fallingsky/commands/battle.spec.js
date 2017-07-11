@@ -440,10 +440,87 @@ describe("Battle", function () {
         catch (err) {
             throw err;
         }
-        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(0);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(1);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(6);
     });
 
-    it('handles balearic slingers by Roman attackers', function () {
+    it('asks roman defenders for germanic horse', function () {
+        state.playersByFaction[FactionIDs.ROMANS] = new HumanPlayer({factionId: FactionIDs.ROMANS});
+
+        const mandubii = state.regionsById[RegionIDs.MANDUBII];
+        const bituriges = state.regionsById[RegionIDs.BITURIGES];
+
+
+        PlaceWarbands.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 8});
+        PlaceAuxilia.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.MANDUBII, count: 8});
+
+        const battleResults = Battle.test(state, {
+            regionId: RegionIDs.MANDUBII,
+            attackingFactionId: FactionIDs.AEDUI,
+            defendingFactionId: FactionIDs.ROMANS
+        });
+
+        AddCapability.execute(state,
+                              {
+                                  id: CapabilityIDs.GERMANIC_HORSE,
+                                  state: CapabilityStates.UNSHADED,
+                                  factionId: FactionIDs.ROMANS
+                              });
+
+        state.turnHistory.startTurn(FactionIDs.AEDUI);
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
+
+        let interaction = null;
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('GermanicHorseDeclaration');
+            interaction = err.interaction;
+        }
+
+        interaction.status = 'agreed';
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('Losses');
+            interaction = err.interaction;
+        }
+
+        expect(interaction.losses).to.equal(4);
+        const piecesToRemove = _.take(
+            Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id),
+                                         interaction.retreated), interaction.losses);
+        RemovePieces.execute(state, {
+            factionId: romans.id,
+            regionId: interaction.regionId,
+            pieces: piecesToRemove
+        });
+
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(4);
+        interaction.removed = piecesToRemove;
+        interaction.caesarCanCounterattack = false;
+
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+            expect(battleResults.complete).to.equal(true);
+        }
+        catch (err) {
+            throw err;
+        }
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(4);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(4);
+    });
+
+    it('handles germanic horse by Roman attackers', function () {
 
         const mandubii = state.regionsById[RegionIDs.MANDUBII];
 
@@ -452,7 +529,7 @@ describe("Battle", function () {
 
         AddCapability.execute(state,
                               {
-                                  id: CapabilityIDs.BALEARIC_SLINGERS,
+                                  id: CapabilityIDs.GERMANIC_HORSE,
                                   state: CapabilityStates.UNSHADED,
                                   factionId: FactionIDs.ROMANS
                               });
@@ -463,14 +540,214 @@ describe("Battle", function () {
             defendingFactionId: FactionIDs.ARVERNI
         });
 
-        battleResults.willApplyBalearicSlingers = true;
+        battleResults.willApplyGermanicHorse = true;
+
         state.turnHistory.startTurn(FactionIDs.ROMANS);
         const turn = state.turnHistory.getCurrentTurn();
         turn.startCommand(CommandIDs.BATTLE);
 
         Battle.execute(state, {battleResults: battleResults});
 
-        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(2);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(4);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(8);
+    });
+
+    it('handles germanic horse by gallic attackers', function () {
+
+        const mandubii = state.regionsById[RegionIDs.MANDUBII];
+
+        PlaceWarbands.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 8});
+        PlaceWarbands.execute(state, {factionId: FactionIDs.ARVERNI, regionId: RegionIDs.MANDUBII, count: 8});
+
+        AddCapability.execute(state,
+                              {
+                                  id: CapabilityIDs.GERMANIC_HORSE,
+                                  state: CapabilityStates.SHADED,
+                                  factionId: FactionIDs.AEDUI
+                              });
+
+        const battleResults = Battle.test(state, {
+            regionId: RegionIDs.MANDUBII,
+            attackingFactionId: FactionIDs.AEDUI,
+            defendingFactionId: FactionIDs.ARVERNI
+        });
+
+        battleResults.willApplyGermanicHorse = true;
+
+        state.turnHistory.startTurn(FactionIDs.AEDUI);
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
+
+        Battle.execute(state, {battleResults: battleResults});
+
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(8);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(0);
+    });
+
+    it('handles germanic horse by gallic defenders', function () {
+        state.playersByFaction[FactionIDs.ARVERNI] = new HumanPlayer({factionId: FactionIDs.ARVERNI});
+
+        const mandubii = state.regionsById[RegionIDs.MANDUBII];
+
+        PlaceWarbands.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 8});
+        PlaceWarbands.execute(state, {factionId: FactionIDs.ARVERNI, regionId: RegionIDs.MANDUBII, count: 8});
+
+        AddCapability.execute(state,
+                              {
+                                  id: CapabilityIDs.GERMANIC_HORSE,
+                                  state: CapabilityStates.SHADED,
+                                  factionId: FactionIDs.ARVERNI
+                              });
+
+        const battleResults = Battle.test(state, {
+            regionId: RegionIDs.MANDUBII,
+            attackingFactionId: FactionIDs.AEDUI,
+            defendingFactionId: FactionIDs.ARVERNI
+        });
+
+        battleResults.willApplyGermanicHorse = true;
+
+        state.turnHistory.startTurn(FactionIDs.AEDUI);
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
+
+        let interaction = null;
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('GermanicHorseDeclaration');
+            interaction = err.interaction;
+        }
+
+        interaction.status = 'agreed';
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('Losses');
+            interaction = err.interaction;
+        }
+
+        expect(interaction.losses).to.equal(4);
+        const piecesToRemove = _.take(
+            Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(arverni.id),
+                                         interaction.retreated), interaction.losses);
+        RemovePieces.execute(state, {
+            factionId: arverni.id,
+            regionId: interaction.regionId,
+            pieces: piecesToRemove
+        });
+
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(4);
+        interaction.removed = piecesToRemove;
+        interaction.caesarCanCounterattack = false;
+
+        turn.addInteraction(interaction);
+
+        Battle.execute(state, {battleResults: battleResults});
+
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(4);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length).to.equal(4);
+    });
+
+    it('handles germanic horse and balearic slingers for Roman defenders', function () {
+        state.playersByFaction[FactionIDs.ROMANS] = new HumanPlayer({factionId: FactionIDs.ROMANS});
+
+        const mandubii = state.regionsById[RegionIDs.MANDUBII];
+        const bituriges = state.regionsById[RegionIDs.BITURIGES];
+
+
+        PlaceWarbands.execute(state, {factionId: FactionIDs.AEDUI, regionId: RegionIDs.MANDUBII, count: 12});
+        PlaceAuxilia.execute(state, {factionId: FactionIDs.ROMANS, regionId: RegionIDs.MANDUBII, count: 8});
+
+        const battleResults = Battle.test(state, {
+            regionId: RegionIDs.MANDUBII,
+            attackingFactionId: FactionIDs.AEDUI,
+            defendingFactionId: FactionIDs.ROMANS
+        });
+
+        AddCapability.execute(state,
+                              {
+                                  id: CapabilityIDs.GERMANIC_HORSE,
+                                  state: CapabilityStates.UNSHADED,
+                                  factionId: FactionIDs.ROMANS
+                              });
+
+                AddCapability.execute(state,
+                              {
+                                  id: CapabilityIDs.BALEARIC_SLINGERS,
+                                  state: CapabilityStates.UNSHADED,
+                                  factionId: FactionIDs.ROMANS
+                              });
+
+        state.turnHistory.startTurn(FactionIDs.AEDUI);
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
+
+        let interaction = null;
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('GermanicHorseDeclaration');
+            interaction = err.interaction;
+        }
+
+        interaction.status = 'agreed';
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('BalearicSlingersDeclaration');
+            interaction = err.interaction;
+        }
+
+        interaction.status = 'agreed';
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+        }
+        catch (err) {
+            expect(err.name).to.equal('PlayerInteractionNeededError');
+            expect(err.interaction.type).to.equal('Losses');
+            interaction = err.interaction;
+        }
+
+        expect(interaction.losses).to.equal(2);
+        const piecesToRemove = _.take(
+            Losses.orderPiecesForRemoval(state, state.regionsById[interaction.regionId].getPiecesForFaction(romans.id),
+                                         interaction.retreated), interaction.losses);
+        RemovePieces.execute(state, {
+            factionId: romans.id,
+            regionId: interaction.regionId,
+            pieces: piecesToRemove
+        });
+
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(6);
+        interaction.removed = piecesToRemove;
+        interaction.caesarCanCounterattack = false;
+
+        turn.addInteraction(interaction);
+
+        try {
+            Battle.execute(state, {battleResults: battleResults});
+            expect(battleResults.complete).to.equal(true);
+        }
+        catch (err) {
+            throw err;
+        }
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length).to.equal(0);
+        expect(mandubii.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(6);
     });
 
 });

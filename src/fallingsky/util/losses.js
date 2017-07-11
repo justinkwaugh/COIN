@@ -18,7 +18,7 @@ class Losses {
                     }
                 }
                 else if (piece.type === 'auxilia') {
-                    losses += germanicHorse && state.hasUnshadedCapability(CapabilityIDs.GERMANIC_HORSE, FactionIDs.ROMANS) ? 1 : 0.5;
+                    losses += germanicHorse && state.hasUnshadedCapability(CapabilityIDs.GERMANIC_HORSE) ? 1 : 0.5;
                 }
                 else if (piece.type === 'legion') {
                     if (!counterattack && leader && !leader.isSuccessor() && piece.factionId === FactionIDs.ROMANS && !usedLegioXLegion) {

@@ -165,9 +165,18 @@ class Battle extends Command {
             attackingPieces = _.concat(attackingPieces, germanicPieces);
         }
 
-        if(!battleResults.handledBalearicSlingers) {
+        this.handleGermanicHorse(state, battleResults, region, attackingFaction, defendingFaction);
+
+        if (!battleResults.handledBalearicSlingers) {
             this.handleBalearicSlingers(state, battleResults, region, attackingFaction, defendingFaction);
             battleResults.handledBalearicSlingers = true;
+        }
+
+        // We may have removed some attackers in balearic slingers
+        attackingPieces = region.piecesByFaction()[attackingFaction.id];
+        if (enlistingGermans) {
+            const germanicPieces = region.piecesByFaction()[attackingFaction.id] || [];
+            attackingPieces = _.concat(attackingPieces, germanicPieces);
         }
 
         if (!battleResults.calculatedDefenderResults) {
@@ -252,7 +261,7 @@ class Battle extends Command {
             const defendingPieces = region.piecesByFaction()[defendingFaction.id];
             let attackerLosses = Losses.calculateUnmodifiedLosses(state,
                                                                   battleResults.committedDefenderResults.remaining,
-                                                                  true);
+                                                                  true, battleResults.willApplyGermanicHorse);
             if (battleResults.willApplyGermanicHorse && defendingFaction.id !== FactionIDs.ROMANS &&
                 state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE, defendingFaction.id) &&
                 !this.defenderHasCitadelOrFort(state, defendingPieces)) {
@@ -314,28 +323,49 @@ class Battle extends Command {
         return state.hasUnshadedCapability(CapabilityIDs.LEGIO_X);
     }
 
+    static handleGermanicHorse(state, battleResults, region, attackingFaction, defendingFaction) {
+
+        if ((state.hasUnshadedCapability(
+                CapabilityIDs.GERMANIC_HORSE) && defendingFaction.id === FactionIDs.ROMANS) || state.hasShadedCapability(
+                CapabilityIDs.GERMANIC_HORSE, defendingFaction.id)) {
+            const existingGermanicHorseDeclaration = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
+                                                            interaction => interaction.type === 'GermanicHorseDeclaration' && interaction.regionId === region.id && interaction.respondingFactionId === defendingFaction.id);
+            if (existingGermanicHorseDeclaration) {
+                battleResults.willApplyGermanicHorse = existingGermanicHorseDeclaration.status === 'agreed';
+            }
+            else {
+                battleResults.willApplyGermanicHorse = state.playersByFaction[defendingFaction.id].willApplyGermanicHorse(
+                    state, region, attackingFaction);
+            }
+        }
+    }
+
     static handleBalearicSlingers(state, battleResults, region, attackingFaction, defendingFaction) {
 
         if (state.hasUnshadedCapability(CapabilityIDs.BALEARIC_SLINGERS) && attackingFaction.id !== FactionIDs.ROMANS) {
-            const existingBalearicSlingersDeclaration = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                                           interaction => interaction.type === 'BalearicSlingersDeclaration' && interaction.regionId === region.id && interaction.respondingFactionId === FactionIDs.ROMANS);
+            const existingBalearicSlingersDeclaration = _.find(
+                state.turnHistory.getCurrentTurn().getCurrentInteractions(),
+                interaction => interaction.type === 'BalearicSlingersDeclaration' && interaction.regionId === region.id && interaction.respondingFactionId === FactionIDs.ROMANS);
             if (existingBalearicSlingersDeclaration) {
                 battleResults.willApplyBalearicSlingers = existingBalearicSlingersDeclaration.status === 'agreed';
             }
             else {
-                battleResults.willApplyBalearicSlingers = state.playersByFaction[FactionIDs.ROMANS].willUseBalearicSlingers(
+                battleResults.willApplyBalearicSlingers = state.playersByFaction[FactionIDs.ROMANS].willApplyBalearicSlingers(
                     state, region, attackingFaction, defendingFaction);
             }
         }
 
         if (battleResults.willApplyBalearicSlingers) {
-            const defenderLosses = Math.floor(Losses.calculateUnmodifiedLosses(state, region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS), false));
+            const defenderLosses = Math.floor(
+                Losses.calculateUnmodifiedLosses(state, region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS),
+                                                 false, battleResults.willApplyGermanicHorse));
             if (defenderLosses > 0) {
                 const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
                                               interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defendingFaction.id && interaction.balearicSlingers);
                 if (!existingLosses) {
                     console.log('*** Romans are using their Balearic Slingers *** ');
-                    state.playersByFaction[defendingFaction.id].takeLosses(state, battleResults, { losses: defenderLosses }, false, true);
+                    state.playersByFaction[attackingFaction.id].takeLosses(state, battleResults,
+                                                                           {losses: defenderLosses}, false, true);
                 }
             }
         }
