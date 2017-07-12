@@ -11,6 +11,10 @@ import HidePieces from '../../actions/hidePieces';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
 import Map from '../../util/map';
+import Battle from '../../commands/battle';
+import Enlist from 'fallingsky/commands/belgae/enlist';
+import Rampage from 'fallingsky/commands/belgae/rampage';
+import RomanUtils from 'fallingsky/bots/romans/romanUtils';
 
 class RomanMarch {
 
@@ -74,10 +78,10 @@ class RomanMarch {
 
         const marchData = this.prioritizeMarchDestinations(state, allMarches, prioritizedFactions, threatRegionIds);
 
-        if(state.romans.offMapLegions() > 5) {
+        if (state.romans.offMapLegions() > 5) {
 
             const marchToOneMarches = this.getMarchToOneMarches(state, modifiers, marchData);
-            if(marchToOneMarches) {
+            if (marchToOneMarches) {
                 return marchToOneMarches;
             }
         }
@@ -97,21 +101,22 @@ class RomanMarch {
 
         const requiredMarches = _.filter(marchData, data => data.numLegions > 0 || data.leader);
 
-        if(modifiers.limited && requiredMarches.length > 1) {
+        if (modifiers.limited && requiredMarches.length > 1) {
             return [];
         }
 
         const cost = _.reduce(requiredMarches, (sum, data) => {
             return sum + data.march.cost;
-        },0);
+        }, 0);
 
-        if(!modifiers.free && state.romans.resources() < cost) {
+        if (!modifiers.free && state.romans.resources() < cost) {
             return [];
         }
 
         const possibleDestinations = _(requiredMarches).reduce((destinations, data) => {
             const marchDestinations = _.map(data.prioritizedDestinations, destData => destData.destination);
-            return destinations.length === 0 ? marchDestinations :  _.intersectionBy(destinations, marchDestinations, destination => destination.id);
+            return destinations.length === 0 ? marchDestinations : _.intersectionBy(destinations, marchDestinations,
+                                                                                    destination => destination.id);
         }, []);
 
         if (possibleDestinations.length === 0) {
@@ -125,7 +130,7 @@ class RomanMarch {
             });
         });
 
-        if(!actualDestination) {
+        if (!actualDestination) {
             return [];
         }
 
@@ -142,7 +147,7 @@ class RomanMarch {
                 accumulator.marches.push(march);
             }
             return accumulator
-        }, { resourcesRemaining: state.romans.resources(), marches: [] }).marches;
+        }, {resourcesRemaining: state.romans.resources(), marches: []}).marches;
 
         _.each(paidForMarches, (march) => {
             march.targetDestination = actualDestination;
@@ -158,8 +163,9 @@ class RomanMarch {
         const leader = region.getLeaderForFaction(FactionIDs.ROMANS);
         const auxilia = region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS);
 
-        const controlMarginAfterInitialPieces = region.controllingMarginByFaction()[FactionIDs.ROMANS] - (legions.length + (leader ? 1: 0) + (auxilia.length > 0 ? 1 : 0));
-        const numAuxiliaToMarch = controlMarginAfterInitialPieces >= 0 ? Math.min(controlMarginAfterInitialPieces+1, auxilia.length) : auxilia.length;
+        const controlMarginAfterInitialPieces = region.controllingMarginByFaction()[FactionIDs.ROMANS] - (legions.length + (leader ? 1 : 0) + (auxilia.length > 0 ? 1 : 0));
+        const numAuxiliaToMarch = controlMarginAfterInitialPieces >= 0 ? Math.min(controlMarginAfterInitialPieces + 1,
+                                                                                  auxilia.length) : auxilia.length;
 
         return _(legions).concat([leader], _.take(auxilia, numAuxiliaToMarch)).compact().value();
     }
@@ -173,14 +179,24 @@ class RomanMarch {
                     return;
                 }
 
-                const priority = _(prioritizedFactions).reduce((priority, factionId, index) => {
-                    if (destination.numAlliesAndCitadelsForFaction(factionId) > 0 && index < priority) {
-                        return index;
+                const priority = _(prioritizedFactions).reduce((priority, factionData, index) => {
+                    if (destination.numAlliesAndCitadelsForFaction(factionData.id) <= 0) {
+                        return priority;
+                    }
+
+                    let newPriority = '' + (10 + index);
+                    if(factionData.checkBattle) {
+                        newPriority += '-' + (10 + RomanUtils.getWorstLossesForEnemyInitiatedBattle(state, destination, factionData.id));
+                    }
+
+                    if(newPriority < priority) {
+                        return newPriority;
                     }
                     return priority;
-                }, 99);
+                }, '99');
 
-                if (priority === 99) {
+                // Check battle results as part of priority if one of the rolled priority levels
+                if (priority === '99') {
                     return;
                 }
 
@@ -213,13 +229,14 @@ class RomanMarch {
 
             return {
                 id: faction.id,
+                checkBattle: false,
                 priority
             }
 
-        }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().map('id').value();
+        }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value();
 
         if (targetGermans) {
-            priorityFactions.push(FactionIDs.GERMANIC_TRIBES);
+            priorityFactions.push({ id: FactionIDs.GERMANIC_TRIBES, checkBattle: false });
         }
 
         const roll = _.random(1, 6);
@@ -230,10 +247,10 @@ class RomanMarch {
                                                 const priority = 99 - faction.numAlliedTribesAndCitadelsPlaced();
                                                 return {
                                                     id: faction.id,
+                                                    checkBattle: true,
                                                     priority
                                                 };
-                                            }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().map(
-                                            'id').value());
+                                            }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value());
         }
         else {
             priorityFactions.push.apply(priorityFactions,
@@ -243,10 +260,10 @@ class RomanMarch {
                                                 const priority = player.isNonPlayer ? 'b' : 'a';
                                                 return {
                                                     id: faction.id,
+                                                    checkBattle: true,
                                                     priority
                                                 };
-                                            }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().map(
-                                            'id').value());
+                                            }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value());
         }
 
         return _.uniq(priorityFactions);

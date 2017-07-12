@@ -15,6 +15,7 @@ class BattleResults {
         this.canAmbush = definition.canAmbush;
         this.canEnlistGermans = definition.canEnlistGermans;
         this.defenderCanRetreat = definition.defenderCanRetreat;
+        this.defenderCanGuaranteeSafeRetreat = definition.defenderCanGuaranteeSafeRetreat;
         this.defenderCanCounterattack = definition.defenderCanCounterattack;
 
         this.defenderLosses = definition.defenderLosses;
@@ -39,6 +40,10 @@ class BattleResults {
         this.calculatedDefenderResults = definition.calculatedDefenderResults;
         this.committedDefenderResults = definition.committedDefenderResults;
         this.complete = definition.complete;
+    }
+
+    mostDefenderLosses() {
+        return (this.defenderCanGuaranteeSafeRetreat && !this.canAmbush) ? this.defenderLosses.retreat : this.defenderLosses.normal;
     }
 
     willCauseLeaderRemoval(ambush = false) {

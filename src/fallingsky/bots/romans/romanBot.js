@@ -11,16 +11,16 @@ import FactionActions from '../../../common/factionActions';
 import Pass from '../../commands/pass';
 
 const Checkpoints = {
-    BATTLE_CHECK : 'battle',
-    MARCH_CHECK : 'march',
+    BATTLE_CHECK: 'battle',
+    MARCH_CHECK: 'march',
     RECRUIT_CHECK: 'recruit',
     SEIZE_CHECK: 'seize',
-    EVENT_CHECK : 'event',
-    RALLY_CHECK : 'rally',
-    SPREAD_MARCH_CHECK : 'spread-march',
-    FIRST_RAID_CHECK : 'first-raid',
+    EVENT_CHECK: 'event',
+    RALLY_CHECK: 'rally',
+    SPREAD_MARCH_CHECK: 'spread-march',
+    FIRST_RAID_CHECK: 'first-raid',
     MASS_MARCH_CHECK: 'mass-march',
-    SECOND_RAID_CHECK : 'second-raid'
+    SECOND_RAID_CHECK: 'second-raid'
 
 };
 
@@ -40,7 +40,7 @@ class RomanBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.BATTLE_CHECK);
 
-        if(modifiers.tryThreatMarch) {
+        if (modifiers.tryThreatMarch) {
             if (!turn.getCheckpoint(Checkpoints.MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(
                     CommandIDs.MARCH) && modifiers.tryThreatMarch) {
                 commandAction = RomanMarch.march(state, modifiers);
@@ -60,7 +60,8 @@ class RomanBot extends Bot {
             turn.markCheckpoint(Checkpoints.SEIZE_CHECK);
         }
         else {
-            if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && this.canPlayEvent(state) && RomanEvent.handleEvent(state)) {
+            if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && this.canPlayEvent(
+                    state) && RomanEvent.handleEvent(state)) {
                 commandAction = FactionActions.EVENT;
             }
             turn.markCheckpoint(Checkpoints.EVENT_CHECK);
@@ -88,7 +89,7 @@ class RomanBot extends Bot {
 
         commandAction = commandAction || FactionActions.PASS;
 
-        if(commandAction === FactionActions.PASS) {
+        if (commandAction === FactionActions.PASS) {
             Pass.execute(state, {factionId: FactionIDs.ROMANS});
         }
 
@@ -115,6 +116,7 @@ class RomanBot extends Bot {
     handleEvent(state, currentCard) {
 
     }
+
 }
 
 export default RomanBot;

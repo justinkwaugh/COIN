@@ -9,6 +9,7 @@ import FactionActions from '../../../common/factionActions';
 import RomanBesiege from 'fallingsky/bots/romans/romanBesiege';
 import Enlist from 'fallingsky/commands/belgae/enlist';
 import Rampage from 'fallingsky/commands/belgae/rampage';
+import RomanUtils from 'fallingsky/bots/romans/romanUtils';
 
 const Checkpoints = {
     PRE_BATTLE_SPECIAL_CHECK: 'pre-battle-special'
@@ -102,39 +103,13 @@ class RomanBattle {
                     return;
                 }
 
-                const numNonCriticalPieces = region.getPiecesForFaction(
-                        FactionIDs.ROMANS).length - numLegions - (hasCaesar ? 1 : 0);
                 const importantEnemyData = _(EnemyFactionPriority).keys().map(
                     function (factionId) {
                         const hasLeader = region.getLeaderForFaction(factionId);
                         const numAlliesAndCitadels = region.numAlliesAndCitadelsForFaction(factionId);
                         const hasControl = region.controllingFactionId() === factionId;
 
-                        let successfulRampage = false;
-                        let canEnlist = false;
-
-                        if (factionId === FactionIDs.BELGAE) {
-                            const rampageResults = Rampage.test(state);
-                            const resultForRegion = _.find(rampageResults, result => result.region.id === region.id);
-                            successfulRampage = resultForRegion && resultForRegion.numWarbands > numNonCriticalPieces;
-
-                            const enlistResults = Enlist.test(state);
-                            canEnlist = _.find(enlistResults, result => result.region.id === region.id);
-                        }
-
-                        const battleResult = Battle.test(state, {
-                            region,
-                            attackingFactionId: factionId,
-                            defendingFactionId: FactionIDs.ROMANS,
-                            enlistingGermans: canEnlist
-                        });
-
-                        const willInflictCriticalLoss = successfulRampage || battleResult.willInflictLossAgainstLegion(
-                                battleResult.canAmbush) ||
-                                                        battleResult.willInflictLossAgainstLeader(
-                                                            battleResult.canAmbush);
-
-
+                        const willInflictCriticalLoss = RomanUtils.canEnemyTurnInflictCriticalLoss(state, region, factionId);
                         if (!hasLeader && numAlliesAndCitadels === 0 && !hasControl && !willInflictCriticalLoss) {
                             return;
                         }

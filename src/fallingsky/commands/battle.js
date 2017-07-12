@@ -14,37 +14,44 @@ class Battle extends Command {
         const region = args.region;
         const enlistingGermans = args.enlistingGermans;
         const withGermanicHorse = args.withGermanicHorse;
+
         const attackingFaction = args.attackingFaction;
         const defendingFaction = args.defendingFaction;
-        const attackingPlayer = state.playersByFaction[attackingFaction.id];
-        const defendingPlayer = state.playersByFaction[defendingFaction.id];
 
-        let attackingPieces = region.piecesByFaction()[attackingFaction.id] || [];
+        let attackingPieces = region.getPiecesForFaction(attackingFaction.id);
         if (enlistingGermans) {
-            const germanicPieces = region.piecesByFaction()[attackingFaction.id] || [];
+            const germanicPieces = region.getPiecesForFaction(FactionIDs.GERMANIC_TRIBES);
             attackingPieces = _.concat(attackingPieces, germanicPieces);
         }
-        const defendingPieces = region.piecesByFaction()[defendingFaction.id] || [];
+        const defendingPieces = args.defendingPieces || region.getPiecesForFaction(defendingFaction.id);
+        const canAmbush = !enlistingGermans &&
+                          this.canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces);
 
-        const canAmbush = !enlistingGermans && this.canAmbush(state, region, attackingFaction, attackingPieces,
-                                                              defendingPieces);
+
+        if(defendingFaction.id === FactionIDs.ROMANS && state.hasUnshadedCapability(CapabilityIDs.BALEARIC_SLINGERS)) {
+            attackingPieces = this.simulateBalearicSlingers(state, region, attackingFaction, attackingPieces);
+        }
+
+        
+
         const defenderCanRetreat = this.canRetreat(attackingFaction, defendingFaction, region);
+        const defenderCanGuaranteeSafeRetreat = defenderCanRetreat &&
+                                                this.hasGuaranteedSafeRetreat(attackingFaction, defendingFaction, region);
 
         // Base Losses
         let unmodifiedDefenderLosses = Losses.calculateUnmodifiedLosses(state, attackingPieces, false,
                                                                         withGermanicHorse);
-        if (attackingFaction.id === FactionIDs.ARVERNI && state.hasUnshadedCapability(
-                CapabilityIDs.MASSED_GALLIC_ARCHERS)) {
+
+        if (attackingFaction.id === FactionIDs.ARVERNI && state.hasUnshadedCapability(CapabilityIDs.MASSED_GALLIC_ARCHERS)) {
             unmodifiedDefenderLosses = Math.max(0, unmodifiedDefenderLosses - 1);
         }
 
         // No Retreat
         let noRetreatDefenderLosses = unmodifiedDefenderLosses;
-        if (this.defenderHasCitadelOrFort(state, defendingPieces)) {
+        if (this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id))) {
             noRetreatDefenderLosses /= 2;
         }
-        else if (withGermanicHorse && attackingFaction.id !== FactionIDs.ROMANS && state.hasShadedCapability(
-                CapabilityIDs.GERMANIC_HORSE, attackingFaction.id)) {
+        else if (withGermanicHorse && state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE, attackingFaction.id) && !this.defenderHasCitadelOrFort(state, defendingPieces)) {
             noRetreatDefenderLosses *= 2;
         }
         noRetreatDefenderLosses = Math.floor(noRetreatDefenderLosses);
@@ -79,12 +86,12 @@ class Battle extends Command {
         const defenderCanCounterattack = this.canCounterattack(false, retreatDefenderLosses, defendingPieces);
         const defenderCanCounterattackAmbush = this.canCounterattack(true, retreatDefenderLosses, defendingPieces);
 
+        const romansUseGermanicHorseOnDefense = defendingFaction.id === FactionIDs.ROMANS && state.hasUnshadedCapability(CapabilityIDs.GERMANIC_HORSE);
+        const gallicUseGermanicHorseOnDefense = state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE, defendingFaction.id);
         let worstCaseAttackerLosses = Losses.calculateUnmodifiedLosses(state,
                                                                        worstCaseNoRetreatDefenderResults.remaining,
-                                                                       true, withGermanicHorse);
-        if (withGermanicHorse && defendingFaction.id !== FactionIDs.ROMANS &&
-            state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE,
-                                      defendingFaction.id) && !this.defenderHasCitadelOrFort(state, defendingPieces)) {
+                                                                       true, romansUseGermanicHorseOnDefense);
+        if (gallicUseGermanicHorseOnDefense && !this.defenderHasCitadelOrFort(state, defendingPieces)) {
             worstCaseAttackerLosses *= 2;
         }
         worstCaseAttackerLosses = Math.floor(worstCaseAttackerLosses);
@@ -122,6 +129,7 @@ class Battle extends Command {
                 canAmbush: canAmbush,
                 enlistingGermans: enlistingGermans,
                 defenderCanRetreat: defenderCanRetreat,
+                defenderCanGuaranteeSafeRetreat: defenderCanGuaranteeSafeRetreat,
                 defenderCanCounterattack: {normal: defenderCanCounterattack, ambush: defenderCanCounterattackAmbush},
 
                 defenderLosses: {normal: noRetreatDefenderLosses, retreat: retreatDefenderLosses},
@@ -190,7 +198,7 @@ class Battle extends Command {
             }
             // No Retreat
             let noRetreatDefenderLosses = unmodifiedDefenderLosses;
-            if (this.defenderHasCitadelOrFort(state, defendingPieces)) {
+            if (this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id))) {
                 noRetreatDefenderLosses /= 2;
             }
             else if (battleResults.willApplyGermanicHorse && attackingFaction.id !== FactionIDs.ROMANS && state.hasShadedCapability(
@@ -356,19 +364,33 @@ class Battle extends Command {
         }
 
         if (battleResults.willApplyBalearicSlingers) {
-            const defenderLosses = Math.floor(
+            const attackerLosses = Math.floor(
                 Losses.calculateUnmodifiedLosses(state, region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS),
                                                  false, battleResults.willApplyGermanicHorse));
-            if (defenderLosses > 0) {
+            if (attackerLosses > 0) {
                 const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                              interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defendingFaction.id && interaction.balearicSlingers);
+                                              interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === attackingFaction.id && interaction.balearicSlingers);
                 if (!existingLosses) {
                     console.log('*** Romans are using their Balearic Slingers *** ');
                     state.playersByFaction[attackingFaction.id].takeLosses(state, battleResults,
-                                                                           {losses: defenderLosses}, false, true);
+                                                                           {losses: attackerLosses}, false, true);
                 }
             }
         }
+    }
+
+    static simulateBalearicSlingers(state, region, attackingFaction, attackerPieces) {
+        const attackerLosses = Math.floor(Losses.calculateUnmodifiedLosses(state,
+                                                                           region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS),
+                                                                           false,
+                                                                           state.hasUnshadedCapability(CapabilityIDs.GERMANIC_HORSE)));
+
+        // Arverni can use the elite to soak up the losses if lucky
+        if(attackingFaction.id === FactionIDs.ARVERNI && _.find(attackerPieces, {type : 'leader'}) && state.hasShadedCapability(CapabilityIDs.VERCINGETORIXS_ELITE, attackingFaction.id)) {
+            return attackerPieces;
+        }
+
+        return _.drop(Losses.orderPiecesRollsFirst(attackerPieces, false), attackerLosses);
     }
 
 
@@ -450,6 +472,17 @@ class Battle extends Command {
         return true;
     }
 
+    static hasGuaranteedSafeRetreat(attackingFaction, defendingFaction, region) {
+        if (attackingFaction.id === FactionIDs.ROMANS) {
+            return true;
+        }
+
+        return _.find(region.adjacent, function (adjacentRegion) {
+            return adjacentRegion.controllingFactionId() === defendingFaction.id;
+        });
+
+    }
+
     static calculateLeastAttackResults(orderedFactionPieces, calculatedLosses, ambush) {
         const allowRolls = !ambush || this.caesarDefending(orderedFactionPieces);
         const firstRollablePieceIndex = _.findIndex(orderedFactionPieces, this.canRollForType);
@@ -482,8 +515,7 @@ class Battle extends Command {
         return _.indexOf(typesForRolls, piece.type) >= 0;
     }
 
-    static defenderHasCitadelOrFort(state, defendingPieces) {
-        const ballistae = state.hasUnshadedCapability(CapabilityIDs.BALLISTAE);
+    static defenderHasCitadelOrFort(state, defendingPieces, ballistae) {
         return _.find(
             defendingPieces, function (piece) {
                 return (piece.type === 'citadel' && !ballistae) || piece.type === 'fort';
@@ -491,6 +523,10 @@ class Battle extends Command {
     }
 
     static canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces) {
+
+        if(attackingFaction.id === FactionIDs.ROMANS) {
+            return false;
+        }
 
         if (attackingFaction.id === FactionIDs.BELGAE || attackingFaction.id === FactionIDs.ARVERNI) {
             const leaderRegion = _.find(state.regions, region => region.getLeaderForFaction(attackingFaction.id));
