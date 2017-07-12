@@ -34,6 +34,7 @@ class BattleResults {
 
         this.paid = definition.paid;
         this.handledBalearicSlingers = definition.handledBalearicSlingers;
+        this.handledMassedGallicArchers = definition.handledMassedGallicArchers;
         this.willRetreat = definition.willRetreat;
         this.retreated = definition.retreated;
         this.besieged = definition.besieged;

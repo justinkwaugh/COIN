@@ -217,13 +217,13 @@ class Bot extends FallingSkyPlayer {
         return agreements;
     }
 
-    takeLosses(state, battleResults, attackResults, counterattack, balearic) {
+    takeLosses(state, battleResults, attackResults, counterattack, causedByCapability) {
         const region = battleResults.region;
         const attackingFaction = counterattack ? battleResults.defendingFaction : battleResults.attackingFaction;
-        const ambush = battleResults.willAmbush && !balearic;
-        const ballistae = state.hasUnshadedCapability(CapabilityIDs.BALLISTAE) && this.factionId === FactionIDs.ROMANS;
+        const ambush = battleResults.willAmbush && !causedByCapability;
 
-        let allowRolls = balearic || (!ambush && !counterattack);
+        const ballistae = state.hasUnshadedCapability(CapabilityIDs.BALLISTAE) && this.factionId === FactionIDs.ROMANS;
+        let allowRolls = causedByCapability || (!ambush && !counterattack);
 
         if (!allowRolls && !counterattack && this.factionId === FactionIDs.ROMANS) {
             const defendingLeader = _.find(region.piecesByFaction()[this.factionId], {type: 'leader'});
@@ -240,7 +240,11 @@ class Bot extends FallingSkyPlayer {
             }
         }
 
-        const targets = _.clone(Losses.orderPiecesForRemoval(state, region.getPiecesForFaction(this.factionId), battleResults.willRetreat));
+
+        const amAttacker = battleResults.attackingFaction.id === this.factionId;
+        const myPieces = amAttacker ? Battle.getAttackingPieces(battleResults) : Battle.getDefendingPieces(battleResults);
+        const helpingFactionId = (amAttacker && battleResults.willEnlistGermans) ? FactionIDs.GERMANIC_TRIBES : null;
+        const targets = _.clone(Losses.orderPiecesForRemoval(state, myPieces, battleResults.willRetreat, helpingFactionId));
         const losses = attackResults.losses;
 
         const removed = [];

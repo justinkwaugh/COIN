@@ -23,23 +23,29 @@ class Battle extends Command {
             const germanicPieces = region.getPiecesForFaction(FactionIDs.GERMANIC_TRIBES);
             attackingPieces = _.concat(attackingPieces, germanicPieces);
         }
-        const defendingPieces = args.defendingPieces || region.getPiecesForFaction(defendingFaction.id);
+        let defendingPieces = args.defendingPieces || region.getPiecesForFaction(defendingFaction.id);
         const canAmbush = !enlistingGermans &&
                           this.canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces);
 
 
         if(defendingFaction.id === FactionIDs.ROMANS && state.hasUnshadedCapability(CapabilityIDs.BALEARIC_SLINGERS)) {
-            attackingPieces = this.simulateBalearicSlingers(state, region, attackingFaction, attackingPieces);
+            attackingPieces = this.simulateBalearicSlingers(state, region, attackingFaction, attackingPieces, defendingFaction);
         }
 
-        
+        if(state.hasShadedCapability(CapabilityIDs.MASSED_GALLIC_ARCHERS)) {
+            const {updatedAttackingPieces, updatedDefendingPieces} = this.simulateMassedGallicArchers(state, region, attackingFaction, attackingPieces, defendingFaction,
+                                               defendingPieces);
+
+            attackingPieces = updatedAttackingPieces;
+            defendingPieces = updatedDefendingPieces;
+        }
 
         const defenderCanRetreat = this.canRetreat(attackingFaction, defendingFaction, region);
         const defenderCanGuaranteeSafeRetreat = defenderCanRetreat &&
                                                 this.hasGuaranteedSafeRetreat(attackingFaction, defendingFaction, region);
 
         // Base Losses
-        let unmodifiedDefenderLosses = Losses.calculateUnmodifiedLosses(state, attackingPieces, false,
+        let unmodifiedDefenderLosses = Losses.calculateUnmodifiedLosses(state, attackingFaction, attackingPieces, false,
                                                                         withGermanicHorse);
 
         if (attackingFaction.id === FactionIDs.ARVERNI && state.hasUnshadedCapability(CapabilityIDs.MASSED_GALLIC_ARCHERS)) {
@@ -88,7 +94,7 @@ class Battle extends Command {
 
         const romansUseGermanicHorseOnDefense = defendingFaction.id === FactionIDs.ROMANS && state.hasUnshadedCapability(CapabilityIDs.GERMANIC_HORSE);
         const gallicUseGermanicHorseOnDefense = state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE, defendingFaction.id);
-        let worstCaseAttackerLosses = Losses.calculateUnmodifiedLosses(state,
+        let worstCaseAttackerLosses = Losses.calculateUnmodifiedLosses(state, defendingFaction,
                                                                        worstCaseNoRetreatDefenderResults.remaining,
                                                                        true, romansUseGermanicHorseOnDefense);
         if (gallicUseGermanicHorseOnDefense && !this.defenderHasCitadelOrFort(state, defendingPieces)) {
@@ -103,7 +109,8 @@ class Battle extends Command {
         }
         const worstCaseAttackerLossesAmbush = defenderCanCounterattackAmbush ? worstCaseAttackerLosses : 0;
 
-        const orderedAttackingPieces = Losses.orderPiecesForRemoval(state, attackingPieces, false);
+        const helpingFactionId = enlistingGermans ? FactionIDs.GERMANIC_TRIBES : null;
+        const orderedAttackingPieces = Losses.orderPiecesForRemoval(state, attackingPieces, false, helpingFactionId);
         const worstCaseCounterattackResults = this.calculateMostAttackResults(orderedAttackingPieces,
                                                                               worstCaseAttackerLosses,
                                                                               false);
@@ -166,13 +173,9 @@ class Battle extends Command {
         if (ambush) {
             console.log(attackingFaction.name + ' is ambushing!');
         }
+        debugger;
 
-        let attackingPieces = region.piecesByFaction()[attackingFaction.id];
-        if (enlistingGermans) {
-            const germanicPieces = region.piecesByFaction()[attackingFaction.id] || [];
-            attackingPieces = _.concat(attackingPieces, germanicPieces);
-        }
-
+        let attackingPieces = Battle.getAttackingPieces(battleResults);
         this.handleGermanicHorse(state, battleResults, region, attackingFaction, defendingFaction);
 
         if (!battleResults.handledBalearicSlingers) {
@@ -180,17 +183,20 @@ class Battle extends Command {
             battleResults.handledBalearicSlingers = true;
         }
 
-        // We may have removed some attackers in balearic slingers
-        attackingPieces = region.piecesByFaction()[attackingFaction.id];
-        if (enlistingGermans) {
-            const germanicPieces = region.piecesByFaction()[attackingFaction.id] || [];
-            attackingPieces = _.concat(attackingPieces, germanicPieces);
+        if(state.hasShadedCapability(CapabilityIDs.MASSED_GALLIC_ARCHERS)) {
+            if (!battleResults.handledMassedGallicArchers) {
+                this.handleMassedGallicArchers(state, battleResults, region, attackingFaction, defendingFaction);
+                battleResults.handledMassedGallicArchers = true;
+            }
         }
 
-        if (!battleResults.calculatedDefenderResults) {
-            const defendingPieces = region.piecesByFaction()[defendingFaction.id];
+        // We may have removed some attackers or defenders in balearic slingers or massed gallic archers
+        attackingPieces = Battle.getAttackingPieces(battleResults);
 
-            let unmodifiedDefenderLosses = Losses.calculateUnmodifiedLosses(state, attackingPieces, false,
+        if (!battleResults.calculatedDefenderResults) {
+            const defendingPieces = Battle.getDefendingPieces(battleResults);
+
+            let unmodifiedDefenderLosses = Losses.calculateUnmodifiedLosses(state, attackingFaction, attackingPieces, false,
                                                                             battleResults.willApplyGermanicHorse);
             if (attackingFaction.id === FactionIDs.ARVERNI && state.hasUnshadedCapability(
                     CapabilityIDs.MASSED_GALLIC_ARCHERS)) {
@@ -267,7 +273,7 @@ class Battle extends Command {
 
         if (battleResults.committedDefenderResults.counterattackPossible && !battleResults.willRetreat) {
             const defendingPieces = region.piecesByFaction()[defendingFaction.id];
-            let attackerLosses = Losses.calculateUnmodifiedLosses(state,
+            let attackerLosses = Losses.calculateUnmodifiedLosses(state, defendingFaction,
                                                                   battleResults.committedDefenderResults.remaining,
                                                                   true, battleResults.willApplyGermanicHorse);
             if (battleResults.willApplyGermanicHorse && defendingFaction.id !== FactionIDs.ROMANS &&
@@ -319,6 +325,24 @@ class Battle extends Command {
         console.log('Battle complete');
     }
 
+    static getAttackingPieces(battleResults) {
+        let pieces = battleResults.region.getPiecesForFaction(battleResults.attackingFaction.id);
+        if(battleResults.willEnlistGermans) {
+            const germans = battleResults.region.getPiecesForFaction(FactionIDs.GERMANIC_TRIBES);
+            pieces = _.concat(pieces,germans);
+        }
+        // diviciacus too
+
+        return pieces;
+    }
+
+    static getDefendingPieces(battleResults) {
+        let pieces = battleResults.region.getPiecesForFaction(battleResults.defendingFaction.id);
+        // diviciacus too
+
+        return pieces;
+    }
+
     static partyHasUnshadedLegioX(state, region, faction) {
         if (faction.id !== FactionIDs.ROMANS) {
             return false;
@@ -365,7 +389,7 @@ class Battle extends Command {
 
         if (battleResults.willApplyBalearicSlingers) {
             const attackerLosses = Math.floor(
-                Losses.calculateUnmodifiedLosses(state, region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS),
+                Losses.calculateUnmodifiedLosses(state, defendingFaction, region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS),
                                                  false, battleResults.willApplyGermanicHorse));
             if (attackerLosses > 0) {
                 const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
@@ -379,8 +403,9 @@ class Battle extends Command {
         }
     }
 
-    static simulateBalearicSlingers(state, region, attackingFaction, attackerPieces) {
+    static simulateBalearicSlingers(state, region, attackingFaction, attackerPieces, defendingFaction) {
         const attackerLosses = Math.floor(Losses.calculateUnmodifiedLosses(state,
+                                                                           defendingFaction,
                                                                            region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS),
                                                                            false,
                                                                            state.hasUnshadedCapability(CapabilityIDs.GERMANIC_HORSE)));
@@ -393,6 +418,38 @@ class Battle extends Command {
         return _.drop(Losses.orderPiecesRollsFirst(attackerPieces, false), attackerLosses);
     }
 
+    static handleMassedGallicArchers(state, battleResults, region, attackingFaction, defendingFaction) {
+        if((attackingFaction.id === FactionIDs.ARVERNI || defendingFaction.id === FactionIDs.ARVERNI) && region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length < 6) {
+            return;
+        }
+
+        const targetFaction = attackingFaction.id === FactionIDs.ARVERNI ? defendingFaction : attackingFaction;
+        const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
+                                          interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === targetFaction.id && interaction.massedGallicArchers);
+
+        if (!existingLosses) {
+            console.log('*** Arverni are using their Massed Gallic Archers *** ');
+            state.playersByFaction[targetFaction.id].takeLosses(state, battleResults, {losses: 1}, false, true);
+        }
+    }
+
+    static simulateMassedGallicArchers(state, region, attackingFaction, attackingPieces, defendingFaction, defendingPieces, enlistingGermans) {
+        let updatedAttackingPieces = attackingPieces;
+        let updatedDefendingPieces = defendingPieces;
+        if(attackingFaction.id === FactionIDs.ARVERNI && (_.countBy(attackingPieces, 'type').warband || 0) >=6 ) {
+            const rollFirstOrderedPieces = Losses.orderPiecesRollsFirst(defendingPieces, false);
+            const firstPiece = _.first(rollFirstOrderedPieces);
+            if(firstPiece && !firstPiece.canRoll) {
+                const weakestOrderedPieces = Losses.orderPiecesForRemoval(state, defendingPieces, false);
+                updatedDefendingPieces = _.drop(weakestOrderedPieces, 1);
+            }
+        }
+        else if(defendingFaction.id === FactionIDs.ARVERNI && (_.countBy(defendingPieces, 'type').warband || 0) >=6) {
+            const helpingFactionId = enlistingGermans ? FactionIDs.GERMANIC_TRIBES : null;
+            updatedAttackingPieces = _.drop(Losses.orderPiecesForRemoval(state, attackingPieces, false, helpingFactionId), 1);
+        }
+        return { updatedAttackingPieces, updatedDefendingPieces };
+    }
 
     static getRetreatDeclaration(state, region, attackingFaction, defendingFaction, noRetreatLosses, retreatLosses) {
 

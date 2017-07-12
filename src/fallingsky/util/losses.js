@@ -3,14 +3,14 @@ import FactionIDs from 'fallingsky/config/factionIds';
 import {CapabilityIDs} from 'fallingsky/config/capabilities';
 class Losses {
 
-    static calculateUnmodifiedLosses(state, attackingPieces, counterattack=false, germanicHorse=false) {
+    static calculateUnmodifiedLosses(state, attackingFaction, attackingPieces, counterattack=false, germanicHorse=false) {
         let losses = 0;
         const leader = _.find(attackingPieces, {type: 'leader'});
         let usedLegioXLegion = false;
         _.each(
             attackingPieces, function (piece) {
                 if (piece.type === 'warband') {
-                    if (!counterattack && leader && !leader.isSuccessor() && piece.factionId === FactionIDs.BELGAE) {
+                    if (!counterattack && leader && !leader.isSuccessor() && attackingFaction.id === FactionIDs.BELGAE) {
                         losses += 1;
                     }
                     else {
@@ -46,26 +46,30 @@ class Losses {
         return losses;
     }
 
-    static orderPiecesForRemoval(state, pieces, retreat) {
+    static orderPiecesForRemoval(state, pieces, retreat, helpingFactionId) {
         const alliesFortsAndCitadels = _(pieces).filter(
             function (piece) {
                 return piece.type === 'alliedtribe' || piece.type === 'fort' || piece.type === 'citadel';
             }).sortBy(
             function (piece) {
                 if (piece.type === 'alliedtribe') {
+                    if(piece.factionId === helpingFactionId) {
+                        return 'a'
+                    }
+
                     const tribe = state.tribesById[piece.tribeId];
                     if (!tribe.isCity) {
-                        return 'a';
+                        return 'b';
                     }
                     else {
-                        return 'b';
+                        return 'c';
                     }
                 }
                 else if (piece.type === 'fort') {
-                    return 'c';
+                    return 'd';
                 }
                 else if (piece.type === 'citadel') {
-                    return 'd';
+                    return 'e';
                 }
             }).value();
 
@@ -75,22 +79,25 @@ class Losses {
             }).sortBy(
             function (piece) {
                 if (piece.type === 'warband' || piece.type === 'auxilia') {
-                    if (piece.scouted()) {
-                        return 'a';
+                    if(piece.factionId === helpingFactionId) {
+                        return 'a'
                     }
-                    else if (piece.revealed()) {
+                    if (piece.scouted()) {
                         return 'b';
                     }
-                    else {
+                    else if (piece.revealed()) {
                         return 'c';
+                    }
+                    else {
+                        return 'd';
                     }
 
                 }
                 else if (piece.type === 'legion') {
-                    return 'd';
+                    return 'e';
                 }
                 else if (piece.type === 'leader') {
-                    return 'e';
+                    return 'f';
                 }
             }).value();
 
