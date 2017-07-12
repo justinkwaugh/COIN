@@ -5,7 +5,7 @@ import RomanEvent from './romanEvent';
 import RomanBattle from './romanBattle';
 // import RomanRecruit from './romanRecruit';
 // import RomanSeize from './romanSeize';
-// import RomanMarch from './romanMarch';
+import RomanMarch from './romanMarch';
 import CommandIDs from '../../config/commandIds';
 import FactionActions from '../../../common/factionActions';
 import Pass from '../../commands/pass';
@@ -43,7 +43,7 @@ class RomanBot extends Bot {
         if(modifiers.tryThreatMarch) {
             if (!turn.getCheckpoint(Checkpoints.MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(
                     CommandIDs.MARCH) && modifiers.tryThreatMarch) {
-                // commandAction = RomanMarch.march(state, modifiers, 'threat');
+                commandAction = RomanMarch.march(state, modifiers);
             }
             turn.markCheckpoint(Checkpoints.MARCH_CHECK);
 
@@ -69,7 +69,7 @@ class RomanBot extends Bot {
             if (!turn.getCheckpoint(Checkpoints.MARCH_CHECK) && !commandAction &&
                 state.romans.availableAuxilia().length <= 8 &&
                 modifiers.isCommandAllowed(CommandIDs.MARCH)) {
-                // commandAction = RomanMarch.march(state, modifiers, 'threat');
+                commandAction = RomanMarch.march(state, modifiers);
             }
             turn.markCheckpoint(Checkpoints.MARCH_CHECK);
 

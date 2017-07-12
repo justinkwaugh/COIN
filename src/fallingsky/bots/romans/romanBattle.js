@@ -174,6 +174,7 @@ class RomanBattle {
                     }, 0 );
 
                 if(numCriticalEnemies > 1) {
+                    // Too many threats... run away! (Not necessarily part of rules)
                     return;
                 }
 

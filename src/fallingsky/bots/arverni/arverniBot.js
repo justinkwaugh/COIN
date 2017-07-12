@@ -81,6 +81,9 @@ class ArverniBot extends Bot {
         return commandAction;
     }
 
+    willHarass(factionId) {
+        return factionId === FactionIDs.ROMANS;
+    }
 }
 
 export default ArverniBot;

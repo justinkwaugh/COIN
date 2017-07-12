@@ -29,7 +29,6 @@ class March extends Command {
                 let secondRegions = [];
                 let thirdRegions = [];
 
-
                 const hasVercingetorix = isArverni && _.find(
                         mobileFactionPieces, function (piece) {
                             return piece.type === 'leader' && !piece.isSuccessor();
@@ -39,7 +38,7 @@ class March extends Command {
                             return piece.type === 'leader' && !piece.isSuccessor();
                         });
 
-                if (hasVercingetorix || (isRomans && !hasCaesar)) {
+                if (hasVercingetorix || isRomans) {
                     secondRegions = _(firstRegions).map(
                         adjacentRegion => adjacentRegion.adjacent).flatten().uniq().value();
                 }

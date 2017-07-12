@@ -57,21 +57,13 @@ class ArverniMarch {
 
         state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         console.log('*** Arverni Marching to Escape Threat ***');
+        const alreadyMarched = {};
         _.each(
             marches, (march) => {
-                if (arverni.resources() < march.march.cost && !modifiers.free) {
+
+                if (!this.payForMarchAndHide(state, modifiers, march.march, alreadyMarched)) {
                     return false;
                 }
-
-                if (!modifiers.free) {
-                    RemoveResources.execute(state, {factionId: FactionIDs.ARVERNI, count: leaderMarch.march.cost});
-                }
-
-                HidePieces.execute(
-                    state, {
-                        factionId: arverni.id,
-                        regionId: march.region.id
-                    });
 
                 MovePieces.execute(
                     state, {
@@ -403,6 +395,7 @@ class ArverniMarch {
                     (path) => {
                         const middleRegion = state.regionsById[path[1]];
                         const harassmentLosses = this.harassmentLosses(state, FactionIDs.ROMANS, middleRegion) +
+                                                 this.harassmentLosses(state, FactionIDs.BELGAE, middleRegion) +
                                                  this.harassmentLosses(state, FactionIDs.AEDUI, middleRegion) +
                                                  this.harassmentLosses(state, FactionIDs.GERMANIC_TRIBES, middleRegion);
 
@@ -434,7 +427,7 @@ class ArverniMarch {
         let losses = 0;
         const numHiddenEnemies = region.getHiddenPiecesForFaction(factionId).length;
         if (numHiddenEnemies >= 3) {
-            const player = state.playersByFaction[FactionIDs.ROMANS];
+            const player = state.playersByFaction[factionId];
             if (player.willHarass(FactionIDs.ARVERNI)) {
                 losses = Math.floor(numHiddenEnemies / 3);
             }

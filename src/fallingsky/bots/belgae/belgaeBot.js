@@ -87,6 +87,10 @@ class BelgaeBot extends Bot {
                state.currentCard().initiativeOrder[0] !== FactionIDs.BELGAE &&
                _.random(1, 6) < 5;
     }
+
+    willHarass(factionId) {
+        return factionId === FactionIDs.ROMANS;
+    }
 }
 
 export default BelgaeBot;

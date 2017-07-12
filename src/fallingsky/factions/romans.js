@@ -53,7 +53,8 @@ class Romans extends FallingSkyFaction {
 
         this.offMapLegions = ko.pureComputed(
             () => {
-                return this.fallenLegions().length +
+                return this.availableLegions().length +
+                       this.fallenLegions().length +
                        this.adulationLegions().length +
                        this.intrigueLegions().length +
                        this.uproarLegions().length;
