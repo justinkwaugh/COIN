@@ -53,9 +53,9 @@ describe("Roman march", function () {
         command.should.equal(FactionActions.COMMAND);
         expect(romans.resources()).to.equal(16);
         expect(pictonesRegion.getLegions().length).to.equal(6);
-        expect(pictonesRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(2);
-        expect(arverniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(1);
-        expect(arverniRegion.controllingFactionId()).to.equal(FactionIDs.ROMANS);
+        expect(pictonesRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(3);
+        expect(arverniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        expect(arverniRegion.controllingFactionId()).to.be.null;
 
     });
 });

@@ -159,7 +159,7 @@ class RomanMarch {
         const auxilia = region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS);
 
         const controlMarginAfterInitialPieces = region.controllingMarginByFaction()[FactionIDs.ROMANS] - (legions.length + (leader ? 1: 0) + (auxilia.length > 0 ? 1 : 0));
-        const numAuxiliaToMarch = controlMarginAfterInitialPieces > 0 ? Math.min(controlMarginAfterInitialPieces, auxilia.length) : auxilia.length;
+        const numAuxiliaToMarch = controlMarginAfterInitialPieces >= 0 ? Math.min(controlMarginAfterInitialPieces+1, auxilia.length) : auxilia.length;
 
         return _(legions).concat([leader], _.take(auxilia, numAuxiliaToMarch)).compact().value();
     }
