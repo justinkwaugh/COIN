@@ -79,15 +79,284 @@ class RomanMarch {
         const marchData = this.prioritizeMarchDestinations(state, allMarches, prioritizedFactions, threatRegionIds);
 
         if (state.romans.offMapLegions() > 5) {
-
             const marchToOneMarches = this.getMarchToOneMarches(state, modifiers, marchData);
             if (marchToOneMarches) {
                 return marchToOneMarches;
             }
         }
 
+        return this.getMarchToTwoMarches(state, modifiers, marchData);
+
+    }
+
+    static getDestinationPairs(state, modifiers, marchData) {
+        const allDestinations = _(marchData).map('prioritizedDestinations').flatten().uniqBy(
+            destinationData => destinationData.destination.id).value();
+
+        // Assign bitvalue to each destination, equal to the sum of each valid march where the value for each is (2^marchindex)
+        _.each(allDestinations, (destination) => {
+            destination.bitvalue = _.reduce(marchData, (bitvalue, data, index) => {
+                if (_.find(data.prioritizedDestinations,
+                           destinationData => destinationData.destination.id === destination.destination.id)) {
+                    return bitvalue += 2 ** index;
+                }
+                return bitvalue
+            }, 0);
+        });
+
+        // Find all pairs of regions
+        const allPairs = this.getDestinationCombinations(allDestinations);
+
+        // Keep all that == 2^marchlen -1
+        const allMarchedMask = (2 ** marchData.length) - 1;
+        const allMarchedPairs = _.filter(allPairs, pair => (pair[0].bitvalue | pair[1].bitvalue) === allMarchedMask);
+
+        // Find best priority in all pairs
+        const bestPriority = _(allMarchedPairs).flatten().map('priority').uniq().sort().first();
+
+        // Reject any that do not have that max priority
+        const allMarchedWithBestPriority = _.filter(allMarchedPairs,
+                                                    pair => pair[0].priority === bestPriority || pair[1].priority === bestPriority);
+
+        // Group them by priority and take best group
+        const groupedPairsByPriority = _.groupBy(allMarchedWithBestPriority,
+                                                 pair => pair[0].priority + pair[1].priority);
+        return groupedPairsByPriority[_(groupedPairsByPriority).keys().sort().first()];
+    }
+
+    static getDestinationCombinations(destinations) {
+        if (destinations.length < 2) {
+            return [];
+        }
+
+        const combinations = [];
+        _.each(_.range(0, destinations.length - 1), (index) => {
+            const head = _.nth(destinations, index);
+            const tail = _.drop(destinations, index + 1);
+            combinations.push.apply(combinations, _.map(tail, destination => [head, destination]));
+        });
+        return combinations;
+    }
+
+    static calculatePiecesToPairs(state, modifiers, marchData, pairs) {
+
+        const numLegionsMarching = _.reduce(marchData, (sum, data) => {
+            return sum + data.numLegions;
+        }, 0);
+
+        return _.map(pairs, pair => {
+            const first = {
+                destination: pair[0].destination,
+                priority: pair[0].priority,
+                numLegions: pair[0].destination.getLegions().length,
+                numAuxilia: pair[0].destination.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length,
+                leader: pair[0].destination.getLeaderForFaction(FactionIDs.ROMANS),
+                piecesFromRegion: {}
+            };
+
+            const second = {
+                destination: pair[1].destination,
+                priority: pair[1].priority,
+                numLegions: pair[1].destination.getLegions().length,
+                numAuxilia: pair[1].destination.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length,
+                leader: pair[1].destination.getLeaderForFaction(FactionIDs.ROMANS),
+                piecesFromRegion: {}
+            };
+
+            _.each(marchData, data => {
+                first.piecesFromRegion[data.march.region.id] = {
+                    regionId: data.march.region.id,
+                    numLegions: 0,
+                    numAuxilia: 0,
+                    harassedAuxilia: 0,
+                    leader: false
+                };
+                second.piecesFromRegion[data.march.region.id] = {
+                    regionId: data.march.region.id,
+                    numLegions: 0,
+                    numAuxilia: 0,
+                    harassedAuxilia: 0,
+                    leader: false
+                };
+            });
+
+            const numLegionsAtTargets = first.numLegions + second.numLegions;
+            const totalLegions = numLegionsMarching + numLegionsAtTargets;
+            const idealFirstLegionGroup = Math.floor(totalLegions / 2);
+            const idealSecondLegionGroup = totalLegions - idealFirstLegionGroup;
+
+            const groupedByChoice = _(marchData).map((data) => {
+                const firstDest = _.find(data.prioritizedDestinations,
+                                         marchDest => marchDest.destination.id === pair[0].destination.id);
+                const secondDest = _.find(data.prioritizedDestinations,
+                                          marchDest => marchDest.destination.id === pair[1].destination.id);
+
+                const bothTooFarToSplit = (firstDest.distance === 3 && secondDest.distance === 3);
+                const tooManyLossesToSplit = (firstDest.harassmentLosses + secondDest.harassmentLosses) > data.numAuxilia;
+
+                return {
+                    data,
+                    firstDest,
+                    secondDest,
+                    canSplit: !bothTooFarToSplit && !tooManyLossesToSplit
+                }
+            }).groupBy((dataWithDests) => {
+                if ((dataWithDests.firstDest && !dataWithDests.secondDest) || (dataWithDests.secondDest && !dataWithDests.firstDest)) {
+                    return 'one';
+                }
+                return 'both';
+            }).value();
+
+            // Only one place to go, so go
+            _.each(groupedByChoice.one, choiceData => {
+                const target = choiceData.firstDest ? first : second;
+                const targetDest = choiceData.firstDest || choiceData.secondDest;
+                target.numLegions += choiceData.data.numLegions;
+                const numArrivingAuxilia = choiceData.data.numAuxilia - targetDest.harassmentLosses;
+                target.numAuxilia += numArrivingAuxilia;
+                target.leader = choiceData.data.leader;
+                const regionData = target.piecesFromRegion[choiceData.data.march.region.id];
+                regionData.numLegions = choiceData.data.numLegions;
+                regionData.numAuxilia = numArrivingAuxilia;
+                regionData.harassedAuxilia += targetDest.harassmentLosses;
+                regionData.leader = choiceData.data.hasLeader;
+            });
+
+            // Partition greedily, legions, bringing auxilia to die if needed
+            _.each(_(groupedByChoice.both).sortBy(choiceData => choiceData.data.numLegions).reverse().value(),
+                   choiceData => {
+                       // Legions
+                       const ordered = _([first, second]).sortBy('numLegions').value();
+                       const target = _.first(ordered);
+                       const otherTarget = _.last(ordered);
+                       const targetDest = (first.destination.id === choiceData.firstDest.destination.id) ? choiceData.firstDest : choiceData.secondDest;
+                       const otherDest = (first.destination.id === choiceData.firstDest.destination.id) ? choiceData.secondDest : choiceData.firstDest;
+
+                       if (!choiceData.canSplit) {
+                           target.numLegions += choiceData.data.numLegions;
+                           const numArrivingAuxilia = choiceData.data.numAuxilia - targetDest.harassmentLosses;
+                           target.numAuxilia += numArrivingAuxilia;
+                           target.leader = choiceData.data.leader;
+                           const regionData = target.piecesFromRegion[choiceData.data.march.region.id];
+                           regionData.numLegions += choiceData.data.numLegions;
+                           regionData.numAuxilia += numArrivingAuxilia;
+                           regionData.harassedAuxilia += targetDest.harassmentLosses;
+                           regionData.leader = choiceData.data.leader;
+                           return;
+                       }
+
+                       const numToFirst = otherTarget.numLegions === idealSecondLegionGroup ? choiceData.data.numLegions : Math.min(
+                           idealFirstLegionGroup - target.numLegions, choiceData.data.numLegions);
+                       const remaining = choiceData.data.numLegions - numToFirst;
+                       target.numLegions += numToFirst;
+                       target.piecesFromRegion[choiceData.data.march.region.id].legions = numToFirst;
+                       if (targetDest.harassmentLosses > 0) {
+                           target.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia = targetDest.harassmentLosses;
+                       }
+
+                       if (remaining) {
+                           otherTarget.numLegions += remaining;
+                           otherTarget.piecesFromRegion[choiceData.data.march.region.id].legions = remaining;
+                           if (otherDest.harassmentLosses > 0) {
+                               otherTarget.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia = otherDest.harassmentLosses;
+                           }
+                       }
+                   });
+
+            // Partition greedily Auxilia, and place Leader
+            _.each(_(groupedByChoice.both).sortBy(choiceData => choiceData.data.numAuxilia).reverse().value(),
+                   choiceData => {
+                       // Legions we know exactly how many so we can just do them.
+                       const ordered = _([first, second]).sortBy('numAuxilia').value();
+                       const target = _.first(ordered);
+                       const targetDest = (first.destination.id === choiceData.firstDest.destination.id) ? choiceData.firstDest : choiceData.secondDest;
+                       const otherTarget = _.last(ordered);
+
+                       // We've placed legions to the best of our ability so we go ahead and place the leader if he hasn't already gone
+                       if (!first.leader && !second.leader && choiceData.data.leader) {
+                           let leaderTarget;
+                           if (first.numLegions === second.numLegions) {
+                               leaderTarget = choiceData.firstDest.distance > choiceData.secondDest.distance ? first : second;
+                           }
+                           else {
+                               leaderTarget = first.first.numLegions > second.numLegions ? first : second;
+                           }
+                           leaderTarget.leader = choiceData.data.leader;
+                           leaderTarget.piecesFromRegion[choiceData.data.march.region.id].leader = true;
+                           if (targetDest.harassmentLosses > 0 && leaderTarget.piecesFromRegion[choiceData.data.march.region.id].numAuxilia === 0) {
+                               leaderTarget.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia = targetDest.harassmentLosses;
+                           }
+                       }
+
+                       const numArrivingAuxilia = choiceData.data.numAuxilia - (targetDest.harassmentLosses + otherTarget.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia);
+                       target.numAuxilia += numArrivingAuxilia;
+                       target.piecesFromRegion[choiceData.data.march.region.id].numAuxilia += numArrivingAuxilia;
+                   });
+
+            // Fix the auxilia as best we can to an even partition
+            let imbalance = Math.abs(first.numAuxilia - second.numAuxilia);
+            if (imbalance > 1) {
+                const bigger = _([first, second]).sortBy('numAuxilia').last();
+                const orderedRegionPieces = _(bigger.piecesFromRegion).reject({numAuxilia: 0}).sortBy(
+                    'numAuxilia').reverse().value();
+                const splittable = _(orderedRegionPieces).filter(regionPieces => _.find(groupedByChoice.both,
+                                                                                        choiceData => choiceData.data.march.region.id === regionPieces.regionId &&
+                                                                                                      choiceData.canSplit)).value();
+                _.each(splittable, (regionPieces) => {
+                    debugger;
+                    const choiceData = _.find(groupedByChoice.both,
+                                              choiceData => choiceData.data.march.region.id === regionPieces.regionId);
+                    const smaller = (first.destination.id === bigger.destination.id) ? second : first;
+
+                    const otherDest = (first.destination.id === bigger.destination.id) ? choiceData.secondDest : choiceData.firstDest;
+                    const harassmentLosses = (smaller.piecesFromRegion[regionPieces.regionId].harassedAuxilia ? 0 : otherDest.harassmentLosses);
+                    const piecesToMove = Math.floor(Math.min(imbalance, regionPieces.numAuxilia - harassmentLosses)/2);
+
+                    if (piecesToMove > 0) {
+                        bigger.numAuxilia -= piecesToMove;
+                        regionPieces.numAuxilia -= piecesToMove;
+                        smaller.numAuxilia += piecesToMove;
+                        smaller.piecesFromRegion[regionPieces.regionId].numAuxilia += piecesToMove;
+                        if(harassmentLosses) {
+                            smaller.piecesFromRegion[regionPieces.regionId].harassedAuxilia += harassmentLosses;
+                        }
+
+                        imbalance = Math.abs(first.numAuxilia - second.numAuxilia);
+                        if (imbalance <= 1) {
+                            return false;
+                        }
+                    }
+                });
+            }
+
+        });
+
+    }
+
+    static getMarchToTwoMarches(state, modifiers, marchData) {
+
+        const pairs = this.getDestinationPairs(state, modifiers, marchData);
+
+        const populatedPairs = this.calculatePiecesToPairs(state, modifiers, marchData, pairs);
+        
+        // Test Battle
+        debugger;
+        // Re-prioritize
+
+        // Take best
         return [];
 
+        // Now the ones that have choice for auxilia and leader
+
+        // Simulate battles in target regions to determine priority
+
+        debugger;
+
+    }
+
+    static canGoToDestination(destination, marchData) {
+        return _.find(destination.possibleMarches,
+                      possibleMarch => possibleMarch.marchData.march.region.id === marchData.march.region.id);
     }
 
     static getMarchToOneMarches(state, modifiers, marchData) {
@@ -173,9 +442,15 @@ class RomanMarch {
     static prioritizeMarchDestinations(state, marches, prioritizedFactions, threatRegionIds) {
         const marchRegionIds = _.map(marches, march => march.region.id);
         return _(marches).map((march) => {
+            const marchingPieces = this.getMarchingPieces(march.region);
             const prioritizedDestinations = _(march.destinations).map(destination => {
 
                 if (_.indexOf(marchRegionIds, destination) >= 0) {
+                    return;
+                }
+
+                const pathData = this.getBestDestinationPath(state, marchingPieces, march.region, destination);
+                if (!pathData) {
                     return;
                 }
 
@@ -184,24 +459,22 @@ class RomanMarch {
                         return priority;
                     }
 
-                    let newPriority = '' + (10 + index);
-                    if(factionData.checkBattle) {
-                        newPriority += '-' + (10 + RomanUtils.getWorstLossesForEnemyInitiatedBattle(state, destination, factionData.id));
-                    }
-
-                    if(newPriority < priority) {
+                    let newPriority = 10 + index;
+                    if (newPriority < priority) {
                         return newPriority;
                     }
                     return priority;
-                }, '99');
+                }, 99);
 
-                // Check battle results as part of priority if one of the rolled priority levels
-                if (priority === '99') {
+                if (priority === 99) {
                     return;
                 }
 
                 return {
                     destination,
+                    path: pathData.path,
+                    distance: pathData.distance,
+                    harassmentLosses: pathData.harassmentLosses,
                     priority
                 }
             }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value();
@@ -209,6 +482,7 @@ class RomanMarch {
             return {
                 march,
                 numLegions: march.region.getLegions().length,
+                numAuxilia: _.filter(marchingPieces, {type: 'auxilia'}).length,
                 leader: march.region.getLeaderForFaction(FactionIDs.ROMANS),
                 threat: _.indexOf(threatRegionIds, march.region.id) >= 0,
                 prioritizedDestinations
@@ -229,14 +503,13 @@ class RomanMarch {
 
             return {
                 id: faction.id,
-                checkBattle: false,
                 priority
             }
 
         }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value();
 
         if (targetGermans) {
-            priorityFactions.push({ id: FactionIDs.GERMANIC_TRIBES, checkBattle: false });
+            priorityFactions.push({id: FactionIDs.GERMANIC_TRIBES});
         }
 
         const roll = _.random(1, 6);
@@ -247,7 +520,6 @@ class RomanMarch {
                                                 const priority = 99 - faction.numAlliedTribesAndCitadelsPlaced();
                                                 return {
                                                     id: faction.id,
-                                                    checkBattle: true,
                                                     priority
                                                 };
                                             }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value());
@@ -260,7 +532,6 @@ class RomanMarch {
                                                 const priority = player.isNonPlayer ? 'b' : 'a';
                                                 return {
                                                     id: faction.id,
-                                                    checkBattle: true,
                                                     priority
                                                 };
                                             }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value());
@@ -335,10 +606,10 @@ class RomanMarch {
 
                 return {
                     path,
+                    distance: path.length - 1,
                     harassmentLosses
                 }
-            }).compact().sortBy('harassmentLosses').groupBy('harassmentLosses').map(
-            _.shuffle).flatten().first();
+            }).compact().orderBy(['harassmentLosses', 'distance']).first();
 
         if (!bestPath) {
             return;
@@ -347,6 +618,7 @@ class RomanMarch {
         return {
             destination,
             path: bestPath.path,
+            distance: bestPath.distance,
             harassmentLosses: bestPath.harassmentLosses
         }
 

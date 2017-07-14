@@ -52,7 +52,7 @@ class March extends Command {
                 destinations = _(destinations).reject(destination => destination.id === region.id).filter(
                     destination => destination.inPlay()).uniq().value();
 
-                const marchLimit = hasCaesar ? 3 : hasVercingetorix ? 2 : 1;
+                const marchLimit = hasCaesar ? 3 : isRomans || hasVercingetorix ? 2 : 1;
                 destinations = _(destinations).filter((destination) => {
                     const paths = _(Map.findPathsToRegion(state, region.id, destination.id, marchLimit)).reject(
                         (path) => {

@@ -173,7 +173,6 @@ class Battle extends Command {
         if (ambush) {
             console.log(attackingFaction.name + ' is ambushing!');
         }
-        debugger;
 
         let attackingPieces = Battle.getAttackingPieces(battleResults);
         this.handleGermanicHorse(state, battleResults, region, attackingFaction, defendingFaction);
