@@ -6,7 +6,14 @@ import FactionIDs from 'fallingsky/config/factionIds';
 
 class RomanUtils {
 
-    static getWorstLossesForEnemyInitiatedBattle(state, region, factionId) {
+    static getWorstLossesForAllEnemyInitiatedBattlesInRegion(state, region, defendingPieces) {
+        return _.reduce(state.factionsById, (losses, faction) => {
+            const factionLosses = this.getWorstLossesForEnemyInitiatedBattle(state, region, faction.id, defendingPieces);
+            return Math.max(factionLosses, losses);
+        }, 0);
+    }
+
+    static getWorstLossesForEnemyInitiatedBattle(state, region, factionId, defendingPieces) {
         let canEnlist = false;
         let rampageLosses = 0;
 
@@ -21,7 +28,8 @@ class RomanUtils {
         const battleResult = Battle.test(state, {
             region: region,
             attackingFactionId: factionId,
-            defendingFactionId: FactionIDs.ROMANS
+            defendingFactionId: FactionIDs.ROMANS,
+            defendingPieces: defendingPieces
         });
 
         let worstLosses = rampageLosses + battleResult.mostDefenderLosses();
@@ -30,6 +38,7 @@ class RomanUtils {
                 region: region,
                 attackingFactionId: factionId,
                 defendingFactionId: FactionIDs.ROMANS,
+                defendingPieces: defendingPieces,
                 enlistingGermans: true
             });
 

@@ -249,14 +249,14 @@ class RomanMarch {
                            idealFirstLegionGroup - target.numLegions, choiceData.data.numLegions);
                        const remaining = choiceData.data.numLegions - numToFirst;
                        target.numLegions += numToFirst;
-                       target.piecesFromRegion[choiceData.data.march.region.id].legions = numToFirst;
+                       target.piecesFromRegion[choiceData.data.march.region.id].numLegions = numToFirst;
                        if (targetDest.harassmentLosses > 0) {
                            target.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia = targetDest.harassmentLosses;
                        }
 
                        if (remaining) {
                            otherTarget.numLegions += remaining;
-                           otherTarget.piecesFromRegion[choiceData.data.march.region.id].legions = remaining;
+                           otherTarget.piecesFromRegion[choiceData.data.march.region.id].numLegions = remaining;
                            if (otherDest.harassmentLosses > 0) {
                                otherTarget.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia = otherDest.harassmentLosses;
                            }
@@ -303,7 +303,6 @@ class RomanMarch {
                                                                                         choiceData => choiceData.data.march.region.id === regionPieces.regionId &&
                                                                                                       choiceData.canSplit)).value();
                 _.each(splittable, (regionPieces) => {
-                    debugger;
                     const choiceData = _.find(groupedByChoice.both,
                                               choiceData => choiceData.data.march.region.id === regionPieces.regionId);
                     const smaller = (first.destination.id === bigger.destination.id) ? second : first;
@@ -328,29 +327,42 @@ class RomanMarch {
                     }
                 });
             }
+            return [first, second];
 
         });
 
     }
 
+    static determineBattleLosses(state, modifiers, marchData, populatedPairs) {
+        _.each(populatedPairs, (pair)=> {
+            const firstDefendingPieces = this.getSimulationDefenderPieces(state, pair[0]);
+            pair[0].losses = RomanUtils.getWorstLossesForAllEnemyInitiatedBattlesInRegion(state, pair[0].destination, firstDefendingPieces);
+
+            const secondDefendingPieces = this.getSimulationDefenderPieces(state, pair[1]);
+            pair[1].losses = RomanUtils.getWorstLossesForAllEnemyInitiatedBattlesInRegion(state, pair[1].destination, secondDefendingPieces);
+        })
+    }
+
+    static getSimulationDefenderPieces(state, destData) {
+        return _(destData.piecesFromRegion).map((regionData) => {
+            const region = state.regionsById[regionData.regionId];
+            const auxilia = _.take(region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS), regionData.numAuxilia);
+            const legions = _.take(region.getLegions(), regionData.numLegions);
+            const leader = regionData.leader ? [region.getLeaderForFaction(FactionIDs.ROMANS)] : [];
+
+            return _.concat(auxilia,legions, leader);
+        }).flatten().concat(state.regionsById[destData.destination.id].getPiecesForFaction(FactionIDs.ROMANS)).value();
+    }
+
     static getMarchToTwoMarches(state, modifiers, marchData) {
-
         const pairs = this.getDestinationPairs(state, modifiers, marchData);
-
         const populatedPairs = this.calculatePiecesToPairs(state, modifiers, marchData, pairs);
-        
-        // Test Battle
-        debugger;
-        // Re-prioritize
+        this.determineBattleLosses(state, modifiers, marchData, populatedPairs);
+        const finalDestination = _(populatedPairs).sortBy((pair) => pair[0].losses + pair[1].losses).first();
 
-        // Take best
+        // set the march data on the marches
+        debugger;
         return [];
-
-        // Now the ones that have choice for auxilia and leader
-
-        // Simulate battles in target regions to determine priority
-
-        debugger;
 
     }
 
