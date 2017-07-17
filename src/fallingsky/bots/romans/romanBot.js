@@ -3,7 +3,7 @@ import Bot from '../bot';
 import FactionIDs from '../../config/factionIds';
 import RomanEvent from './romanEvent';
 import RomanBattle from './romanBattle';
-// import RomanRecruit from './romanRecruit';
+import RomanRecruit from './romanRecruit';
 // import RomanSeize from './romanSeize';
 import RomanMarch from './romanMarch';
 import CommandIDs from '../../config/commandIds';
@@ -49,7 +49,7 @@ class RomanBot extends Bot {
 
             if (!turn.getCheckpoint(Checkpoints.RECRUIT_CHECK) && !commandAction && modifiers.isCommandAllowed(
                     CommandIDs.RECRUIT)) {
-                // commandAction = RomanRecruit.recruit(state, modifiers);
+                commandAction = RomanRecruit.recruit(state, modifiers);
             }
             turn.markCheckpoint(Checkpoints.RECRUIT_CHECK);
 
@@ -68,7 +68,7 @@ class RomanBot extends Bot {
 
 
             if (!turn.getCheckpoint(Checkpoints.MARCH_CHECK) && !commandAction &&
-                true &&
+                state.romans.availableAuxilia().length <= 8 &&
                 modifiers.isCommandAllowed(CommandIDs.MARCH)) {
                 commandAction = RomanMarch.march(state, modifiers);
             }
@@ -76,7 +76,7 @@ class RomanBot extends Bot {
 
             if (!turn.getCheckpoint(Checkpoints.RECRUIT_CHECK) && !commandAction && modifiers.isCommandAllowed(
                     CommandIDs.RECRUIT)) {
-                // commandAction = RomanRecruit.recruit(state, modifiers);
+                commandAction = RomanRecruit.recruit(state, modifiers);
             }
             turn.markCheckpoint(Checkpoints.RECRUIT_CHECK);
 

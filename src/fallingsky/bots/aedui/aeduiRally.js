@@ -4,10 +4,11 @@ import FactionIDs from '../../config/factionIds';
 import Rally from '../../commands/rally';
 import AeduiTrade from './aeduiTrade';
 import AeduiSuborn from './aeduiSuborn';
+import RemoveResources from 'fallingsky/actions/removeResources'
 import FactionActions from '../../../common/factionActions';
 
 const Checkpoints = {
-    RALLY_COMPLETE_CHECK : 'rcc'
+    RALLY_COMPLETE_CHECK: 'rcc'
 };
 
 class AeduiRally {
@@ -15,7 +16,7 @@ class AeduiRally {
         const aeduiFaction = state.aedui;
         const turn = state.turnHistory.getCurrentTurn();
 
-        if(!turn.getCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK)) {
+        if (!turn.getCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK)) {
             console.log('*** Are there any effective Aedui Rallies? ***');
             const executableRallyRegions = AeduiRally.getExecutableRallyRegions(state, modifiers, aeduiFaction);
             if ((aeduiFaction.availableWarbands() <= 10 || executableRallyRegions.length === 0) && !this.isRallyEffective(
@@ -23,19 +24,27 @@ class AeduiRally {
                 return false;
             }
             turn.startCommand(CommandIDs.RALLY);
-            Rally.execute(state, {faction: aeduiFaction, regionResults: executableRallyRegions});
+            _.each(executableRallyRegions, (rallyRegion) => {
+                if (!modifiers.free && rallyRegion.cost > 0) {
+                    RemoveResources.execute(state, {factionId: aeduiFaction.id, count: rallyRegion.cost});
+                }
+                Rally.execute(state, {faction: aeduiFaction, regionResult: rallyRegion});
+            });
+
             turn.commitCommand();
         }
 
         turn.markCheckpoint(Checkpoints.RALLY_COMPLETE_CHECK);
-        const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state, modifiers) || AeduiSuborn.suborn(state, modifiers));
+        const usedSpecialAbility = modifiers.canDoSpecial() && (AeduiTrade.trade(state,
+                                                                                 modifiers) || AeduiSuborn.suborn(state,
+                                                                                                                  modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 
     static getCitadelRegions(state, modifiers) {
         const rallyRegionResults = Rally.test(state, {factionId: FactionIDs.AEDUI});
         const citadelRegions = _(rallyRegionResults).filter({canAddCitadel: true}).shuffle().value();
-        _.each(citadelRegions,(regionResult) => {
+        _.each(citadelRegions, (regionResult) => {
             regionResult.addCitadel = true;
         });
         return _.take(citadelRegions, state.aedui.availableCitadels().length);
@@ -43,11 +52,12 @@ class AeduiRally {
 
     static getAllyRegions(state, modifiers, ralliedRegionIds) {
         const regions = _.filter(state.regions, region => _.indexOf(ralliedRegionIds, region.id) < 0);
-        const rallyRegionResults = Rally.test(state, {factionId: FactionIDs.AEDUI,
+        const rallyRegionResults = Rally.test(state, {
+            factionId: FactionIDs.AEDUI,
             regions: regions
         });
         const allyRegions = _(rallyRegionResults).filter({canAddAlly: true}).shuffle().value();
-        _.each(allyRegions,(regionResult) => {
+        _.each(allyRegions, (regionResult) => {
             regionResult.addAlly = true;
         });
         return _.take(allyRegions, state.aedui.availableAlliedTribes().length);
@@ -55,17 +65,18 @@ class AeduiRally {
 
     static getWarbandRegions(state, modifiers, ralliedRegionIds) {
         const regions = _.filter(state.regions, region => _.indexOf(ralliedRegionIds, region.id) < 0);
-        const rallyRegionResults = Rally.test(state, {factionId: FactionIDs.AEDUI,
+        const rallyRegionResults = Rally.test(state, {
+            factionId: FactionIDs.AEDUI,
             regions: regions
         });
-        const warbandRegions = _(rallyRegionResults).filter( result => result.canAddNumWarbands > 0).shuffle().value();
+        const warbandRegions = _(rallyRegionResults).filter(result => result.canAddNumWarbands > 0).shuffle().value();
         _.each(warbandRegions, (regionResult) => {
             regionResult.addNumWarbands = regionResult.canAddNumWarbands;
         });
         return warbandRegions;
     }
 
-   static isRallyEffective(state, executableRallyRegions) {
+    static isRallyEffective(state, executableRallyRegions) {
         const aedui = state.aedui;
         let citadelAdded = false;
         let allyAdded = false;
@@ -95,7 +106,7 @@ class AeduiRally {
         return citadelAdded || allyAdded || numPiecesAdded >= 3;
     }
 
-    static getExecutableRallyRegions(state, modifiers, faction) {
+    static getExecutableRallyRegions(state, modifiers) {
         const ralliedRegions = [];
         const citadelRegions = this.getCitadelRegions(state, modifiers);
         ralliedRegions.push.apply(ralliedRegions, _.map(citadelRegions, rallyRegion => rallyRegion.region.id));
@@ -104,7 +115,15 @@ class AeduiRally {
         const warbandRegions = this.getWarbandRegions(state, modifiers, ralliedRegions);
 
         const allRegions = _(citadelRegions).concat(allyRegions).concat(warbandRegions).value();
-        return modifiers.limited ? _.take(allRegions, 1) : allRegions;
+        const affordableRegions = modifiers.free ? allRegions : _.reduce(allRegions, (accumulator, rallyRegion) => {
+            if (accumulator.resourcesRemaining >= rallyRegion.cost) {
+                accumulator.resourcesRemaining -= rallyRegion.cost;
+                accumulator.rallies.push(rallyRegion);
+            }
+            return accumulator
+        }, {resourcesRemaining: state.aedui.resources(), rallies: []}).rallies;
+
+        return modifiers.limited ? _.take(affordableRegions, 1) : affordableRegions;
     }
 }
 

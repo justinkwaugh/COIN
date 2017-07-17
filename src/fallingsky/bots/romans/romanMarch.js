@@ -85,10 +85,10 @@ class RomanMarch {
         const prioritizedFactions = this.getEnemyFactionPriority(state);
 
         const threatMarches = _.filter(marchResults, result => _.indexOf(threatRegionIds, result.region.id) >= 0);
-        const otherMarches = _.filter(marchResults, result => _.indexOf(otherMarchRegionIds, result.region.id) >= 0);
+        const otherMarches = _(marchResults).filter(result => _.indexOf(otherMarchRegionIds, result.region.id) >= 0).sortBy('cost').value();
         const allMarches = _.concat(threatMarches, otherMarches);
-
-        const marchData = this.prioritizeMarchDestinations(state, allMarches, prioritizedFactions, threatRegionIds);
+        const affordableMarches = this.getAffordableMarches(state, modifiers, allMarches);
+        const marchData = this.prioritizeMarchDestinations(state, affordableMarches, prioritizedFactions, threatRegionIds);
 
         if (state.romans.offMapLegions() > 5) {
             const marchToOneMarches = this.getMarchToOneMarches(state, modifiers, marchData);
@@ -99,6 +99,16 @@ class RomanMarch {
 
         return this.getMarchToTwoMarches(state, modifiers, marchData);
 
+    }
+
+    static getAffordableMarches(state, modifiers, allMarches) {
+        return modifiers.free ? allMarches : _.reduce(allMarches, (accumulator, march) => {
+            if (accumulator.resourcesRemaining >= march.cost) {
+                accumulator.resourcesRemaining -= march.cost;
+                accumulator.marches.push(march);
+            }
+            return accumulator
+        }, {resourcesRemaining: state.romans.resources(), marches: []}).marches;
     }
 
     static getDestinationPairs(state, modifiers, marchData) {

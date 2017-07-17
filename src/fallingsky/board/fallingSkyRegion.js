@@ -146,7 +146,7 @@ class FallingSkyRegion extends Region {
 
     subduedTribesForFaction(factionId) {
         return _(this.tribes).filter(function(tribe) {
-            return tribe.isSubdued() && (!tribe.factionRestriction || tribe.factionRestriction !== factionId);
+            return tribe.isSubdued() && (!tribe.factionRestriction || tribe.factionRestriction === factionId);
         }).value();
     }
 

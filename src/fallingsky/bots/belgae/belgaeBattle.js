@@ -46,6 +46,7 @@ class BelgaeBattle {
             turn.markCheckpoint(Checkpoints.PRE_BATTLE_SPECIAL_CHECK);
         }
 
+        debugger;
         _.each(battles, (battle) => {
             if (!battle.complete) {
                 if (!battle.paid && !modifiers.free) {
@@ -73,7 +74,7 @@ class BelgaeBattle {
 
         const importantBattleRegions = this.findImportantBattleRegions(state, modifiers);
         if (importantBattleRegions.length === 0) {
-            return false;
+            return [];
         }
 
         const battlegrounds = this.findBattlegrounds(state, modifiers, importantBattleRegions);

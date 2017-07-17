@@ -9,6 +9,7 @@ import PlaceAlliedTribe from '../actions/placeAlliedTribe';
 import PlaceCitadel  from '../actions/placeCitadel';
 import RemoveResources  from '../actions/removeResources';
 import PlaceWarbands  from '../actions/placeWarbands';
+import PlaceAuxilia  from '../actions/placeAuxilia';
 import {CapabilityIDs} from '../config/capabilities';
 
 
@@ -21,85 +22,100 @@ class Rally extends Command {
     }
 
     static doExecute(state, args) {
-        console.log('*** ' + args.faction.name + ' Rally *** ');
+        console.log(
+            '*** ' + args.faction.name + ' ' + (args.faction.id === FactionIDs.ROMANS ? 'Recruit' : 'Rally') + ' *** ');
         const faction = args.faction;
-        const regionResults = args.regionResults;
+        const regionResult = args.regionResult;
 
-        _.each(
-            regionResults, function (regionResult) {
-                const factionPieces = regionResult.region.piecesByFaction()[faction.id];
+        const factionPieces = regionResult.region.getPiecesForFaction(faction.id);
 
-                const isArverni = faction.id === FactionIDs.ARVERNI;
-                const isGermanic = faction.id === FactionIDs.GERMANIC_TRIBES;
-                const hasVercingetorix = isArverni && _.find(
-                        factionPieces, function (piece) {
-                            return piece.type === 'leader' && !piece.isSuccessor();
-                        });
+        const isArverni = faction.id === FactionIDs.ARVERNI;
+        const isGermanic = faction.id === FactionIDs.GERMANIC_TRIBES;
+        const hasVercingetorix = isArverni && _.find(
+                factionPieces, function (piece) {
+                    return piece.type === 'leader' && !piece.isSuccessor();
+                });
 
-                let citadelAdded = false;
-                let allyAdded = false;
-                let warbandsAdded = false;
+        let citadelAdded = false;
+        let allyAdded = false;
+        let warbandsAdded = false;
+        let auxiliaAdded = false;
 
-                const actions = [];
+        const actions = [];
 
-                if (regionResult.addCitadel && faction.availableCitadels().length > 0) {
-                    const tribeForCity = regionResult.region.getAlliedCityForFaction(faction.id);
-                    actions.push(new PlaceCitadel({factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForCity.id}));
-                    citadelAdded = true;
-                }
+        if (regionResult.addCitadel && faction.availableCitadels().length > 0) {
+            const tribeForCity = regionResult.region.getAlliedCityForFaction(faction.id);
+            actions.push(
+                new PlaceCitadel({factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForCity.id}));
+            citadelAdded = true;
+        }
 
-                if (!citadelAdded && regionResult.addAlly && faction.availableAlliedTribes().length > 0) {
-                    const tribeForAlly = _(regionResult.region.subduedTribesForFaction(faction.id)).sortBy(
-                        tribe => tribe.isCity ? 'a' : 'b').groupBy(
-                        tribe => tribe.isCity ? 'a' : 'b').map(_.shuffle).flatten().first();
+        if (!citadelAdded && regionResult.addAlly && faction.availableAlliedTribes().length > 0) {
+            const tribeForAlly = _(regionResult.region.subduedTribesForFaction(faction.id)).sortBy(
+                tribe => tribe.isCity ? 'a' : 'b').groupBy(
+                tribe => tribe.isCity ? 'a' : 'b').map(_.shuffle).flatten().first();
 
-                    actions.push(new PlaceAlliedTribe({factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForAlly.id}));
-                    allyAdded = true;
-                }
+            actions.push(new PlaceAlliedTribe(
+                {factionId: faction.id, regionId: regionResult.region.id, tribeId: tribeForAlly.id}));
+            allyAdded = true;
+        }
 
-                if ((!citadelAdded && !allyAdded) || hasVercingetorix || isGermanic) {
-                    if (regionResult.addNumWarbands > 0 && faction.availableWarbands().length > 0) {
-                        actions.push(new PlaceWarbands({
-                                factionId: faction.id,
-                                regionId: regionResult.region.id,
-                                count: Math.min(regionResult.addNumWarbands, faction.availableWarbands().length)
-                            }));
-                        warbandsAdded = true;
-                    }
-                }
+        if ((!citadelAdded && !allyAdded) || hasVercingetorix || isGermanic) {
+            if (regionResult.addNumAuxilia > 0 && faction.availableAuxilia().length > 0) {
+                actions.push(new PlaceAuxilia({
+                                                  factionId: faction.id,
+                                                  regionId: regionResult.region.id,
+                                                  count: Math.min(regionResult.addNumAuxilia,
+                                                                  faction.availableAuxilia().length)
+                                              }));
+                auxiliaAdded = true;
+            }
 
-                if (citadelAdded || allyAdded || warbandsAdded) {
-                    RemoveResources.execute(state, { factionId: faction.id, count: regionResult.cost});
-                    _.each(actions, action=>action.execute(state));
-                }
-            });
+            if (regionResult.addNumWarbands > 0 && faction.availableWarbands().length > 0) {
+                actions.push(new PlaceWarbands({
+                                                   factionId: faction.id,
+                                                   regionId: regionResult.region.id,
+                                                   count: Math.min(regionResult.addNumWarbands,
+                                                                   faction.availableWarbands().length)
+                                               }));
+                warbandsAdded = true;
+            }
+        }
+
+        if (citadelAdded || allyAdded || warbandsAdded || auxiliaAdded) {
+            _.each(actions, action => action.execute(state));
+        }
     }
 
     static generateResultsForRegions(state, faction, regions) {
         return _(regions).map(
             function (region) {
 
-                const factionPieces = region.piecesByFaction()[faction.id];
+                const factionPieces = region.getPiecesForFaction(faction.id);
 
+                const isRomans = faction.id === FactionIDs.ROMANS;
                 const isArverni = faction.id === FactionIDs.ARVERNI;
                 const isBelgae = faction.id === FactionIDs.BELGAE;
                 const isGermanic = faction.id === FactionIDs.GERMANIC_TRIBES;
 
-                const hasVercingetorix = isArverni && _.find(
-                        factionPieces, function (piece) {
-                            return piece.type === 'leader' && !piece.isSuccessor();
-                        });
+                const hasLeader = _.find(factionPieces, function (piece) {
+                    return piece.type === 'leader' && !piece.isSuccessor();
+                });
+
+                const hasVercingetorix = hasLeader && isArverni;
+                const hasCaesar = hasLeader && isRomans;
 
                 if (region.devastated() && !hasVercingetorix) {
                     return;
                 }
 
                 const isBelgaeOutsideOfBelgica = (isBelgae && region.group !== RegionGroups.BELGICA);
-                const cost = isGermanic ? 0 : (region.devastated() || isBelgaeOutsideOfBelgica ? 2 : 1);
+                const inSupplyLine = isRomans && false;
+                const cost = isRomans ? (inSupplyLine ? 0 : 2) : isGermanic ? 0 : (region.devastated() || isBelgaeOutsideOfBelgica ? 2 : 1);
 
                 let allyAdded = false;
                 let citadelAdded = false;
-                let numWarbandsAdded = 0;
+                let numWarbandsOrAuxiliaAdded = 0;
 
                 const hasAllyInCity = region.getAlliedCityForFaction(faction.id);
                 if (hasAllyInCity && faction.availableCitadels().length > 0) {
@@ -107,34 +123,46 @@ class Rally extends Command {
                 }
 
                 const hasSubduedTribe = region.subduedTribesForFaction(faction.id).length > 0;
-                if (hasSubduedTribe && faction.availableAlliedTribes().length > 0 && (region.controllingFactionId() === faction.id || hasVercingetorix)) {
+                if (hasSubduedTribe && faction.availableAlliedTribes().length > 0 && (region.controllingFactionId() === faction.id || hasVercingetorix || hasCaesar)) {
                     allyAdded = true;
                 }
 
                 const countedPieces = _.countBy(factionPieces, 'type');
-                numWarbandsAdded += (countedPieces.alliedtribe || 0) + (countedPieces.citadel || 0);
+                numWarbandsOrAuxiliaAdded += (countedPieces.alliedtribe || 0) + (countedPieces.citadel || 0);
                 if (isArverni) {
                     if (countedPieces.leader) {
-                        numWarbandsAdded += 1;
+                        numWarbandsOrAuxiliaAdded += 1;
                     }
-                    if (numWarbandsAdded) {
-                        numWarbandsAdded += 1;
+                    if (numWarbandsOrAuxiliaAdded) {
+                        numWarbandsOrAuxiliaAdded += 1;
                     }
                 }
 
-                if (numWarbandsAdded === 0 && faction.isHomeRegion(region)) {
-                    numWarbandsAdded += 1;
+                if (isRomans) {
+                    if (countedPieces.leader) {
+                        numWarbandsOrAuxiliaAdded += 1;
+                    }
                 }
 
-                if (state.hasShadedCapability(CapabilityIDs.AQUITANI, faction.id) &&
+                if (numWarbandsOrAuxiliaAdded === 0 && faction.isHomeRegion(region)) {
+                    numWarbandsOrAuxiliaAdded += 1;
+                }
+
+                if (!isRomans && state.hasShadedCapability(CapabilityIDs.AQUITANI, faction.id) &&
                     (region.id === RegionIDs.PICTONES || region.id === RegionIDs.ARVERNI)) {
-                    numWarbandsAdded += 2;
+                    numWarbandsOrAuxiliaAdded += 2;
                 }
 
-                numWarbandsAdded = Math.min(numWarbandsAdded, faction.availableWarbands().length);
+                let numWarbandsAdded = 0;
+                let numAuxiliaAdded = 0;
+                if (isRomans) {
+                    numAuxiliaAdded = Math.min(numWarbandsOrAuxiliaAdded, faction.availableAuxilia().length);
+                }
+                else {
+                    numWarbandsAdded = Math.min(numWarbandsOrAuxiliaAdded, faction.availableWarbands().length);
+                }
 
-
-                if (allyAdded || citadelAdded || numWarbandsAdded > 0) {
+                if (allyAdded || citadelAdded || numWarbandsAdded > 0 || numAuxiliaAdded > 0) {
                     return new RallyRegionResults(
                         {
                             region: region,
@@ -142,7 +170,8 @@ class Rally extends Command {
                             cost: cost,
                             canAddAlly: allyAdded,
                             canAddCitadel: citadelAdded,
-                            canAddNumWarbands: numWarbandsAdded
+                            canAddNumWarbands: numWarbandsAdded,
+                            canAddNumAuxilia: numAuxiliaAdded
                         });
                 }
 
