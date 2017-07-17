@@ -45,7 +45,7 @@ class BelgaeBattle {
             }
             turn.markCheckpoint(Checkpoints.PRE_BATTLE_SPECIAL_CHECK);
         }
-        
+
         _.each(battles, (battle) => {
             if (!battle.complete) {
                 if (!battle.paid && !modifiers.free) {

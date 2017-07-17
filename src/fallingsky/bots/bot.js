@@ -49,27 +49,14 @@ class Bot extends FallingSkyPlayer {
     }
 
     canPlayEvent(currentState) {
-        console.log('*** Aedui allowed to play event by sequence of play? ***');
         return _.indexOf(currentState.sequenceOfPlay.availableActions(), FactionActions.EVENT) >= 0;
     }
 
     willHarass(factionId, context) {
-        if (this.factionId === FactionIDs.ROMANS) {
-            throw new PlayerInteractionNeededError('Harassment possible for ' + factionId, new Harassment({
-                                                                                                              requestingFactionId: factionId,
-                                                                                                              respondingFactionId: this.factionId
-                                                                                                          }));
-        }
         return true;
     }
 
     willAgreeToQuarters(state, factionId) {
-        if (this.factionId === FactionIDs.ROMANS) {
-            throw new PlayerInteractionNeededError('Quarters requested by ' + factionId, new QuartersAgreement({
-                                                                                                                   requestingFactionId: factionId,
-                                                                                                                   respondingFactionId: this.factionId
-                                                                                                               }));
-        }
         return false;
     }
 
@@ -78,12 +65,6 @@ class Bot extends FallingSkyPlayer {
     }
 
     willAgreeToSupplyLine(state, factionId) {
-        if (this.factionId === FactionIDs.ROMANS) {
-            throw new PlayerInteractionNeededError('Supply line requested by ' + factionId, new SupplyLineAgreement({
-                                                                                                                        requestingFactionId: factionId,
-                                                                                                                        respondingFactionId: this.factionId
-                                                                                                                    }));
-        }
         return false;
     }
 
