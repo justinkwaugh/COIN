@@ -68,7 +68,7 @@ class RomanBot extends Bot {
 
 
             if (!turn.getCheckpoint(Checkpoints.MARCH_CHECK) && !commandAction &&
-                state.romans.availableAuxilia().length <= 8 &&
+                true &&
                 modifiers.isCommandAllowed(CommandIDs.MARCH)) {
                 commandAction = RomanMarch.march(state, modifiers);
             }

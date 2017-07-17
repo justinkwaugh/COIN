@@ -36,12 +36,24 @@ class RomanMarch {
                     return false;
                 }
 
-                MovePieces.execute(
-                    state, {
-                        sourceRegionId: march.region.id,
-                        destRegionId: march.targetDestination.id,
-                        pieces: march.pieces
+                if (march.groups) {
+                    _.each(march.groups, (group) => {
+                        MovePieces.execute(
+                            state, {
+                                sourceRegionId: march.region.id,
+                                destRegionId: group.targetDestination.id,
+                                pieces: this.getPiecesToMoveForRegion(march.region, group.pieceData)
+                            });
                     });
+                }
+                else {
+                    MovePieces.execute(
+                        state, {
+                            sourceRegionId: march.region.id,
+                            destRegionId: march.targetDestination.id,
+                            pieces: march.pieces
+                        });
+                }
                 effective = true;
             });
 
@@ -52,7 +64,7 @@ class RomanMarch {
         state.turnHistory.getCurrentTurn().commitCommand();
 
         let didSpecial = false;
-        if (modifiers.canDoSpecial() && !this.wasBritanniaMarch(marches)) {
+        if (modifiers.canDoSpecial()) {// && !this.wasBritanniaMarch(marches)) {
             // didSpecial = RomanBuild.build(state, modifiers) || RomanScout.scout(state, modifiers);
         }
 
@@ -65,7 +77,7 @@ class RomanMarch {
             const threatRegion = _.indexOf(threatRegionIds, id) >= 0;
             const noEnemyAlliesOrCitadels = !_.find(region.pieces(),
                                                     piece => (piece.type === 'alliedtribe' || piece.type === 'citadel') && piece.factionId !== FactionIDs.ROMANS);
-            const hasMobileRomans = region.getMobilePiecesForFaction(FactionIDs.ROMANS).length > 0;
+            const hasMobileRomans = this.getMarchingPieces(region);
 
             return !threatRegion && region.inPlay() && noEnemyAlliesOrCitadels && hasMobileRomans;
         }).map((region, id) => region.id).value();
@@ -191,8 +203,8 @@ class RomanMarch {
                 const secondDest = _.find(data.prioritizedDestinations,
                                           marchDest => marchDest.destination.id === pair[1].destination.id);
 
-                const bothTooFarToSplit = (firstDest.distance === 3 && secondDest.distance === 3);
-                const tooManyLossesToSplit = (firstDest.harassmentLosses + secondDest.harassmentLosses) > data.numAuxilia;
+                const bothTooFarToSplit = firstDest && secondDest && (firstDest.distance === 3 && secondDest.distance === 3);
+                const tooManyLossesToSplit = firstDest && secondDest && (firstDest.harassmentLosses + secondDest.harassmentLosses) > data.numAuxilia;
 
                 return {
                     data,
@@ -219,7 +231,7 @@ class RomanMarch {
                 regionData.numLegions = choiceData.data.numLegions;
                 regionData.numAuxilia = numArrivingAuxilia;
                 regionData.harassedAuxilia += targetDest.harassmentLosses;
-                regionData.leader = choiceData.data.hasLeader;
+                regionData.leader = choiceData.data.leader;
             });
 
             // Partition greedily, legions, bringing auxilia to die if needed
@@ -309,14 +321,15 @@ class RomanMarch {
 
                     const otherDest = (first.destination.id === bigger.destination.id) ? choiceData.secondDest : choiceData.firstDest;
                     const harassmentLosses = (smaller.piecesFromRegion[regionPieces.regionId].harassedAuxilia ? 0 : otherDest.harassmentLosses);
-                    const piecesToMove = Math.floor(Math.min(imbalance, regionPieces.numAuxilia - harassmentLosses)/2);
+                    const piecesToMove = Math.floor(
+                        Math.min(imbalance, regionPieces.numAuxilia - harassmentLosses) / 2);
 
                     if (piecesToMove > 0) {
                         bigger.numAuxilia -= piecesToMove;
                         regionPieces.numAuxilia -= piecesToMove;
                         smaller.numAuxilia += piecesToMove;
                         smaller.piecesFromRegion[regionPieces.regionId].numAuxilia += piecesToMove;
-                        if(harassmentLosses) {
+                        if (harassmentLosses) {
                             smaller.piecesFromRegion[regionPieces.regionId].harassedAuxilia += harassmentLosses;
                         }
 
@@ -334,37 +347,70 @@ class RomanMarch {
     }
 
     static determineBattleLosses(state, modifiers, marchData, populatedPairs) {
-        _.each(populatedPairs, (pair)=> {
+        _.each(populatedPairs, (pair) => {
             const firstDefendingPieces = this.getSimulationDefenderPieces(state, pair[0]);
-            pair[0].losses = RomanUtils.getWorstLossesForAllEnemyInitiatedBattlesInRegion(state, pair[0].destination, firstDefendingPieces);
+            pair[0].losses = RomanUtils.getWorstLossesForAllEnemyInitiatedBattlesInRegion(state, pair[0].destination,
+                                                                                          firstDefendingPieces);
 
             const secondDefendingPieces = this.getSimulationDefenderPieces(state, pair[1]);
-            pair[1].losses = RomanUtils.getWorstLossesForAllEnemyInitiatedBattlesInRegion(state, pair[1].destination, secondDefendingPieces);
+            pair[1].losses = RomanUtils.getWorstLossesForAllEnemyInitiatedBattlesInRegion(state, pair[1].destination,
+                                                                                          secondDefendingPieces);
         })
     }
 
     static getSimulationDefenderPieces(state, destData) {
         return _(destData.piecesFromRegion).map((regionData) => {
             const region = state.regionsById[regionData.regionId];
-            const auxilia = _.take(region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS), regionData.numAuxilia);
-            const legions = _.take(region.getLegions(), regionData.numLegions);
-            const leader = regionData.leader ? [region.getLeaderForFaction(FactionIDs.ROMANS)] : [];
-
-            return _.concat(auxilia,legions, leader);
+            return this.getPiecesToMoveForRegion(region, regionData);
         }).flatten().concat(state.regionsById[destData.destination.id].getPiecesForFaction(FactionIDs.ROMANS)).value();
+    }
+
+    static getPiecesToMoveForRegion(region, regionData) {
+        const auxilia = _.take(region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS), regionData.numAuxilia);
+        const legions = _.take(region.getLegions(), regionData.numLegions);
+        const leader = regionData.leader ? [region.getLeaderForFaction(FactionIDs.ROMANS)] : [];
+        return _.concat(auxilia, legions, leader);
     }
 
     static getMarchToTwoMarches(state, modifiers, marchData) {
         const pairs = this.getDestinationPairs(state, modifiers, marchData);
         const populatedPairs = this.calculatePiecesToPairs(state, modifiers, marchData, pairs);
         this.determineBattleLosses(state, modifiers, marchData, populatedPairs);
-        const finalDestination = _(populatedPairs).sortBy((pair) => pair[0].losses + pair[1].losses).first();
+        const finalDestinationPair = _(populatedPairs).sortBy((pair) => pair[0].losses + pair[1].losses).first();
+        if (!finalDestinationPair) {
+            return [];
+        }
 
-        // set the march data on the marches
-        debugger;
-        return [];
+        const marches = _(finalDestinationPair).map(destData => {
+            return _(destData.piecesFromRegion).map((regionData) => {
+                const region = state.regionsById[regionData.regionId];
+                const pieces = this.getPiecesToMoveForRegion(region, regionData);
+                if (pieces.length > 0) {
+                    return {
+                        region: region,
+                        group: {
+                            targetDestination: destData.destination,
+                            pieceData: regionData,
+                        }
+                    };
+                }
+            }).compact().value();
+        }).flatten().groupBy(groupData => groupData.region.id).map((regionData, regionId) => {
+            return {
+                region: state.regionsById[regionId],
+                groups: _.map(regionData, 'group'),
+            }
+        }).value();
+
+        _.each(marches, (march) => {
+            const marchResult = _.find(marchData, entry => entry.march.region.id === march.region.id);
+            march.cost = marchResult.march.cost;
+        });
+
+        return marches;
 
     }
+
 
     static canGoToDestination(destination, marchData) {
         return _.find(destination.possibleMarches,
@@ -453,6 +499,7 @@ class RomanMarch {
 
     static prioritizeMarchDestinations(state, marches, prioritizedFactions, threatRegionIds) {
         const marchRegionIds = _.map(marches, march => march.region.id);
+
         return _(marches).map((march) => {
             const marchingPieces = this.getMarchingPieces(march.region);
             const prioritizedDestinations = _(march.destinations).map(destination => {
@@ -466,17 +513,34 @@ class RomanMarch {
                     return;
                 }
 
-                const priority = _(prioritizedFactions).reduce((priority, factionData, index) => {
-                    if (destination.numAlliesAndCitadelsForFaction(factionData.id) <= 0) {
+                const priority = _.reduce(FactionIDs, (priority, factionId) => {
+                    if (destination.numAlliesAndCitadelsForFaction(factionId) <= 0) {
                         return priority;
                     }
 
-                    let newPriority = 10 + index;
-                    if (newPriority < priority) {
-                        return newPriority;
+                    const priorityIndex = this.getPriorityIndex(prioritizedFactions, factionId);
+                    if(priorityIndex < 0) {
+                        return priority;
                     }
-                    return priority;
+
+                    const newPriority = 10 + priorityIndex;
+                    return Math.min(newPriority, priority);
+
                 }, 99);
+
+                // const priority = _(prioritizedFactions).reduce((priority, factionData, index) => {
+                //     if (destination.numAlliesAndCitadelsForFaction(factionData.id) <= 0) {
+                //         return priority;
+                //     }
+                //
+                //
+                //
+                //     let newPriority = 10 + index;
+                //     if (newPriority < priority) {
+                //         return newPriority;
+                //     }
+                //     return priority;
+                // }, 99);
 
                 if (priority === 99) {
                     return;
@@ -502,6 +566,12 @@ class RomanMarch {
         }).value();
     }
 
+    static getPriorityIndex(prioritizedFactions, factionId) {
+        return _.findIndex(_.values(prioritizedFactions), (factions) => {
+            return _.find(factions, {id: factionId});
+        });
+    }
+
     static getEnemyFactionPriority(state) {
         const targetGermans = state.factionsById[FactionIDs.GERMANIC_TRIBES].numAlliedTribesAndCitadelsPlaced() >= 2;
         let priorityFactions = _([FactionIDs.ARVERNI, FactionIDs.BELGAE, FactionIDs.AEDUI]).map(
@@ -521,7 +591,7 @@ class RomanMarch {
         }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value();
 
         if (targetGermans) {
-            priorityFactions.push({id: FactionIDs.GERMANIC_TRIBES});
+            priorityFactions.push({id: FactionIDs.GERMANIC_TRIBES, priority: 'b' });
         }
 
         const roll = _.random(1, 6);
@@ -529,27 +599,27 @@ class RomanMarch {
             priorityFactions.push.apply(priorityFactions,
                                         _(state.factions).reject(faction => faction.id === FactionIDs.ROMANS).map(
                                             (faction) => {
-                                                const priority = 99 - faction.numAlliedTribesAndCitadelsPlaced();
+                                                const priority = 'c' + (99 - faction.numAlliedTribesAndCitadelsPlaced());
                                                 return {
                                                     id: faction.id,
                                                     priority
                                                 };
-                                            }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value());
+                                            }).sortBy('priority').value());
         }
         else {
             priorityFactions.push.apply(priorityFactions,
                                         _(state.factions).reject(faction => faction.id === FactionIDs.ROMANS).map(
                                             (faction) => {
                                                 const player = state.playersByFaction[faction.id];
-                                                const priority = player.isNonPlayer ? 'b' : 'a';
+                                                const priority = player.isNonPlayer ? 'd' : 'c';
                                                 return {
                                                     id: faction.id,
                                                     priority
                                                 };
-                                            }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().value());
+                                            }).sortBy('priority').value());
         }
 
-        return _.uniq(priorityFactions);
+        return _.groupBy(_.uniqBy(priorityFactions, 'id'), 'priority');
     }
 
     static wasBritanniaMarch(marches) {
@@ -595,8 +665,12 @@ class RomanMarch {
             };
         }
 
-        const bestPath = _(Map.findPathsToRegion(state, startRegion.id, destination.id, 3)).map(
+        const bestPath = _(Map.findPathsToRegion(state, startRegion.id, destination.id, 3)).reject(
             (path) => {
+                return March.isInvalidMarchPath(state, path);
+            }).map(
+            (path) => {
+
                 const harassmentLosses = _(path).slice(1, path.length - 1).map(
                     regionId => state.regionsById[regionId]).reduce((sum, region) => {
                     const regionLosses = this.harassmentLosses(state, FactionIDs.ARVERNI, region) +

@@ -56,32 +56,7 @@ class March extends Command {
                 destinations = _(destinations).filter((destination) => {
                     const paths = _(Map.findPathsToRegion(state, region.id, destination.id, marchLimit)).reject(
                         (path) => {
-                            if (path.length < 3) {
-                                return false;
-                            }
-
-                            // Britannia
-                            let subPath = path.slice(0, path.length - 1);
-                            if (_.indexOf(subPath, RegionIDs.BRITANNIA) >= 0) {
-                                return true;
-                            }
-
-                            // Devastated
-                            subPath = path.slice(1, path.length - 1);
-                            if (_.find(subPath, id => state.regionsById[id].devastated())) {
-                                return true;
-                            }
-
-                            // Rhenus
-                            if (_.find(_.range(1, path.length - 1), (index) => {
-                                    const from = path[index - 1];
-                                    const to = path[index];
-                                    return this.crossesRhenus(state, from, to);
-
-                                })) {
-                                return true;
-                            }
-
+                            return this.isInvalidMarchPath(state, path);
                         }).value();
                     return paths.length > 0;
                 }).value();
@@ -107,13 +82,40 @@ class March extends Command {
             }).compact().value();
     }
 
+    static isInvalidMarchPath(state, path) {
+        if (path.length < 3) {
+            return false;
+        }
+
+        // Britannia
+        let subPath = path.slice(0, path.length - 1);
+        if (_.indexOf(subPath, RegionIDs.BRITANNIA) >= 0) {
+            return true;
+        }
+
+        // Devastated
+        subPath = path.slice(1, path.length - 1);
+        if (_.find(subPath, id => state.regionsById[id].devastated())) {
+            return true;
+        }
+
+        // Rhenus
+        if (_.find(_.range(1, path.length - 1), (index) => {
+                const from = path[index - 1];
+                const to = path[index];
+                return this.crossesRhenus(state, from, to);
+
+            })) {
+            return true;
+        }
+    }
 
     static crossesRhenus(state, fromId, toId) {
         const fromRegion = state.regionsById[fromId];
         const toRegion = state.regionsById[toId];
 
         return (fromRegion.group === RegionGroups.GERMANIA || toRegion.group === RegionGroups.GERMANIA) &&
-           !(fromRegion.group === RegionGroups.GERMANIA && toRegion.group === RegionGroups.GERMANIA);
+               !(fromRegion.group === RegionGroups.GERMANIA && toRegion.group === RegionGroups.GERMANIA);
     }
 
 }
