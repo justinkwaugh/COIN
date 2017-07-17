@@ -110,8 +110,7 @@ class Rally extends Command {
                 }
 
                 const isBelgaeOutsideOfBelgica = (isBelgae && region.group !== RegionGroups.BELGICA);
-                const inSupplyLine = isRomans && false;
-                const cost = isRomans ? (inSupplyLine ? 0 : 2) : isGermanic ? 0 : (region.devastated() || isBelgaeOutsideOfBelgica ? 2 : 1);
+                const cost = isRomans ? 2 : isGermanic ? 0 : (region.devastated() || isBelgaeOutsideOfBelgica ? 2 : 1);
 
                 let allyAdded = false;
                 let citadelAdded = false;

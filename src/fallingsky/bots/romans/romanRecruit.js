@@ -17,7 +17,7 @@ class RomanRecruit {
 
         state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RALLY);
         _.each(executableRallyRegions, (rallyRegion) => {
-            if (!modifiers.free && rallyRegion.cost > 0) {
+            if (!modifiers.free && rallyRegion.cost > 0 && !rallyRegion.inSupplyLine) {
                 RemoveResources.execute(state, {factionId: state.romans.id, count: rallyRegion.cost});
             }
             Rally.execute(state, {faction: state.romans, regionResult: rallyRegion});
@@ -54,12 +54,16 @@ class RomanRecruit {
 
         // Order by supply line
 
-
-        const auxiliaRegions = _(rallyRegionResults).filter(result => result.canAddNumAuxilia > 0).shuffle().value();
-        _.each(auxiliaRegions, (regionResult) => {
-            regionResult.addNumAuxilia = regionResult.canAddNumAuxilia;
+        let auxiliaRemaining = state.romans.availableAuxilia().length;
+        _.each(rallyRegionResults, (regionResult) => {
+            regionResult.addNumAuxilia = Math.min(regionResult.canAddNumAuxilia, auxiliaRemaining);
+            auxiliaRemaining -= regionResult.addNumAuxilia;
+            if(auxiliaRemaining === 0) {
+                return false;
+            }
         });
-        return auxiliaRegions;
+
+        return _(rallyRegionResults).filter(result => result.addNumAuxilia > 0).shuffle().value();
     }
 
     static isRallyEffective(state, executableRallyRegions) {
@@ -87,6 +91,15 @@ class RomanRecruit {
         const auxiliaRegions = this.getAuxiliaRegions(state, modifiers, ralliedRegions);
 
         const allRegions = _(allyRegions).concat(auxiliaRegions).value();
+
+        _.each(allRegions, (regionResult) => {
+            const agreementsForSupplyLine = regionResult.region.getAgreementsNeededForSupplyLine(FactionIDs.ROMANS);
+            if (agreementsForSupplyLine.length === 0) {
+                regionResult.inSupplyLine = true;
+            }
+            regionResult.agreementsNeeded = agreementsForSupplyLine;
+        });
+
         const affordableRegions = modifiers.free ? allRegions : _.reduce(allRegions, (accumulator, rallyRegion) => {
             if (accumulator.resourcesRemaining >= rallyRegion.cost) {
                 accumulator.resourcesRemaining -= rallyRegion.cost;

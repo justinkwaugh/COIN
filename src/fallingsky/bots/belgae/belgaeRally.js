@@ -57,6 +57,7 @@ class BelgaeRally {
             factionId: FactionIDs.BELGAE,
             regions: regions
         });
+
         const warbandRegions = _(rallyRegionResults).filter(result => result.canAddNumWarbands > 0).map(
             (regionResult) => {
                 const controlMargin = regionResult.region.controllingMarginByFaction()[FactionIDs.BELGAE];
@@ -71,11 +72,16 @@ class BelgaeRally {
                 return {priority, regionResult};
             }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().map('regionResult').value();
 
-        _.each(warbandRegions, (regionResult) => {
-            regionResult.addNumWarbands = regionResult.canAddNumWarbands;
+        let warbandsRemaining = state.belgae.availableWarbands().length;
+        _.each(rallyRegionResults, (regionResult) => {
+            regionResult.addNumWarbands = Math.min(regionResult.canAddNumWarbands, warbandsRemaining);
+            warbandsRemaining -= regionResult.addNumWarbands;
+            if (warbandsRemaining === 0) {
+                return false;
+            }
         });
 
-        return warbandRegions;
+        return _(rallyRegionResults).filter(result => result.addNumWarbands > 0).value();
     }
 
     static isRallyEffective(state, executableRallyRegions) {

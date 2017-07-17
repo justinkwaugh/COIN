@@ -5,6 +5,7 @@ class RallyRegionResults {
         this.region = definition.region;
         this.faction = definition.faction;
         this.cost = definition.cost;
+        this.inSupplyLine = definition.inSupplyLine;
         this.canAddCitadel = definition.canAddCitadel;
         this.canAddAlly = definition.canAddAlly;
         this.canAddNumWarbands = definition.canAddNumWarbands;

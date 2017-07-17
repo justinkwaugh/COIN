@@ -68,15 +68,21 @@ class ArverniRally {
 
     static getWarbandRegions(state, modifiers, ralliedRegionIds) {
         const regions = _.filter(state.regions, region => _.indexOf(ralliedRegionIds, region.id) < 0);
-        const rallyRegionResults = Rally.test(state, {
+        const rallyRegionResults = _.shuffle(Rally.test(state, {
             factionId: FactionIDs.ARVERNI,
             regions: regions
+        }));
+
+        let warbandsRemaining = state.arverni.availableWarbands().length;
+        _.each(rallyRegionResults, (regionResult) => {
+            regionResult.addNumWarbands = Math.min(regionResult.canAddNumWarbands, warbandsRemaining);
+            warbandsRemaining -= regionResult.addNumWarbands;
+            if(warbandsRemaining === 0) {
+                return false;
+            }
         });
-        const warbandRegions = _(rallyRegionResults).filter(result => result.canAddNumWarbands > 0).shuffle().value();
-        _.each(warbandRegions, (regionResult) => {
-            regionResult.addNumWarbands = regionResult.canAddNumWarbands;
-        });
-        return warbandRegions;
+
+        return _(rallyRegionResults).filter(result => result.addNumWarbands > 0).shuffle().value();
     }
 
     static isRallyEffective(state, executableRallyRegions) {
