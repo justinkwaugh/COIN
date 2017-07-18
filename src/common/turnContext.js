@@ -11,6 +11,7 @@ class TurnContext {
         this.free = definition.free;
         this.winter = definition.winter;
         this.context = definition.context || {};
+        this.currentFactionId = definition.currentFactionId;
         this.allowedRegions = _(RegionIDs).values().filter(function(regionId) {
             return !definition.allowedRegions || _.indexOf(definition.allowedRegions , regionId) >= 0;
         }).reject(function(regionId) {

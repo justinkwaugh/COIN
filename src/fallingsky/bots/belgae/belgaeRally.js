@@ -119,7 +119,7 @@ class BelgaeRally {
         return citadelAdded || allyAdded || numPiecesAdded >= 3 || controlAdded;
     }
 
-    static getExecutableRallyRegions(state, modifiers, faction) {
+    static getExecutableRallyRegions(state, modifiers) {
         const ralliedRegions = [];
         const citadelRegions = this.getCitadelRegions(state, modifiers);
         ralliedRegions.push.apply(ralliedRegions, _.map(citadelRegions, rallyRegion => rallyRegion.region.id));
@@ -127,7 +127,7 @@ class BelgaeRally {
         ralliedRegions.push.apply(ralliedRegions, _.map(allyRegions, rallyRegion => rallyRegion.region.id));
         const warbandRegions = this.getWarbandRegions(state, modifiers, ralliedRegions);
 
-        const allRegions = _(citadelRegions).concat(allyRegions).concat(warbandRegions).value();
+        const allRegions = _(citadelRegions).concat(allyRegions).concat(warbandRegions).filter(rallyRegion => _.indexOf(modifiers.allowedRegions, rallyRegion.region.id) >= 0).value();
         const affordableRegions = modifiers.free ? allRegions : _.reduce(allRegions, (accumulator, rallyRegion) => {
             if (accumulator.resourcesRemaining >= rallyRegion.cost) {
                 accumulator.resourcesRemaining -= rallyRegion.cost;

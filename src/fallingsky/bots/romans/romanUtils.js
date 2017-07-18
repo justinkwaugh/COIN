@@ -3,12 +3,15 @@ import Enlist from 'fallingsky/commands/belgae/enlist';
 import Rampage from 'fallingsky/commands/belgae/rampage';
 import Battle from 'fallingsky/commands/battle';
 import FactionIDs from 'fallingsky/config/factionIds';
+import RemovePieces from 'fallingsky/actions/removePieces';
+import Losses from 'fallingsky/util/losses';
 
 class RomanUtils {
 
     static getWorstLossesForAllEnemyInitiatedBattlesInRegion(state, region, defendingPieces) {
         return _.reduce(state.factionsById, (losses, faction) => {
-            const factionLosses = this.getWorstLossesForEnemyInitiatedBattle(state, region, faction.id, defendingPieces);
+            const factionLosses = this.getWorstLossesForEnemyInitiatedBattle(state, region, faction.id,
+                                                                             defendingPieces);
             return Math.max(factionLosses, losses);
         }, 0);
     }
@@ -111,6 +114,45 @@ class RomanUtils {
         }
 
         return false;
+    }
+
+    static takeHarassmentLosses(state, region, losses, mobileOnly = true) {
+        const pieces = Losses.orderPiecesForRemoval(mobileOnly ? region.getMobilePiecesForFaction(FactionIDs.ROMANS) :
+                                                        region.getPiecesForFaction(FactionIDs.ROMANS));
+
+        const removed = [];
+        if (pieces.length > 0) {
+            _.each(_.range(0, losses), (index) => {
+                const piece = _.first(pieces);
+                let willRemove = true;
+                const canRollForLoss = piece.type === 'leader' || piece.type === 'citadel' || piece.type === 'legion' || piece.type === 'fort';
+                if (canRollForLoss) {
+                    const roll = _.random(1, 6);
+                    console.log('Rolling for loss of ' + piece.type + ', need 4-6 and got ' + roll);
+                    willRemove = roll < 4;
+                }
+
+                if (willRemove) {
+                    removed.push(pieces.shift());
+                }
+                else {
+                    console.log(piece.type + ' saved!');
+                }
+
+                if (pieces.length === 0) {
+                    return false;
+                }
+            });
+        }
+
+        if (removed.length > 0) {
+            RemovePieces.execute(
+                state, {
+                    regionId: region.id,
+                    factionId: FactionIDs.ROMANS,
+                    pieces: removed
+                });
+        }
     }
 }
 

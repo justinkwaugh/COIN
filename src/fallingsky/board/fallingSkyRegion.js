@@ -150,6 +150,10 @@ class FallingSkyRegion extends Region {
         }).value();
     }
 
+    getSubduedTribes() {
+        return _(this.tribes).filter(tribe => tribe.isSubdued()).value();
+    }
+
     getAlliedCityForFaction(factionId) {
         return _(this.tribes).find(function(tribe) {
             return tribe.isAllied() && tribe.isCity && tribe.alliedFactionId() === factionId;

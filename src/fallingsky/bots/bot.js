@@ -225,6 +225,7 @@ class Bot extends FallingSkyPlayer {
         const amAttacker = battleResults.attackingFaction.id === this.factionId;
         const myPieces = amAttacker ? Battle.getAttackingPieces(battleResults) : Battle.getDefendingPieces(battleResults);
         const helpingFactionId = (amAttacker && battleResults.willEnlistGermans) ? FactionIDs.GERMANIC_TRIBES : null;
+
         const targets = _.clone(Losses.orderPiecesForRemoval(state, myPieces, battleResults.willRetreat, helpingFactionId));
         const losses = attackResults.losses;
 
@@ -268,6 +269,8 @@ class Bot extends FallingSkyPlayer {
 
         attackResults.counterattackPossible = allowRolls && _.find(attackResults.remaining, {isMobile: true});
     }
+
+
 
     retreatFromBattle(state, battleResults, attackResults) {
         const region = battleResults.region;

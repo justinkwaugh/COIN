@@ -4,7 +4,7 @@ import FactionIDs from '../../config/factionIds';
 import RomanEvent from './romanEvent';
 import RomanBattle from './romanBattle';
 import RomanRecruit from './romanRecruit';
-// import RomanSeize from './romanSeize';
+import RomanSeize from './romanSeize';
 import RomanMarch from './romanMarch';
 import CommandIDs from '../../config/commandIds';
 import FactionActions from '../../../common/factionActions';
@@ -55,7 +55,7 @@ class RomanBot extends Bot {
 
             if (!turn.getCheckpoint(Checkpoints.SEIZE_CHECK) && !commandAction && modifiers.isCommandAllowed(
                     CommandIDs.SEIZE)) {
-                // commandAction = RomanSeize.seize(state, modifiers);
+                commandAction = RomanSeize.seize(state, modifiers);
             }
             turn.markCheckpoint(Checkpoints.SEIZE_CHECK);
         }
@@ -82,7 +82,7 @@ class RomanBot extends Bot {
 
             if (!turn.getCheckpoint(Checkpoints.SEIZE_CHECK) && !commandAction && modifiers.isCommandAllowed(
                     CommandIDs.SEIZE)) {
-                // commandAction = RomanSeize.seize(state, modifiers);
+                commandAction = RomanSeize.seize(state, modifiers);
             }
             turn.markCheckpoint(Checkpoints.SEIZE_CHECK);
         }

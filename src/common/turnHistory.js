@@ -16,7 +16,7 @@ class TurnHistory {
             factionId: factionId,
             actionStartIndex: this.state.actionHistory.currentIndex()
         });
-        this.currentTurn.pushContext(new TurnContext());
+        this.currentTurn.pushContext(new TurnContext({ currentFactionId: factionId }));
     }
 
     rollbackTurn() {
