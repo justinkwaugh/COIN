@@ -26,7 +26,7 @@ class Build extends Command {
                                          tribe => tribe.isAllied() && tribe.alliedFactionId() !== FactionIDs.ROMANS) &&
                                   (romanControlMargin > 0 || requiresFortForControl);
 
-            const canPlaceAlly = region.getSubduedTribes().length > 0 && (romanControlMargin > 0 || requiresFortForControl);
+            const canPlaceAlly = region.subduedTribesForFaction(FactionIDs.ROMANS).length > 0 && (romanControlMargin > 0 || requiresFortForControl);
 
             if (!canPlaceFort && !canRemoveAlly && !canPlaceAlly) {
                 return;
