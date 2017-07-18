@@ -56,6 +56,15 @@ class Turn extends ActionGroup {
         this.actionGroups.push(actionGroup);
     }
 
+    rollbackPrior(type) {
+        const prior = this.actionGroups.pop();
+        if (!prior || prior.type !== type) {
+            throw Error('Tried to rollback prior ' + type + ', but none found');
+        }
+        console.log('Rolling back ' + prior.type + ' ' + prior.id);
+        this.state.actionHistory.undoRange(prior.actionStartIndex);
+    }
+
     rollbackActionGroup(type) {
         const last = _.last(this.inProgress);
         if (!last || (type && last.type !== type)) {
@@ -103,6 +112,10 @@ class Turn extends ActionGroup {
 
     rollbackSpecialAbility() {
         this.rollbackActionGroup('sa');
+    }
+
+    rollbackPriorSpecialAbility() {
+        this.rollbackPrior('sa');
     }
 
     startEvent(id) {

@@ -8,7 +8,7 @@ import ArverniRally from 'fallingsky/bots/arverni/arverniRally';
 import BelgaeRally from 'fallingsky/bots/belgae/belgaeRally';
 import DisperseTribe from 'fallingsky/actions/disperseTribe';
 import FactionActions from '../../../common/factionActions';
-import RomanUtils from 'fallingsky/bots/romans/romanUtils';
+import RomanBuild from 'fallingsky/bots/romans/romanBuild';
 import TurnContext from 'common/turnContext';
 
 
@@ -42,11 +42,8 @@ class RomanSeize {
         });
 
         state.turnHistory.getCurrentTurn().commitCommand();
-
-        // BUILD AFTER
-        // SCOUT AFTER
-
-        const usedSpecialAbility = modifiers.canDoSpecial() && false;
+        modifiers.context.seizeRegions = _.map(executableSeizes, seize=> seize.region.id);
+        const usedSpecialAbility = modifiers.canDoSpecial() && RomanBuild.build(state, modifiers);// || RomanScout.scout(state, modifiers);;
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 

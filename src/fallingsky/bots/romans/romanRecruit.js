@@ -1,21 +1,35 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import CommandIDs from '../../config/commandIds';
+import RomanBuild from 'fallingsky/bots/romans/romanBuild';
 import Rally from '../../commands/rally';
 import RemoveResources from 'fallingsky/actions/removeResources';
 import FactionActions from '../../../common/factionActions';
 
+const Checkpoints = {
+    PRE_RECRUIT_SPECIAL_CHECK: 'pre-recruit-special'
+};
+
 
 class RomanRecruit {
     static recruit(state, modifiers) {
+        const turn = state.turnHistory.getCurrentTurn();
+        if (!turn.getCheckpoint(Checkpoints.PRE_RECRUIT_SPECIAL_CHECK)) {
+            if(modifiers.canDoSpecial()) {
+                modifiers.context.didPreRecruitSpecial = RomanBuild.build(state, modifiers);
+            }
+            turn.markCheckpoint(Checkpoints.PRE_BATTLE_SPECIAL_CHECK);
+        }
+
         const executableRallyRegions = this.getExecutableRallyRegions(state, modifiers);
         if (!this.isRallyEffective(state, executableRallyRegions)) {
+            if(modifiers.context.didPreRecruitSpecial) {
+                turn.rollbackPriorSpecialAbility();
+            }
             return false;
         }
 
-        // BUILD BEFORE
-
-        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RALLY);
+        state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RECRUIT);
         _.each(executableRallyRegions, (rallyRegion) => {
             if (!modifiers.free && rallyRegion.cost > 0 && !rallyRegion.inSupplyLine) {
                 RemoveResources.execute(state, {factionId: state.romans.id, count: rallyRegion.cost});
@@ -25,10 +39,12 @@ class RomanRecruit {
 
         state.turnHistory.getCurrentTurn().commitCommand();
 
-        // SCOUT AFTER
+        let didSpecial = modifiers.context.didPreRecruitSpecial;
+        if (modifiers.canDoSpecial() && !didSpecial) {
+            // didSpecial = RomanScout.scout(state, modifiers);
+        }
 
-        const usedSpecialAbility = modifiers.canDoSpecial() && false;
-        return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
+        return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 
     static getAllyRegions(state, modifiers, ralliedRegionIds) {

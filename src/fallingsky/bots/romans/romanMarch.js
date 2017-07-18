@@ -11,10 +11,8 @@ import HidePieces from '../../actions/hidePieces';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
 import Map from '../../util/map';
-import Battle from '../../commands/battle';
-import Enlist from 'fallingsky/commands/belgae/enlist';
-import Rampage from 'fallingsky/commands/belgae/rampage';
 import RomanUtils from 'fallingsky/bots/romans/romanUtils';
+import RomanBuild from 'fallingsky/bots/romans/romanBuild';
 
 class RomanMarch {
 
@@ -65,7 +63,7 @@ class RomanMarch {
 
         let didSpecial = false;
         if (modifiers.canDoSpecial()) {// && !this.wasBritanniaMarch(marches)) {
-            // didSpecial = RomanBuild.build(state, modifiers) || RomanScout.scout(state, modifiers);
+            didSpecial = RomanBuild.build(state, modifiers);// || RomanScout.scout(state, modifiers);
         }
 
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
