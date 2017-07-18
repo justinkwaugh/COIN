@@ -35,7 +35,7 @@ class RomanBuild {
                 RemovePieces.execute(state, {factionId: ally.factionId, regionId: build.region.id, pieces: [ally]});
             }
             else if(build.willPlaceAlly) {
-                const tribe = _(build.region.getSubduedTribes()).sortBy(tribe=>tribe.isCity).first();
+                const tribe = _(build.region.subduedTribesForFaction(FactionIDs.ROMANS)).sortBy(tribe=>tribe.isCity).first();
                 PlaceAlliedTribe.execute(state, {factionId: FactionIDs.ROMANS, regionId: build.region.id, tribeId: tribe.id});
             }
         });
