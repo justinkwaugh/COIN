@@ -5,6 +5,7 @@ import RomanBuild from 'fallingsky/bots/romans/romanBuild';
 import Rally from '../../commands/rally';
 import RemoveResources from 'fallingsky/actions/removeResources';
 import FactionActions from '../../../common/factionActions';
+import RomanScout from 'fallingsky/bots/romans/romanScout';
 
 const Checkpoints = {
     PRE_RECRUIT_SPECIAL_CHECK: 'pre-recruit-special'
@@ -41,7 +42,7 @@ class RomanRecruit {
 
         let didSpecial = modifiers.context.didPreRecruitSpecial;
         if (modifiers.canDoSpecial() && !didSpecial) {
-            // didSpecial = RomanScout.scout(state, modifiers);
+            didSpecial = RomanScout.scout(state, modifiers);
         }
 
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;

@@ -13,6 +13,7 @@ import FactionActions from '../../../common/factionActions';
 import Map from '../../util/map';
 import RomanUtils from 'fallingsky/bots/romans/romanUtils';
 import RomanBuild from 'fallingsky/bots/romans/romanBuild';
+import RomanScout from 'fallingsky/bots/romans/romanScout';
 
 class RomanMarch {
 
@@ -63,7 +64,7 @@ class RomanMarch {
 
         let didSpecial = false;
         if (modifiers.canDoSpecial()) {// && !this.wasBritanniaMarch(marches)) {
-            didSpecial = RomanBuild.build(state, modifiers);// || RomanScout.scout(state, modifiers);
+            didSpecial = RomanBuild.build(state, modifiers) || RomanScout.scout(state, modifiers);
         }
 
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
@@ -299,7 +300,7 @@ class RomanMarch {
                                leaderTarget = choiceData.firstDest.distance > choiceData.secondDest.distance ? first : second;
                            }
                            else {
-                               leaderTarget = first.first.numLegions > second.numLegions ? first : second;
+                               leaderTarget = first.numLegions > second.numLegions ? first : second;
                            }
                            leaderTarget.leader = choiceData.data.leader;
                            leaderTarget.piecesFromRegion[choiceData.data.march.region.id].leader = true;
@@ -498,9 +499,17 @@ class RomanMarch {
         const leader = region.getLeaderForFaction(FactionIDs.ROMANS);
         const auxilia = region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS);
 
-        const controlMarginAfterInitialPieces = region.controllingMarginByFaction()[FactionIDs.ROMANS] - (legions.length + (leader ? 1 : 0) + (auxilia.length > 0 ? 1 : 0));
-        const numAuxiliaToMarch = controlMarginAfterInitialPieces >= 0 ? Math.min(controlMarginAfterInitialPieces + 1,
-                                                                                  auxilia.length) : auxilia.length;
+        let numAuxiliaToMarch = 0;
+        if(auxilia.length > 0) {
+            const numInitialMarchedPieces = legions.length + (leader ? 1 : 0) + 1;
+            const maxEnemyMarginAfterMarch = region.getMaxEnemyControllingMargin(FactionIDs.ROMANS) + numInitialMarchedPieces;
+            if(maxEnemyMarginAfterMarch > 0 ) {
+                numAuxiliaToMarch = auxilia.length;
+            }
+            else {
+                numAuxiliaToMarch = Math.min(Math.abs(maxEnemyMarginAfterMarch - 1), auxilia.length);
+            }
+        }
 
         return _(legions).concat([leader], _.take(auxilia, numAuxiliaToMarch)).compact().value();
     }

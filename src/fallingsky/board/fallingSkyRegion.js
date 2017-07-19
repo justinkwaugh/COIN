@@ -3,6 +3,7 @@ import ko from '../../lib/knockout';
 import Region from '../../common/region';
 import Logging from '../util/logging';
 import FactionIDs from '../config/factionIds';
+import RegionIDs from 'fallingsky/config/regionIds';
 
 class FallingSkyRegion extends Region {
     constructor(definition, tribesById) {
@@ -65,6 +66,11 @@ class FallingSkyRegion extends Region {
         return this.controllingFactionId() === factionId;
     }
 
+    getMaxEnemyControllingMargin(requestingFactionId) {
+        const margin = _(this.controllingMarginByFaction()).reject( (margin, factionId) => factionId === requestingFactionId ).values().max();
+        return _.isUndefined(margin) ? -99 : margin;
+    }
+
     addColony(colony) {
         colony.regionId = this.id;
         this.tribes.push(colony);
@@ -94,16 +100,19 @@ class FallingSkyRegion extends Region {
         this.pieces.removeAll(pieces);
     }
 
-    hasValidSupplyLine(requestingFactionId, agreeingFactionIds) {
-        if (!this.isValidForSupplyLine(requestingFactionId, agreeingFactionIds)) {
+    hasValidSupplyLine(requestingFactionId, agreeingFactionIds, invalidRegions=[]) {
+        if (_.indexOf(invalidRegions, this.id) >= 0 || !this.isValidForSupplyLine(requestingFactionId, agreeingFactionIds)) {
             return false;
         }
 
-        return _.find(
-            this.supplyLines, function (supplyLine) {
+        if(_.indexOf(_.map(this.adjacent, 'id'), RegionIDs.CISALPINA) >= 0) {
+            return true;
+        }
+
+        return _.find(this.supplyLines, (supplyLine) => {
                 return _.every(
-                    supplyLine, function (region) {
-                        return region.isValidForSupplyLine();
+                    supplyLine, (region) => {
+                        return _.indexOf(invalidRegions, this.id) < 0 && region.isValidForSupplyLine(requestingFactionId, agreeingFactionIds);
                     });
             });
     }
