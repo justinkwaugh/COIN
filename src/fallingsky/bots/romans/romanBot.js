@@ -40,9 +40,9 @@ class RomanBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.BATTLE_CHECK);
 
-        if (modifiers.tryThreatMarch) {
+        if (modifiers.context.tryThreatMarch) {
             if (!turn.getCheckpoint(Checkpoints.MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(
-                    CommandIDs.MARCH) && modifiers.tryThreatMarch) {
+                    CommandIDs.MARCH)) {
                 commandAction = RomanMarch.march(state, modifiers);
             }
             turn.markCheckpoint(Checkpoints.MARCH_CHECK);
