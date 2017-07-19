@@ -51,7 +51,19 @@ class RomanScout {
                     numAuxiliaForSupply: enemyControlMargin
                 };
 
-        }).compact().value();
+        }).compact().filter(regionData=> {
+            const numCanMoveHere = _.reduce(possibleScouts, (sum, possibleScout) => {
+                if(_.find(possibleScout.scout.moveRegions, scoutMoveRegion=> scoutMoveRegion.id === regionData.region.id)) {
+                    return sum + possibleScout.numAuxiliaCanMoveForSupply;
+                }
+                return sum;
+            }, 0);
+
+            return numCanMoveHere >= regionData.numAuxiliaForSupply;
+        }).value();
+
+
+
         debugger;
         return [];
     }
@@ -78,7 +90,7 @@ class RomanScout {
             return numAuxilia;
         }
         const numForEnemyControl = Math.abs(maxEnemyMargin) + 1;
-        if (numForEnemyControl < numAuxilia) {
+        if (numForEnemyControl <= numAuxilia) {
             const numSuppliedAfterEnemyControl = this.regionsWithSupply(state, region.id).length;
             if (numSuppliedAfterEnemyControl === suppliedRegions.length) {
                 return numAuxilia;

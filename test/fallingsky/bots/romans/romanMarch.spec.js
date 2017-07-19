@@ -58,4 +58,43 @@ describe("Roman march", function () {
         expect(arverniRegion.controllingFactionId()).to.be.null;
 
     });
+
+    it('marches to consolidate legions, accounting for battle losses', function () {
+        romans.setResources(20);
+
+        const treveriRegion = state.regionsById[RegionIDs.TREVERI];
+        PlaceLeader.execute(state, { factionId: romans.id, regionId: treveriRegion.id});
+        PlaceLegions.execute(state, { factionId: romans.id, regionId: treveriRegion.id, count: 3});
+        PlaceAuxilia.execute(state, { factionId: romans.id, regionId: treveriRegion.id, count: 3});
+
+        const arverniRegion = state.regionsById[RegionIDs.ARVERNI];
+        PlaceLegions.execute(state, { factionId: romans.id, regionId: arverniRegion.id, count: 3});
+        PlaceAuxilia.execute(state, { factionId: romans.id, regionId: arverniRegion.id, count: 3});
+
+        const pictonesRegion = state.regionsById[RegionIDs.PICTONES];
+        PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: pictonesRegion.id, tribeId: TribeIDs.PICTONES});
+
+        const sequaniRegion = state.regionsById[RegionIDs.SEQUANI];
+        PlaceAlliedTribe.execute(state, {factionId: arverni.id, regionId: sequaniRegion.id, tribeId: TribeIDs.SEQUANI});
+        PlaceLeader.execute(state, { factionId: belgae.id, regionId: sequaniRegion.id});
+        PlaceWarbands.execute(state, {factionId: belgae.id, regionId: sequaniRegion.id, count: 12});
+
+        const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];
+        PlaceWarbands.execute(state, {factionId: germanic.id, regionId: mandubiiRegion.id, count: 3});
+
+        const atrebatesRegion = state.regionsById[RegionIDs.ATREBATES];
+        PlaceWarbands.execute(state, {factionId: germanic.id, regionId: atrebatesRegion.id, count: 3});
+
+        const command = RomanMarch.march(state, new TurnContext({noSpecial: true}));
+        command.should.equal(FactionActions.COMMAND);
+        expect(romans.resources()).to.equal(16);
+        expect(pictonesRegion.getLegions().length).to.equal(6);
+        expect(pictonesRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(5);
+        expect(sequaniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        expect(arverniRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        expect(arverniRegion.controllingFactionId()).to.be.null;
+        expect(treveriRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length).to.equal(0);
+        expect(treveriRegion.controllingFactionId()).to.be.null;
+
+    });
 });
