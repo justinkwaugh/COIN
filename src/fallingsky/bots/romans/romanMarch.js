@@ -43,8 +43,10 @@ class RomanMarch {
                                 destRegionId: group.targetDestination.id,
                                 pieces: this.getPiecesToMoveForRegion(march.region, group.pieceData)
                             });
-                        if(group.pieceData.harassedAuxilia > 0) {
-                            const harassedPieces = _.take(march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS), group.pieceData.harassedAuxilia);
+                        if (group.pieceData.harassedAuxilia > 0) {
+                            const harassedPieces = _.take(
+                                march.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS),
+                                group.pieceData.harassedAuxilia);
                             RemovePieces.execute(state, {
                                 factionId: FactionIDs.ROMANS,
                                 regionId: march.region.id,
@@ -265,6 +267,7 @@ class RomanMarch {
                            regionData.numAuxilia += numArrivingAuxilia;
                            regionData.harassedAuxilia += targetDest.harassmentLosses;
                            regionData.leader = choiceData.data.leader;
+                           choiceData.placed = true;
                            return;
                        }
 
@@ -289,6 +292,9 @@ class RomanMarch {
             // Partition greedily Auxilia, and place Leader
             _.each(_(groupedByChoice.both).sortBy(choiceData => choiceData.data.numAuxilia).reverse().value(),
                    choiceData => {
+                       if (!choiceData.canSplit && choiceData.placed) {
+                           return;
+                       }
                        // Legions we know exactly how many so we can just do them.
                        const ordered = _([first, second]).sortBy('numAuxilia').value();
                        const target = _.first(ordered);
@@ -468,7 +474,8 @@ class RomanMarch {
             return [];
         }
 
-        const populatedDestinations = this.calculatePiecesToDestinations(state, modifiers, marchData, possibleDestinations);
+        const populatedDestinations = this.calculatePiecesToDestinations(state, modifiers, marchData,
+                                                                         possibleDestinations);
         this.determineBattleLossesForTargets(state, modifiers, marchData, populatedDestinations);
         const actualDestination = _(populatedDestinations).sortBy('losses').first();
         if (!actualDestination) {
@@ -476,18 +483,18 @@ class RomanMarch {
         }
 
         const marches = _(actualDestination.piecesFromRegion).map((regionData) => {
-                const region = state.regionsById[regionData.regionId];
-                const pieces = this.getPiecesToMoveForRegion(region, regionData);
-                if (pieces.length > 0) {
-                    return {
-                        region: region,
-                        groups: [{
-                            targetDestination: actualDestination.destination,
-                            pieceData: regionData,
-                        }]
-                    };
-                }
-            }).compact().value();
+            const region = state.regionsById[regionData.regionId];
+            const pieces = this.getPiecesToMoveForRegion(region, regionData);
+            if (pieces.length > 0) {
+                return {
+                    region: region,
+                    groups: [{
+                        targetDestination: actualDestination.destination,
+                        pieceData: regionData,
+                    }]
+                };
+            }
+        }).compact().value();
 
         _.each(marches, (march) => {
             const marchResult = _.find(marchData, entry => entry.march.region.id === march.region.id);
@@ -517,7 +524,11 @@ class RomanMarch {
             };
 
             _.each(marchData, data => {
-                const targetDestData = _.find(data.prioritizedDestinations, marchDest => marchDest.destination.id === target.destination.id);
+                const targetDestData = _.find(data.prioritizedDestinations,
+                                              marchDest => marchDest.destination.id === target.destination.id);
+                if (!targetDestData) {
+                    return;
+                }
                 target.numLegions += data.numLegions;
                 target.numAuxilia += data.numAuxilia - targetDestData.harassmentLosses;
                 target.leader = data.leader;

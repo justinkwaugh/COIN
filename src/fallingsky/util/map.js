@@ -17,7 +17,7 @@ class Map {
         }
 
         let solutions = [];
-        const groupsToCheck = _.range(2, numRegions).reverse();
+        const groupsToCheck = _.range(1, numRegions).reverse();
         _.each(
             groupsToCheck, (groupId) => {
                 const rankingGroup = groupedRankings[groupId];
