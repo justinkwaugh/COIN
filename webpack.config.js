@@ -1,5 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const common = {
     module: {
@@ -43,6 +44,12 @@ const web = {
     entry: {
         web: ['bootstrap-loader','./src/main.js']
     },
+
+    plugins: [
+        new CopyWebpackPlugin([{
+             from: path.resolve('./web')
+        }])
+    ],
 
     output: {
         filename: '[name].js',

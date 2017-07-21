@@ -100,8 +100,8 @@ class FallingSkyRegion extends Region {
         this.pieces.removeAll(pieces);
     }
 
-    hasValidSupplyLine(requestingFactionId, agreeingFactionIds, invalidRegions=[]) {
-        if (_.indexOf(invalidRegions, this.id) >= 0 || !this.isValidForSupplyLine(requestingFactionId, agreeingFactionIds)) {
+    hasValidSupplyLine(requestingFactionId, agreeingFactionIds, invalidRegions=[], validRegions = []) {
+        if (_.indexOf(invalidRegions, this.id) >= 0 || (!this.isValidForSupplyLine(requestingFactionId, agreeingFactionIds) && _.indexOf(validRegions, this.id) < 0)) {
             return false;
         }
 
@@ -112,7 +112,7 @@ class FallingSkyRegion extends Region {
         return _.find(this.supplyLines, (supplyLine) => {
                 return _.every(
                     supplyLine, (region) => {
-                        return _.indexOf(invalidRegions, this.id) < 0 && region.isValidForSupplyLine(requestingFactionId, agreeingFactionIds);
+                        return _.indexOf(invalidRegions, this.id) < 0 && (region.isValidForSupplyLine(requestingFactionId, agreeingFactionIds) || _.indexOf(validRegions, this.id) >= 0);
                     });
             });
     }
@@ -186,7 +186,7 @@ class FallingSkyRegion extends Region {
     }
 
     getRevealedPiecesForFaction(factionId) {
-        return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && piece.revealed());
+        return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && piece.revealed() && !piece.scouted());
     }
 
     getScoutedPiecesForFaction(factionId) {

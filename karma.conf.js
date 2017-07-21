@@ -30,7 +30,7 @@ module.exports = function (config) {
                 './test/**/*.spec.js': ['webpack']
             },
 
-            webpack: require("./webpack.config.js"),
+            webpack: require("./webpack.config.js")[0],
 
             // test results reporter to use
             // possible values: 'dots', 'progress'
