@@ -255,13 +255,19 @@
                         <!-- ko foreach: game().state().regions -->
                         <!-- ko if: $data.inPlay() -->
                         <li>
-                            <div class="panel panel-default" style="width:190px;position:relative">
+                            <div class="panel panel-default" style="width:250px;position:relative">
                                 <div class="panel-heading" style="padding-left:10px;">
                                     <h3 class="panel-title" style="font-size:20px;" data-bind="text:$data.name"></h3>
                                 </div>
                                 <div class="panel-body" style="padding:0">
                                     <div style="position:absolute;right:4px;top:4px;">
                                         <ul class="list-inline">
+                                            <!-- ko if: $data.devastated() -->
+                                            <li style="padding-left:2px;padding-right:1px;">
+                                                <img style="width:30px"
+                                                     data-bind="attr: { 'src': 'images/Devastated.png' }"/>
+                                            </li>
+                                            <!-- /ko -->
                                             <!-- ko if: $data.getFort() -->
                                             <li style="padding-left:2px;padding-right:1px;">
                                                 <img style="width:30px"
