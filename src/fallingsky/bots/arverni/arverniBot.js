@@ -134,7 +134,7 @@ class ArverniBot extends Bot {
             const massTarget = _(massTargets).map(region => {
                 let numWarbands = _.reduce(devastatedMoveRegions, (sum, sourceRegion) => {
                     if (_.find(_.map(sourceRegion.targets), target => target.id === region.id)) {
-                        return sum + sourceRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length;
+                        return sum + sourceRegion.region.getWarbandsOrAuxiliaForFaction(FactionIDs.ARVERNI).length;
                     }
                     else {
                         return sum;

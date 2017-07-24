@@ -1,4 +1,6 @@
+import _ from 'lib/lodash';
 import Action from './action';
+import {SenateApprovalStateNames} from 'fallingsky/config/senateApprovalStates';
 
 class PlaceLegions extends Action {
 
@@ -8,6 +10,7 @@ class PlaceLegions extends Action {
         this.factionId = args.factionId;
         this.regionId = args.regionId;
         this.count = args.count;
+        this.sourceCounts = args.sourceCounts;
     }
 
     doExecute(state) {
@@ -19,8 +22,9 @@ class PlaceLegions extends Action {
             throw 'Invalid PlaceLegions Action';
         }
 
-        // Need to account for source
-        region.addPieces(faction.removeLegions(count));
+        const legionData = faction.removeLegions(count);
+        region.addPieces(legionData.legions);
+        this.sourceCounts = legionData.sourceCounts;
         console.log('Placing ' + count + 'x ' + faction.name + ' Legions in ' + region.name);
     }
 
@@ -28,8 +32,16 @@ class PlaceLegions extends Action {
         const faction = state.factionsById[this.factionId];
         const region = state.regionsById[this.regionId];
         const count = this.count;
+        const sourceCounts = this.sourceCounts;
 
-        throw 'Unable to undo PlaceLegions Action';
+
+        _.each(sourceCounts, (count, source)=> {
+            const legions = _.take(region.getLegions(), count);
+            region.removePieces(legions);
+            state.romans.returnLegions(legions, source);
+            console.log('Returning ' + count + 'x ' + faction.name + ' Legions to ' + SenateApprovalStateNames[source] + ' track');
+        });
+
     }
 
     instructions(state) {

@@ -4,9 +4,13 @@ import FallingSkyFaction from './fallingSkyFaction';
 import RegionIDs from '../config/regionIds';
 import FactionIDs from '../config/factionIds';
 import Auxilia from '../pieces/auxilia';
+import PlaceAuxilia from 'fallingsky/actions/placeAuxilia';
+import PlaceLegions from 'fallingsky/actions/placeLegions';
+import ReturnFallenLegions from 'fallingsky/actions/returnFallenLegions';
 import Fort from '../pieces/fort';
 import Legion from '../pieces/legion';
-import SenateApprovalStates from '../config/senateApprovalStates';
+import {SenateApprovalStates, SenateApprovalStateNames} from 'fallingsky/config/senateApprovalStates';
+import ChangeSenateApproval from 'fallingsky/actions/changeSenateApproval';
 
 
 class Romans extends FallingSkyFaction {
@@ -50,6 +54,10 @@ class Romans extends FallingSkyFaction {
         this.intrigueLegions = ko.observableArray();
         this.adulationLegions = ko.observableArray();
         this.fallenLegions = ko.observableArray();
+
+        this.senateApprovalText = ko.pureComputed(() => {
+            return (this.senateFirm() ? 'Firm ' : '') + SenateApprovalStateNames[this.senateApprovalState()];
+        });
 
         this.offMapLegions = ko.pureComputed(
             () => {
@@ -112,7 +120,9 @@ class Romans extends FallingSkyFaction {
     }
 
     initializeLegionTrack(state, count) {
-        const legions = this.removeLegions(count);
+        const legionData = this.removeLegions(count);
+        const legions = legionData.legions;
+
         if (state === SenateApprovalStates.UPROAR) {
             this.uproarLegions.push.apply(this.uproarLegions, legions);
         }
@@ -145,6 +155,7 @@ class Romans extends FallingSkyFaction {
 
     removeLegions(count) {
         const removedLegions = [];
+        const sourceCounts = {};
         let numLeft = count;
         let currentNumToRemove = 0;
         if (this.availableLegions().length > 0) {
@@ -154,24 +165,41 @@ class Romans extends FallingSkyFaction {
         }
         if (numLeft && this.senateApprovalState() >= SenateApprovalStates.UPROAR) {
             currentNumToRemove = Math.min(this.uproarLegions().length, numLeft);
+            sourceCounts[SenateApprovalStates.UPROAR] = currentNumToRemove;
             removedLegions.push.apply(removedLegions, this.uproarLegions.splice(0, currentNumToRemove));
             numLeft -= currentNumToRemove;
         }
         if (numLeft && this.senateApprovalState() >= SenateApprovalStates.INTRIGUE) {
             currentNumToRemove = Math.min(this.intrigueLegions().length, numLeft);
+            sourceCounts[SenateApprovalStates.INTRIGUE] = currentNumToRemove;
             removedLegions.push.apply(removedLegions, this.intrigueLegions.splice(0, currentNumToRemove));
             numLeft -= currentNumToRemove;
         }
         if (numLeft && this.senateApprovalState() >= SenateApprovalStates.ADULATION) {
             currentNumToRemove = Math.min(this.adulationLegions().length, numLeft);
+            sourceCounts[SenateApprovalStates.ADULATION] = currentNumToRemove;
             removedLegions.push.apply(removedLegions, this.adulationLegions.splice(0, currentNumToRemove));
             numLeft -= currentNumToRemove;
         }
-        return removedLegions;
+        return {
+            legions: removedLegions,
+            sourceCounts
+        };
     }
 
-    returnLegions(legions) {
-        this.fallenLegions.push.apply(this.fallenLegions, legions);
+    returnLegions(legions, track) {
+        if (track === SenateApprovalStates.UPROAR) {
+            this.uproarLegions.push.apply(this.uproarLegions, legions);
+        }
+        else if (track === SenateApprovalStates.INTRIGUE) {
+            this.intrigueLegions.push.apply(this.intrigueLegions, legions);
+        }
+        else if (track === SenateApprovalStates.ADULATION) {
+            this.adulationLegions.push.apply(this.adulationLegions, legions);
+        }
+        else {
+            this.fallenLegions.push.apply(this.fallenLegions, legions);
+        }
     }
 
     hasAvailableDispersalTokens() {
@@ -190,83 +218,132 @@ class Romans extends FallingSkyFaction {
         const romanVictory = this.victoryScore(state);
         const currentSenateApproval = this.senateApprovalState();
 
-        let newSenateApproval = null;
+        let newSenateApprovalFromVictoryMargin = null;
         if (romanVictory < 10) {
-            newSenateApproval = SenateApprovalStates.UPROAR;
+            newSenateApprovalFromVictoryMargin = SenateApprovalStates.UPROAR;
         }
         else if (romanVictory < 13) {
-            newSenateApproval = SenateApprovalStates.INTRIGUE;
+            newSenateApprovalFromVictoryMargin = SenateApprovalStates.INTRIGUE;
         }
         else {
-            newSenateApproval = SenateApprovalStates.ADULATION;
+            newSenateApprovalFromVictoryMargin = SenateApprovalStates.ADULATION;
         }
 
-        if (newSenateApproval > currentSenateApproval) {
+        let newSenateApproval = currentSenateApproval;
+        let newFirm = this.senateFirm();
+
+        if (newSenateApprovalFromVictoryMargin > currentSenateApproval) {
             if (this.fallenLegions().length > 0) {
                 console.log('No change in approval due to fallen legions');
             }
             else if (currentSenateApproval === SenateApprovalStates.UPROAR && this.senateFirm()) {
-                this.senateFirm(false);
+                newFirm = false;
             }
             else {
-                this.senateApprovalState(currentSenateApproval + 1);
+                newSenateApproval = currentSenateApproval + 1;
             }
         }
         else if (currentSenateApproval === SenateApprovalStates.ADULATION) {
-            this.senateFirm(true);
+            newFirm = true;
         }
         else if (currentSenateApproval === SenateApprovalStates.UPROAR) {
-            this.senateFirm(true);
+            newFirm = true;
         }
-        else if (newSenateApproval < currentSenateApproval) {
+        else if (newSenateApprovalFromVictoryMargin < currentSenateApproval) {
             if (currentSenateApproval === SenateApprovalStates.ADULATION && this.senateFirm()) {
-                this.senateFirm(false);
+                newFirm = false;
             }
             else {
-                this.senateApprovalState(currentSenateApproval - 1);
+                newSenateApproval = currentSenateApproval - 1;
             }
         }
-        this.logSenateApproval();
+
+        if (newSenateApproval !== currentSenateApproval || newFirm !== this.senateFirm()) {
+            ChangeSenateApproval.execute(state, {approvalState: newSenateApproval, isFirm: newFirm});
+            this.logSenateApproval();
+        }
     }
 
-    returnLegionsFromFallen(args = { spring: false }) {
+    returnLegionsFromFallen(state, args = {spring: false}) {
         const spring = args.spring;
         const numFallenLegions = this.fallenLegions().length;
-        const numRemaining = spring ? numFallenLegions : Math.floor(numFallenLegions/2.0);
-        let remaining = numFallenLegions - numRemaining;
+        const numRemaining = spring ? 0 : Math.floor(numFallenLegions / 2.0);
+        const returning = numFallenLegions - numRemaining;
 
-        let numToReturn = 0;
-        if(this.adulationLegions().length < 4) {
-            const numSlots = 4-this.adulationLegions().length;
-            numToReturn = Math.min(numSlots, remaining);
-            this.adulationLegions.push.apply(this.adulationLegions, this.fallenLegions.splice(0, numToReturn));
-            remaining -= numToReturn;
+        if(returning > 0) {
+            ReturnFallenLegions.execute(state, {count: returning});
         }
-        if(remaining && this.intrigueLegions().length < 4) {
-            const numSlots = 4-this.intrigueLegions().length;
-            numToReturn = Math.min(numSlots, remaining);
-            this.intrigueLegions.push.apply(this.intrigueLegions, this.fallenLegions.splice(0, numToReturn));
-            remaining -= numToReturn;
+    }
+
+    returnLegionsToTracks(legions) {
+        if (this.adulationLegions().length < 4) {
+            const numSlots = 4 - this.adulationLegions().length;
+            const numToReturn = Math.min(numSlots, legions.length);
+            this.adulationLegions.push.apply(this.adulationLegions, legions.splice(0, numToReturn));
         }
-        if(remaining && this.uproarLegions().length < 4) {
-            const numSlots = 4-this.uproarLegions().length;
-            numToReturn = Math.min(numSlots, remaining);
-            this.uproarLegions.push.apply(this.uproarLegions, this.fallenLegions.splice(0, numToReturn));
+        if (legions.length > 0 && this.intrigueLegions().length < 4) {
+            const numSlots = 4 - this.intrigueLegions().length;
+            const numToReturn = Math.min(numSlots, legions.length);
+            this.intrigueLegions.push.apply(this.intrigueLegions, legions.splice(0, numToReturn));
+        }
+        if (legions.length > 0 && this.uproarLegions().length < 4) {
+            const numSlots = 4 - this.uproarLegions().length;
+            const numToReturn = Math.min(numSlots, legions.length);
+            this.uproarLegions.push.apply(this.uproarLegions, legions.splice(0, numToReturn));
+        }
+    }
+
+
+    placeWinterLegions(state) {
+        const numToPlace = _.reduce(SenateApprovalStates, (sum, approvalState) => {
+            if (this.senateApprovalState() < approvalState) {
+                return sum;
+            }
+
+            if (approvalState === SenateApprovalStates.UPROAR) {
+                return sum + this.uproarLegions().length;
+            }
+            else if (approvalState === SenateApprovalStates.INTRIGUE) {
+                return sum + this.intrigueLegions().length;
+            }
+            else if (approvalState === SenateApprovalStates.ADULATION) {
+                return sum + this.adulationLegions().length;
+            }
+        }, 0);
+
+        if (numToPlace > 0) {
+            PlaceLegions.execute(state, {
+                factionId: FactionIDs.ROMANS,
+                regionId: RegionIDs.PROVINCIA,
+                count: numToPlace
+            })
         }
     }
 
     placeWinterAuxilia(state) {
         const provincia = state.regionsById[RegionIDs.PROVINCIA];
-        const leaderInProvincia = _.find(provincia.piecesByFaction[FactionIDs.ROMANS], {type:'leader'});
-        if(leaderInProvincia && this.availableAuxilia().length > 0) {
-            if(this.senateApprovalState() === SenateApprovalStates.UPROAR) {
-                PlaceAuxilia.execute(state, { factionId: this.id, regionId: provincia.id, count: Math.min(3, this.availableAuxilia().length)});
+        const leaderInProvincia = _.find(provincia.piecesByFaction[FactionIDs.ROMANS], {type: 'leader'});
+        if (leaderInProvincia && this.availableAuxilia().length > 0) {
+            if (this.senateApprovalState() === SenateApprovalStates.UPROAR) {
+                PlaceAuxilia.execute(state, {
+                    factionId: this.id,
+                    regionId: provincia.id,
+                    count: Math.min(3, this.availableAuxilia().length)
+                });
             }
-            else if(this.senateApprovalState() === SenateApprovalStates.INTRIGUE) {
-                PlaceAuxilia.execute(state, { factionId: this.id, regionId: provincia.id, count: Math.min(4, this.availableAuxilia().length)});
+            else if (this.senateApprovalState() === SenateApprovalStates.INTRIGUE) {
+                PlaceAuxilia.execute(state, {
+                    factionId: this.id,
+                    regionId: provincia.id,
+                    count: Math.min(4, this.availableAuxilia().length)
+                });
             }
-            else if(this.senateApprovalState() === SenateApprovalStates.ADULATION) {
-                PlaceAuxilia.execute(state, { factionId: this.id, regionId: provincia.id, count: Math.min(5, this.availableAuxilia().length)});
+            else if (this.senateApprovalState() === SenateApprovalStates.ADULATION) {
+                PlaceAuxilia.execute(state, {
+                    factionId: this.id,
+                    regionId: provincia.id,
+                    count: Math.min(5, this.availableAuxilia().length)
+                });
             }
         }
     }

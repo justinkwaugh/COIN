@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import CommandIDs from '../../config/commandIds';
 import RevealPieces from '../../actions/revealPieces';
 import RemoveResources from '../../actions/removeResources';
 import Raid from '../../commands/raid';
@@ -7,10 +8,15 @@ import Raid from '../../commands/raid';
 class GermanicRaid {
     static raid(state, modifiers) {
         console.log('*** Germanic Raid ***');
-        let effective = false;
-
         const germanicFaction = state.factionsById[FactionIDs.GERMANIC_TRIBES];
         const raidResults = Raid.test(state, {factionId: FactionIDs.GERMANIC_TRIBES});
+
+        if(raidResults.length === 0) {
+            return false;
+        }
+
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.RAID);
 
         _.each(raidResults, (raidResult) => {
             const enemyFactionOrder = this.getEnemyFactionOrder(state);
@@ -38,10 +44,10 @@ class GermanicRaid {
                     return false;
                 }
             });
-            effective = true;
         });
+        turn.commitCommand();
 
-        return effective;
+        return true;
 
     }
 

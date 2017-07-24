@@ -6,7 +6,7 @@ class GermanicTribes extends FallingSkyFaction {
     constructor() {
         const definition = {
             id: FactionIDs.GERMANIC_TRIBES,
-            name: 'Germanic Tribes',
+            name: 'Germans',
             numWarbands: 15,
             numAlliedTribes: 6,
             numCitadels: 0

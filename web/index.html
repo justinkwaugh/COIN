@@ -152,7 +152,7 @@
                     <table class="table table-striped">
                         <tbody>
                         <!-- ko foreach: game().lastTurn().getInstructions(game().state()) -->
-                        <tr data-bind="css: { info: $data.type === 'command', success: $data.type === 'sa', warning: $data.type === 'event' }">
+                        <tr data-bind="css: { info: $data.type === 'command', success: $data.type === 'sa', danger: $data.type === 'event', warning: $data.type === 'phase'}">
                             <td>
                                 <div data-bind="text: $data.instruction, style: { 'margin-left': $data.type === 'action' ? '20px' : 0 } "></div>
                             </td>
@@ -207,6 +207,8 @@
                                         <!-- ko if: $data.id === 'Romans' -->
                                         <li class="list-group-item">Forts Available<span class="badge badge-info" data-bind="text:$data.availableForts().length"></span></li>
                                         <li class="list-group-item">Dispersal Tokens<span class="badge badge-info" data-bind="text:$data.availableDispersalTokens()"></span></li>
+                                        <li class="list-group-item">Fallen Legions<span class="badge badge-info" data-bind="text:$data.fallenLegions().length"></span></li>
+                                        <li class="list-group-item">Senate<span class="badge badge-info" data-bind="text:$data.senateApprovalText()"></span></li>
                                         <!-- /ko -->
                                     </ul>
                                 </div>

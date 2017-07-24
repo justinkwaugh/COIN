@@ -13,7 +13,7 @@ import PlaceFort from '../actions/placeFort';
 import PlaceLegions from '../actions/placeLegions';
 
 import DisperseTribe from '../actions/disperseTribe';
-import SenateApprovalStates from '../config/senateApprovalStates';
+import { SenateApprovalStates } from '../config/senateApprovalStates';
 
 class TheGreatRevolt extends Scenario {
 

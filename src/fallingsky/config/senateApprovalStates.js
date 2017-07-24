@@ -4,4 +4,10 @@ const SenateApprovalStates = {
     ADULATION: 2
 };
 
-export default SenateApprovalStates;
+const SenateApprovalStateNames = {
+    [SenateApprovalStates.UPROAR] : 'Uproar',
+    [SenateApprovalStates.INTRIGUE]: 'Intrigue',
+    [SenateApprovalStates.ADULATION]: 'Adulation'
+};
+
+export { SenateApprovalStates, SenateApprovalStateNames };

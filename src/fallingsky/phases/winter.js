@@ -3,6 +3,7 @@ import Turn from '../../common/turn';
 import UndisperseTribe from '../actions/undisperseTribe';
 import AddResources from '../actions/addResources';
 import HidePieces from '../actions/hidePieces';
+import UndevastateRegion from '../actions/undevastateRegion';
 
 class Winter {
 
@@ -30,12 +31,17 @@ class Winter {
 
     static germanPhase(state) {
         console.log('*** German Phase ***');
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startPhase('Germans');
         const germanicBot = state.playersByFaction[FactionIDs.GERMANIC_TRIBES];
         germanicBot.takeTurn(state);
+        turn.commitPhase()
     }
 
     static quarters(state) {
         console.log('*** Quarters Phase ***');
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startPhase('Quarters');
         const germans = state.playersByFaction[FactionIDs.GERMANIC_TRIBES];
         const belgae = state.playersByFaction[FactionIDs.BELGAE];
         const aedui = state.playersByFaction[FactionIDs.AEDUI];
@@ -47,10 +53,13 @@ class Winter {
         aedui.quarters(state);
         arverni.quarters(state);
         romans.quarters(state);
+        turn.commitPhase()
     }
 
     static harvest(state) {
         console.log('*** Harvest Phase ***');
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startPhase('Harvest');
         const romans = state.factionsById[FactionIDs.ROMANS];
         const romanVictory = romans.victoryScore(state);
         if(romanVictory > 0) {
@@ -60,44 +69,53 @@ class Winter {
         _.each([FactionIDs.AEDUI, FactionIDs.ARVERNI, FactionIDs.BELGAE], function(factionId) {
             const faction = state.factionsById[factionId];
             let resources = faction.numAlliedTribesAndCitadelsPlaced()*2;
-            if(factionId == FactionIDs.AEDUI) {
+            if(factionId === FactionIDs.AEDUI) {
                 resources += 4;
             }
             if(resources > 0) {
                 AddResources.execute(state, { factionId: faction.id, count: resources});
             }
         });
+        turn.commitPhase();
     }
 
     static senate(state) {
         console.log('*** Senate Phase ***');
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startPhase('Senate');
         const romans = state.factionsById[FactionIDs.ROMANS];
         romans.adjustSenateApproval(state);
-        romans.returnLegionsFromFallen();
+        romans.returnLegionsFromFallen(state);
+        romans.placeWinterLegions(state);
         romans.placeWinterAuxilia(state);
+        turn.commitPhase();
     }
 
     static spring(state) {
         console.log('*** Spring Phase ***');
-
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startPhase('Spring');
         _.each(state.playersByFaction, function(player) {
             player.placeLeader(state);
         });
         const romans = state.factionsById[FactionIDs.ROMANS];
-        romans.returnLegionsFromFallen({spring : true});
+        romans.returnLegionsFromFallen(state, {spring : true});
         _.each(state.tribes, function(tribe) {
             if(tribe.isDispersed() || tribe.isDispersedGathering()) {
                 UndisperseTribe.execute(state, {factionId: romans.id, tribeId: tribe.id});
             }
         });
         _.each(state.regions, function(region) {
-            region.devastated(false);
+            if(region.devastated()) {
+                UndevastateRegion.execute(state, {regionId: region.id });
+            }
             _.each(state.factions, function(faction) {
                 HidePieces.execute(state, {factionId: faction.id, regionId: region.id});
             });
         });
         state.sequenceOfPlay.resetEligibility();
         state.yearsRemaining(state.yearsRemaining-1);
+        turn.commitPhase();
     }
 }
 

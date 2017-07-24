@@ -1,13 +1,18 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import CommandIDs from '../../config/commandIds';
 import Battle from '../../commands/battle';
 
 class GermanicBattle {
 
     static battle(state, modifiers) {
         console.log('*** Germanic Battle ***');
-        let effective = false;
         const effectiveBattles = this.findEffectiveBattles(state);
+        if(effectiveBattles.length === 0) {
+            return false;
+        }
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.BATTLE);
         _.each(effectiveBattles, (battle) => {
                 Battle.execute(
                     state, {
@@ -16,9 +21,9 @@ class GermanicBattle {
                         defendingFaction: battle.defendingFaction,
                         ambush: true
                     });
-                effective = true;
             });
-        return effective;
+        turn.commitCommand();
+        return true;
     }
 
     static getEnemyFactionOrder(state) {

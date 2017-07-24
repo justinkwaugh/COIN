@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import CommandIDs from '../../config/commandIds';
 import RegionGroups from '../../config/regionGroups';
 import TribeIDs from '../../config/tribeIds';
 import Rally from '../../commands/rally';
@@ -9,8 +10,11 @@ import PlaceWarbands from '../../actions/placeWarbands';
 class GermanicRally {
     static rally(state, modifiers) {
         console.log('*** Germanic Rally ***');
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.RALLY);
         this.placeAllies(state, modifiers);
         this.placeWarbands(state, modifiers);
+        turn.commitCommand();
     }
 
     static placeAllies(state, modifiers) {

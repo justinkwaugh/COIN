@@ -36,7 +36,7 @@ describe("Roman Battle", function () {
         turn = state.turnHistory.getCurrentTurn();
     });
 
-    it.only('scouts', function () {
+    it('scouts', function () {
 
         const aeduiRegion = state.regionsById[RegionIDs.AEDUI];
         PlaceAlliedTribe.execute(state, {factionId: aedui.id, regionId: aeduiRegion.id, tribeId: TribeIDs.AEDUI});

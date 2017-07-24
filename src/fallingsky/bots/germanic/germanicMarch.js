@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import CommandIDs from '../../config/commandIds';
 import March from '../../commands/march';
 import MovePieces from '../../actions/movePieces';
 import HidePieces from '../../actions/hidePieces';
@@ -17,6 +18,9 @@ class GermanicMarch {
         }).value();
 
         const factionOrderById = this.getEnemyFactionOrder(state);
+
+        const turn = state.turnHistory.getCurrentTurn();
+        turn.startCommand(CommandIDs.MARCH);
 
         while(validMarches.length > 0) {
             validMarches = _(validMarches).sortBy((marchResult) => {
@@ -46,6 +50,7 @@ class GermanicMarch {
         if(modifiers.winter) {
             this.hideAllWarbands(state, germanicFaction);
         }
+        turn.commitCommand();
         return effective;
     }
 

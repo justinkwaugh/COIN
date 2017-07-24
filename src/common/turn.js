@@ -90,6 +90,18 @@ class Turn extends ActionGroup {
         this.inProgress.push(actionGroup);
     }
 
+    startPhase(id) {
+        this.startActionGroup(id, 'phase');
+    }
+
+    commitPhase() {
+        this.commitActionGroup('phase');
+    }
+
+    rollbackPhase() {
+        this.rollbackActionGroup('phase');
+    }
+
     startCommand(id) {
         this.startActionGroup(id, 'command');
     }
@@ -195,7 +207,7 @@ class Turn extends ActionGroup {
                                       {
                                           index: sa.actionStartIndex,
                                           type: 'sa',
-                                          instruction: sa.factionId + ' chose to ' + sa.id
+                                          instruction: state.factionsById[sa.factionId].name + ' chose to ' + sa.id
                                       });
         });
 
@@ -206,7 +218,7 @@ class Turn extends ActionGroup {
                                       {
                                           index: command.actionStartIndex,
                                           type: 'command',
-                                          instruction: command.factionId + ' chose to ' + command.id
+                                          instruction: state.factionsById[command.factionId].name + ' chose to ' + command.id
                                       });
         });
 
@@ -218,9 +230,24 @@ class Turn extends ActionGroup {
                                       {
                                           index: event.actionStartIndex,
                                           type: 'event',
-                                          instruction: event.factionId + ' chose to play Event'
+                                          instruction: state.factionsById[event.factionId].name + ' chose to play Event'
                                       });
         }
+
+        _.each(actionGroupsByType.phase, (phase) => {
+            if(phase.actionStartIndex === phase.actionEndIndex) {
+                return;
+            }
+
+            const insertIndex = _.findIndex(actionInstructions,
+                                            actionInstruction => actionInstruction.index >= phase.actionStartIndex);
+            actionInstructions.splice(insertIndex, 0,
+                                      {
+                                          index: phase.actionStartIndex,
+                                          type: 'phase',
+                                          instruction: phase.id + ' Phase'
+                                      });
+        });
 
         return actionInstructions;
     }
