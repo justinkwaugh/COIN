@@ -217,6 +217,10 @@ class FallingSkyRegion extends Region {
         return _.find(this.piecesByFaction()[factionId], { type : 'citadel' }) || null;
     }
 
+    getAlliesAndCitadelForFaction(factionId) {
+        return _.filter(this.piecesByFaction()[factionId], piece=> piece.type === 'alliedtribe' || piece.type === 'citadel');
+    }
+
     getHiddenWarbandsOrAuxiliaForFaction(factionId) {
         return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && !piece.revealed());
     }

@@ -2,6 +2,7 @@ import _ from '../../../lib/lodash';
 import Command from '../command';
 import FactionIDs from '../../config/factionIds';
 import RemovePieces from '../../actions/removePieces';
+import DevastateRegion from '../../actions/devastateRegion';
 import DevastateResults from './devastateResults';
 import Losses from 'fallingsky/util/losses';
 
@@ -42,17 +43,19 @@ class Devastate extends Command {
     static doExecute(state, args) {
         const devastation = args.devastation;
         console.log('*** Arverni Devastating region ' + devastation.region.name);
-        devastation.region.devastated(true);
+        DevastateRegion.execute(state, { regionId: devastation.region.id });
 
         const removals = this.calculateRemovals(state, devastation.region);
         _.each(
             removals, (removalData, factionId) => {
-                RemovePieces.execute(
-                    state, {
-                        regionId: devastation.region.id,
-                        factionId: factionId,
-                        pieces: removalData.piecesToRemove
-                    });
+                if(removalData.piecesToRemove.length > 0) {
+                    RemovePieces.execute(
+                        state, {
+                            regionId: devastation.region.id,
+                            factionId: factionId,
+                            pieces: removalData.piecesToRemove
+                        });
+                }
             });
     }
 
@@ -61,7 +64,7 @@ class Devastate extends Command {
             (faction) => {
                 const mobilePieces = _.reject(region.getMobilePiecesForFaction(faction.id), {type: 'leader'});
                 const numPiecesToRemove = mobilePieces.length === 0 ? 0 : Math.floor(mobilePieces.length / (faction.id === FactionIDs.ARVERNI ? 4 : 3));
-                const piecesToRemove = _.take(Losses.orderPiecesForRemoval(state.mobilePieces, false), numPiecesToRemove);
+                const piecesToRemove = _.take(Losses.orderPiecesForRemoval(state, mobilePieces, false), numPiecesToRemove);
                 return {
                     id: faction.id,
                     piecesToRemove

@@ -117,7 +117,7 @@ class RomanUtils {
     }
 
     static takeHarassmentLosses(state, region, losses, mobileOnly = true) {
-        const pieces = Losses.orderPiecesForRemoval(mobileOnly ? region.getMobilePiecesForFaction(FactionIDs.ROMANS) :
+        const pieces = Losses.orderPiecesForRemoval(state, mobileOnly ? region.getMobilePiecesForFaction(FactionIDs.ROMANS) :
                                                         region.getPiecesForFaction(FactionIDs.ROMANS));
 
         const removed = [];

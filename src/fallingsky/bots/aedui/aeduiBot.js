@@ -110,7 +110,7 @@ class AeduiBot extends Bot {
             }
         }).compact().each((relocation) => {
             const adjacentLocations = _(relocation.region.adjacent).reject(function (adjacentRegion) {
-                return !adjacentRegion.controllingFactionId();
+                return !adjacentRegion.controllingFactionId() || adjacentRegion.controllingFactionId() === FactionIDs.GERMANIC_TRIBES;
             }).sortBy(function (destinations, factionId) {
                 if (factionId === FactionIDs.AEDUI) {
                     return 'a';

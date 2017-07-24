@@ -48,7 +48,11 @@ const web = {
     plugins: [
         new CopyWebpackPlugin([{
              from: path.resolve('./web')
-        }])
+        }]),
+        new webpack.ProvidePlugin({
+            $: 'jquery',
+            jQuery: 'jquery'
+        })
     ],
 
     output: {
