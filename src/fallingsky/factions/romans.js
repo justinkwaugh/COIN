@@ -153,7 +153,7 @@ class Romans extends FallingSkyFaction {
         return this.fallenLegions.splice(0, count);
     }
 
-    removeLegions(count) {
+    removeLegions(count, ignoreSenate) {
         const removedLegions = [];
         const sourceCounts = {};
         let numLeft = count;
@@ -163,7 +163,7 @@ class Romans extends FallingSkyFaction {
             removedLegions.push.apply(removedLegions, this.availableLegions.splice(0, currentNumToRemove));
             numLeft -= currentNumToRemove;
         }
-        if (numLeft && this.senateApprovalState() >= SenateApprovalStates.UPROAR) {
+        if (numLeft && (ignoreSenate || this.senateApprovalState() >= SenateApprovalStates.UPROAR)) {
             currentNumToRemove = Math.min(this.uproarLegions().length, numLeft);
             if(currentNumToRemove > 0) {
                 sourceCounts[SenateApprovalStates.UPROAR] = currentNumToRemove;
@@ -171,7 +171,7 @@ class Romans extends FallingSkyFaction {
                 numLeft -= currentNumToRemove;
             }
         }
-        if (numLeft && this.senateApprovalState() >= SenateApprovalStates.INTRIGUE) {
+        if (numLeft && (ignoreSenate || this.senateApprovalState() >= SenateApprovalStates.INTRIGUE)) {
             currentNumToRemove = Math.min(this.intrigueLegions().length, numLeft);
             if(currentNumToRemove > 0) {
                 sourceCounts[SenateApprovalStates.INTRIGUE] = currentNumToRemove;
@@ -179,7 +179,7 @@ class Romans extends FallingSkyFaction {
                 numLeft -= currentNumToRemove;
             }
         }
-        if (numLeft && this.senateApprovalState() >= SenateApprovalStates.ADULATION) {
+        if (numLeft && (ignoreSenate || this.senateApprovalState() >= SenateApprovalStates.ADULATION)) {
             currentNumToRemove = Math.min(this.adulationLegions().length, numLeft);
             if(currentNumToRemove > 0) {
                 sourceCounts[SenateApprovalStates.ADULATION] = currentNumToRemove;

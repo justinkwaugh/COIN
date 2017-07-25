@@ -19,9 +19,8 @@ class ReturnFallenLegions extends Action {
     doUndo(state) {
         const faction = state.romans;
         const count = this.count;
-
-        const legions = faction.removeLegions(count);
-        faction.returnLegions(legions);
+        const legionData = faction.removeLegions(count, true);
+        faction.returnLegions(legionData.legions);
         console.log('Returning ' + count + 'x ' + state.romans.name + ' Legions from Tracks to Fallen');
     }
 
