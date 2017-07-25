@@ -31,7 +31,7 @@ class DisperseTribe extends Action {
         console.log('Removing dispersal token from ' + tribe.name);
         faction.returnDispersalToken();
 
-        tribe.undisperse();
+        tribe.undisperse(true);
     }
 
     instructions(state) {

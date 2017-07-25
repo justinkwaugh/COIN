@@ -74,7 +74,10 @@ import Location from '../../common/location';
             this.state(TribeStates.CITADEL);
         }
 
-        undisperse() {
+        undisperse(fully) {
+            if(fully) {
+                this.state(TribeStates.SUBDUED);
+            }
             if (this.isDispersed()) {
                 this.state(TribeStates.DISPERSED_GATHERING);
             }
