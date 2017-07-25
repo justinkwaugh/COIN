@@ -135,6 +135,10 @@ class SequenceOfPlay {
         return this.currentSequenceForCard().numActionsTaken() > 0 || this.history().length > 0;
     }
 
+    isStartOfCard() {
+        return this.currentSequenceForCard().numActionsTaken() === 0;
+    }
+
     undo() {
         if(this.currentSequenceForCard().numActionsTaken() === 0) {
             if(this.history().length > 0) {

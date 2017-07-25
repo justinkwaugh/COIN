@@ -34,9 +34,11 @@ class UndisperseTribe extends Action {
         if(this.subdued) {
             faction.removeDispersalToken();
             tribe.disperseGathering();
+            console.log(tribe.name + ' is now back to gathering');
         }
         else {
             tribe.disperse();
+            console.log(tribe.name + ' is now back to dispersed');
         }
     }
 

@@ -59,6 +59,15 @@ class HidePieces extends Action {
                 piece.scouted(true);
             }
         });
+
+        if(this.numHiddenFromScouted > 0) {
+            console.log(
+                'Adding scout marker to ' + this.numHiddenFromScouted + 'x ' + faction.name + ' pieces in ' + region.name);
+        }
+
+        if(this.numHiddenFromRevealed > 0 ) {
+            console.log('Revealing ' + this.numHiddenFromRevealed + 'x ' + faction.name + ' pieces in ' + region.name);
+        }
     }
 
     instructions(state) {

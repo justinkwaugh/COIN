@@ -1,4 +1,3 @@
-
 import ko from '../lib/knockout';
 import _ from '../lib/lodash';
 import FallingSkyGameState from '../fallingsky/state/fallingSkyGameState.js';
@@ -20,7 +19,7 @@ class Game {
             return this.state().currentCard() && this.state().currentCard().type === 'winter';
         });
         this.canUndo = ko.pureComputed(() => {
-            return (this.state().discard().length === 0 || _.last(this.state().discard()).type !== 'winter' || this.state().sequenceOfPlay.currentSequenceForCard().numActionsTaken() > 0) && this.state().sequenceOfPlay.canUndo();
+            return this.state().sequenceOfPlay.canUndo() || this.state().discard().length > 0;
         });
     }
 
@@ -46,7 +45,7 @@ class Game {
 
         if (this.state().deck().length > 0) {
             this.state().upcomingCard(this.state().deck.pop());
-            if(this.state().upcomingCard().type === 'winter') {
+            if (this.state().upcomingCard().type === 'winter') {
                 this.state().frost(true);
             }
         }
@@ -83,8 +82,9 @@ class Game {
         try {
             player.takeTurn(this.state(), this.state().turnHistory.currentTurn);
             this.lastTurn(this.state().turnHistory.lastTurn());
-        } catch(err) {
-            if(err.name === 'PlayerInteractionNeededError') {
+        }
+        catch (err) {
+            if (err.name === 'PlayerInteractionNeededError') {
                 Events.emit('PlayerInteractionRequested', err.interaction);
             }
             else {
@@ -101,8 +101,9 @@ class Game {
             this.state().turnHistory.getCurrentTurn().addInteraction(interaction);
             player.resume(this.state());
             this.lastTurn(this.state().turnHistory.lastTurn());
-        } catch(err) {
-            if(err.name === 'PlayerInteractionNeededError') {
+        }
+        catch (err) {
+            if (err.name === 'PlayerInteractionNeededError') {
                 Events.emit('PlayerInteractionRequested', err.interaction);
             }
             else {
@@ -113,19 +114,35 @@ class Game {
     }
 
     undo() {
-        if(this.state().sequenceOfPlay.undo()) {
+        const startOfCard = this.state().sequenceOfPlay.isStartOfCard();
+        const lastCard = _.last(this.state().discard());
+        const lastWasWinter = lastCard && lastCard.type === 'winter';
+
+        this.state().sequenceOfPlay.undo();
+
+        if (!startOfCard || lastWasWinter) {
             console.log('*** Undoing the last Turn ***');
             this.state().turnHistory.undoLastTurn();
-            this.lastTurn(this.state().turnHistory.lastTurn());
         }
-        else if(this.state().discard().length > 0) {
-            if(this.state().upcomingCard().type === 'winter') {
+
+        const undoDraw = this.state().discard().length > 0 && startOfCard;
+        if (undoDraw) {
+            if (this.state().upcomingCard().type === 'winter') {
                 this.state().frost(false);
+            }
+            else if (lastWasWinter) {
+                this.state().frost(true);
             }
             this.state().deck.push(this.state().upcomingCard());
             this.state().upcomingCard(this.state().currentCard());
             this.state().currentCard(this.state().discard.pop());
+        }
+
+        if (this.state().sequenceOfPlay.isStartOfCard()) {
             this.lastTurn(null);
+        }
+        else {
+            this.lastTurn(this.state().turnHistory.lastTurn());
         }
     }
 }

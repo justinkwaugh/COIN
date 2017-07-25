@@ -114,7 +114,6 @@ class Winter {
             });
         });
         state.sequenceOfPlay.resetEligibility();
-        state.yearsRemaining(state.yearsRemaining-1);
         turn.commitPhase();
     }
 }

@@ -165,21 +165,27 @@ class Romans extends FallingSkyFaction {
         }
         if (numLeft && this.senateApprovalState() >= SenateApprovalStates.UPROAR) {
             currentNumToRemove = Math.min(this.uproarLegions().length, numLeft);
-            sourceCounts[SenateApprovalStates.UPROAR] = currentNumToRemove;
-            removedLegions.push.apply(removedLegions, this.uproarLegions.splice(0, currentNumToRemove));
-            numLeft -= currentNumToRemove;
+            if(currentNumToRemove > 0) {
+                sourceCounts[SenateApprovalStates.UPROAR] = currentNumToRemove;
+                removedLegions.push.apply(removedLegions, this.uproarLegions.splice(0, currentNumToRemove));
+                numLeft -= currentNumToRemove;
+            }
         }
         if (numLeft && this.senateApprovalState() >= SenateApprovalStates.INTRIGUE) {
             currentNumToRemove = Math.min(this.intrigueLegions().length, numLeft);
-            sourceCounts[SenateApprovalStates.INTRIGUE] = currentNumToRemove;
-            removedLegions.push.apply(removedLegions, this.intrigueLegions.splice(0, currentNumToRemove));
-            numLeft -= currentNumToRemove;
+            if(currentNumToRemove > 0) {
+                sourceCounts[SenateApprovalStates.INTRIGUE] = currentNumToRemove;
+                removedLegions.push.apply(removedLegions, this.intrigueLegions.splice(0, currentNumToRemove));
+                numLeft -= currentNumToRemove;
+            }
         }
         if (numLeft && this.senateApprovalState() >= SenateApprovalStates.ADULATION) {
             currentNumToRemove = Math.min(this.adulationLegions().length, numLeft);
-            sourceCounts[SenateApprovalStates.ADULATION] = currentNumToRemove;
-            removedLegions.push.apply(removedLegions, this.adulationLegions.splice(0, currentNumToRemove));
-            numLeft -= currentNumToRemove;
+            if(currentNumToRemove > 0) {
+                sourceCounts[SenateApprovalStates.ADULATION] = currentNumToRemove;
+                removedLegions.push.apply(removedLegions, this.adulationLegions.splice(0, currentNumToRemove));
+                numLeft -= currentNumToRemove;
+            }
         }
         return {
             legions: removedLegions,

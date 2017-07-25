@@ -202,7 +202,7 @@ class ArverniBot extends Bot {
                 }
             }).sortBy('priority').first();
 
-            debugger;
+            // debugger;
 
         }
 
