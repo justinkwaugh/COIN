@@ -7,7 +7,7 @@ import EnemyFactionPriority from '../enemyFactionPriority';
 import FactionActions from '../../../../common/factionActions';
 import TurnContext from 'common/turnContext'
 
-class Event50 {
+class Event51 {
     static handleEvent(state) {
         const aeduiBot = state.playersByFaction[FactionIDs.AEDUI];
         const aeduiFaction = state.factionsById[FactionIDs.AEDUI];
@@ -68,4 +68,4 @@ class Event50 {
 
 }
 
-export default Event50;
+export default Event51;
