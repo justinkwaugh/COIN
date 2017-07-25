@@ -1,6 +1,7 @@
 import _ from 'lib/lodash';
 import Bot from '../bot';
 import FactionIDs from '../../config/factionIds';
+import RegionIDs from 'fallingsky/config/regionIds';
 import RomanEvent from './romanEvent';
 import RomanBattle from './romanBattle';
 import RomanRecruit from './romanRecruit';
@@ -8,6 +9,10 @@ import RomanSeize from './romanSeize';
 import RomanMarch from './romanMarch';
 import CommandIDs from '../../config/commandIds';
 import FactionActions from '../../../common/factionActions';
+import MovePieces from 'fallingsky/actions/movePieces';
+import RemovePieces from 'fallingsky/actions/removePieces';
+import RemoveResources from 'fallingsky/actions/removeResources';
+import Losses from 'fallingsky/util/losses';
 import Pass from '../../commands/pass';
 
 const Checkpoints = {
@@ -115,6 +120,124 @@ class RomanBot extends Bot {
 
     handleEvent(state, currentCard) {
 
+    }
+
+    quarters(state) {
+        const regionsWithSupply = _(state.regions).filter(
+            region => !region.devastated() && region.hasValidSupplyLine(this.factionId)).value();
+
+        const regionData = _(state.regions).map(region => {
+            const pieces = region.getPiecesForFaction(this.factionId);
+            const countByType = _.countBy(pieces, 'type');
+            const numFortAndAlly = (countByType.fort) || 0 + (countByType.alliedtribe || 0);
+            const numAuxilia = countByType.auxilia || 0;
+
+            const numAuxiliaToMove = Math.max(numAuxilia - numFortAndAlly, 0);
+            const numLegionsToMove = countByType.legion || 0;
+            if (numAuxiliaToMove + numLegionsToMove === 0) {
+                return;
+            }
+
+            const hasSupply = region.hasValidSupplyLine(this.factionId);
+            const adjacentToSupply = _.intersectionBy(region.adjacent, regionsWithSupply, 'id').length > 0;
+
+            return {
+                region,
+                devastated: region.devastated(),
+                hasAlly: (countByType.alliedtribe || 0) > 0,
+                numAuxiliaToMove,
+                numLegionsToMove,
+                hasSupply,
+                adjacentToSupply
+            }
+        }).compact().value();
+
+        const regionsNeedingSupply = _(regionData).filter(data => !data.hasSupply && !data.adjacentToSupply).value();
+
+        if (regionsNeedingSupply.length > 0) {
+            const agreements = this.getSupplyLineAgreements(state, null,
+                                                            [FactionIDs.AEDUI, FactionIDs.ARVERNI, FactionIDs.BELGAE]);
+            const newRegionsWithSupply = _(state.regions).filter(
+                region => !region.devastated() && region.hasValidSupplyLine(this.factionId, agreements)).value();
+            _.each(regionData, data => {
+                data.hasSupply = data.region.hasValidSupplyLine(this.factionId, agreements);
+                data.adjacentToSupply = _.intersectionBy(data.region.adjacent, regionsWithSupply, 'id').length > 0;
+            });
+        }
+
+        const regionsToMoveToProvincia = _(regionData).filter(
+            data => data.region.id !== RegionIDs.PROVINCIA && (data.hasSupply || data.adjacentToSupply)).value();
+
+        _.each(regionsToMoveToProvincia, data => {
+
+            const legions = data.region.getLegions();
+            const leader = data.region.getLeaderForFaction(this.factionId);
+            const auxilia = _.take(data.region.getWarbandsOrAuxiliaForFaction(this.factionId), data.numAuxiliaToMove);
+            const pieces = _([]).concat(legions, [leader], auxilia).compact().value();
+
+            MovePieces.execute(state, {
+                sourceRegionId: data.region.id,
+                destRegionId: RegionIDs.PROVINCIA,
+                pieces: pieces
+            });
+        });
+
+        const leaderRegion = this.findLeaderRegion(state);
+        if(leaderRegion && leaderRegion.id !== RegionIDs.PROVINCIA) {
+
+            MovePieces.execute(state, {
+                sourceRegionId: leaderRegion.id,
+                destRegionId: RegionIDs.PROVINCIA,
+                pieces: [leaderRegion.getLeaderForFaction(this.factionId)]
+            });
+        }
+
+        // Pay for those staying
+        const regionsToStay = _(regionData).filter(
+            data => data.region.id !== RegionIDs.PROVINCIA && !data.hasSupply && !data.adjacentToSupply).sortBy(data=> {
+                if (data.hasAlly) {
+                    return 'a';
+                }
+                else if(!data.devastated) {
+                    return 'b';
+                }
+                else {
+                    return 'c';
+                }
+        }).value();
+
+        _.each(regionsToStay, data=> {
+            const resourcesAvailable = state.romans.resources();
+            const legions = data.region.getLegions();
+            const auxilia = _.take(data.region.getWarbandsOrAuxiliaForFaction(this.factionId), data.numAuxiliaToMove);
+            const pieces = _([]).concat(legions, auxilia).value();
+            const orderedPieces = Losses.orderPiecesForRemoval(state, pieces).reverse();
+            const pieceCost = (data.hasAlly ? 1 : 2) * (data.devastated ? 1 : 2);
+            const numPiecesToPayFor = Math.min(Math.floor(resourcesAvailable / pieceCost), orderedPieces.length);
+
+            if(numPiecesToPayFor > 0) {
+                RemoveResources.execute(state, {
+                    factionId: this.factionId,
+                    count: numPiecesToPayFor * pieceCost
+                });
+            }
+
+            const piecesToRemove = _(orderedPieces).drop(numPiecesToPayFor).filter(piece=> _.random(1,6) < 4).value();
+            if(piecesToRemove.length > 0) {
+                RemovePieces.execute(state, {
+                    factionId: this.factionId,
+                    regionId: data.region.id,
+                    pieces: piecesToRemove
+                })
+            }
+        });
+
+    }
+
+    findLeaderRegion(state) {
+        return _.find(state.regions, (region) => {
+            return _.find(region.piecesByFaction()[this.factionId], {type: 'leader'});
+        });
     }
 
 }
