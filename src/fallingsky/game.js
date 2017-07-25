@@ -3,13 +3,13 @@ import _ from '../lib/lodash';
 import FallingSkyGameState from '../fallingsky/state/fallingSkyGameState.js';
 import Winter from './phases/winter';
 import Events from 'fallingsky/util/events';
+import FactionIDs from 'fallingsky/config/factionIds';
 
 
 class Game {
     constructor(definition) {
         this.state = ko.observable(new FallingSkyGameState());
         this.scenario = definition.scenario;
-        this.ended = ko.observable(false);
         this.lastTurn = ko.observable();
 
         this.endOfCard = ko.pureComputed(() => {
@@ -35,7 +35,6 @@ class Game {
     drawCard() {
         console.log('Drawing Card');
         if (!this.state().upcomingCard() && this.state().deck().length === 0) {
-            this.ended(true);
             return;
         }
         if (this.state().currentCard()) {
@@ -68,9 +67,14 @@ class Game {
         if (this.state().currentCard().type === 'winter') {
             this.state().frost(false);
             Winter.executeWinter(this.state());
-            this.lastTurn(this.state().turnHistory.lastTurn());
-            this.state().startYear();
-            this.drawCard();
+            if(this.state().victor()) {
+                this.lastTurn(null);
+            }
+            else {
+                this.lastTurn(this.state().turnHistory.lastTurn());
+                this.state().startYear();
+                this.drawCard();
+            }
             return;
         }
 
@@ -114,6 +118,7 @@ class Game {
     }
 
     undo() {
+        this.state().victor(false);
         const startOfCard = this.state().sequenceOfPlay.isStartOfCard();
         const lastCard = _.last(this.state().discard());
         const lastWasWinter = lastCard && lastCard.type === 'winter';
@@ -132,6 +137,7 @@ class Game {
             }
             else if (lastWasWinter) {
                 this.state().frost(true);
+                this.state().undoYear();
             }
             this.state().deck.push(this.state().upcomingCard());
             this.state().upcomingCard(this.state().currentCard());
@@ -144,6 +150,29 @@ class Game {
         else {
             this.lastTurn(this.state().turnHistory.lastTurn());
         }
+    }
+
+    factionsByVictory() {
+        return _(this.state().factions).reject(faction=>faction.id === FactionIDs.GERMANIC_TRIBES).sortBy(
+            (faction) => {
+                let priority = '' + (50 - faction.victoryMargin(this.state()));
+                if (this.state().playersByFaction[faction.id].isNonPlayer) {
+                    priority += '-' + 'a';
+                }
+                else if (faction.id === FactionIDs.ROMANS) {
+                    priority += '-' + 'b';
+                }
+                else if (faction.id === FactionIDs.ARVERNI) {
+                    priority += '-' + 'c';
+                }
+                else if (faction.id === FactionIDs.AEDUI) {
+                    priority += '-' + 'd';
+                }
+                else if (faction.id === FactionIDs.BELGAE) {
+                    priority += '-' + 'd';
+                }
+                return priority;
+            }).value();
     }
 }
 

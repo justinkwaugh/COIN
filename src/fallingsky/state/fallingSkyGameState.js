@@ -83,6 +83,10 @@ class FallingSkyGameState extends GameState {
         this.yearsRemaining(this.yearsRemaining() - 1);
     }
 
+    undoYear() {
+        this.yearsRemaining(this.yearsRemaining() + 1);
+    }
+
     cloneGameState(state) {
 
     }

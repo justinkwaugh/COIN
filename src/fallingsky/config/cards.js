@@ -462,8 +462,11 @@ class Cards {
                         type: CardTypes.WINTER,
                         title: 'Winter (Year ' + (year + 1) + ')'
                     });
-                deck.splice(winterIndex, 0, winterCard);
+                deck.splice(winterIndex, (year === (years-1) ? (deck.length - winterIndex) : 0), winterCard);
+
+
             });
+
         return _.reverse(deck);
     }
 }

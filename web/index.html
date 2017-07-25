@@ -12,7 +12,7 @@
             <button type="button" class="btn btn-primary navbar-btn" style="margin-right:10px;"
                     data-bind="click:start, text: game().state().currentCard() ? 'Restart' : 'Start'"></button>
             <!-- ko if: !agreement() -->
-            <!-- ko if: game().state().currentCard() -->
+            <!-- ko if: game().state().currentCard() && !game().state().victor() -->
             <button type="button" class="btn btn-success navbar-btn" style="margin-right:10px;"
                     data-bind="click:nextTurn, text: game().endOfCard() ? 'Draw Card' : game().winterNext() ? 'Winter' : 'Next Faction'"></button>
             <!-- /ko -->
@@ -165,6 +165,27 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <!-- /ko -->
+            <!-- ko if: game().state().victor() -->
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h2 style="font-weight:300;text-align:center">The <span data-bind="text: game().state().factionsById[game().state().victor()].name"></span> are victorious!</h2>
+                </div>
+                <table class="table table-striped">
+                        <tbody>
+                        <!-- ko foreach: game().factionsByVictory() -->
+                        <tr data-bind="css: $root.styleSuffixForFaction($data.id)">
+                            <td style="padding-left: 40px;">
+                                <div><h4 style="color: #333;font-weight:300;font-size:24px;"><span data-bind="text:$data.name"></span></h4></div>
+                            </td>
+                            <td style="padding-right: 40px;text-align:right">
+                                <div><h4 style="color: #333;font-weight:300;font-size:24px;"><span data-bind="text:$data.victoryMargin($parent.game().state())"></span></h4></div>
+                            </td>
+                        </tr>
+                        <!-- /ko -->
+                        </tbody>
+                    </table>
             </div>
             <!-- /ko -->
         </div>
