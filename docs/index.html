@@ -3,27 +3,39 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body style="background-color:#f2f2f2;">
+<body style="background-color:#f2f2f2;padding-top: 50px;">
 
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="btn btn-primary navbar-btn" style="margin-right:10px;"
+                    data-bind="click:start, text: game().state().currentCard() ? 'Restart' : 'Start'"></button>
+            <!-- ko if: !agreement() -->
+            <!-- ko if: game().state().currentCard() && !game().state().victor() -->
+            <button type="button" class="btn btn-success navbar-btn" style="margin-right:10px;"
+                    data-bind="click:nextTurn, text: game().endOfCard() ? 'Draw Card' : game().winterNext() ? 'Winter' : 'Next Faction'"></button>
+            <!-- /ko -->
+            <!-- ko if: canUndo() -->
+            <button type="button" class="btn btn-danger navbar-btn"
+                    data-bind="click:undo">Undo
+            </button>
+            <!-- /ko -->
+            <!-- /ko -->
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div style="margin:20px 0;">
-                <button type="button" class="btn btn-primary" style="margin-right:10px;"
-                        data-bind="click:start, text: state().currentCard() ? 'Restart' : 'Start'"></button>
-                <!-- ko if: state().currentCard() -->
-                <button type="button" class="btn btn-success" style="margin-right:10px;"
-                        data-bind="click:nextTurn, text: endOfCard() ? 'Draw Card' : winterNext() ? 'Winter' : 'Next Faction'"></button>
-                <!-- /ko -->
-                <!-- ko if: canUndo() -->
-                <button type="button" class="btn btn-danger"
-                        data-bind="click:undo">Undo</button>
-                <!-- /ko -->
-            </div>
+            <!-- ko if: agreement() -->
+            <button type="button" class="btn btn-success navbar-btn" style="margin-right:10px;"
+                    data-bind="click:agree">Agree
+            </button>
+            <button type="button" class="btn btn-danger navbar-btn"
+                    data-bind="click:refuse">Refuse
+            </button>
+            <!-- /ko -->
         </div>
     </div>
-    <div class="row">
+</nav>
+<div class="container-fluid">
+    <div class="row" style="margin-top:15px">
         <div class="col-md-4" style="max-width:441px;">
             <div class="panel panel-default">
                 <div class="panel-body">
@@ -32,11 +44,11 @@
                             <div style="text-align: center">
                                 <div style="font-size:24px;font-weight:300;color:#333;margin-bottom:10px;">Upcoming
                                 </div>
-                                <!-- ko if: state().upcomingCard() -->
+                                <!-- ko if: game().state().upcomingCard() -->
                                 <img style="width:180px;"
-                                     data-bind="attr: { 'src': 'images/cards/' + (state().upcomingCard().type === 'winter' ? '73' : state().upcomingCard().id) + '.jpg' }"/>
+                                     data-bind="attr: { 'src': 'images/cards/' + (game().state().upcomingCard().type === 'winter' ? '73' : game().state().upcomingCard().id) + '.jpg' }"/>
                                 <!-- /ko -->
-                                <!-- ko if: !state().currentCard() -->
+                                <!-- ko if: !game().state().currentCard() -->
                                 <img style="width:180px;"
                                      data-bind="attr: { 'src': 'images/CardBack.png' }"/>
                                 <!-- /ko -->
@@ -44,12 +56,12 @@
                             </div>
                         </li>
                         <li>
-                            <!-- ko if: state().currentCard() -->
+                            <!-- ko if: game().state().currentCard() -->
                             <div style="text-align: center">
                                 <div style="font-size:24px;font-weight:300;color:#333;margin-bottom:10px;">Current</div>
 
                                 <img style="width:180px;"
-                                     data-bind="attr: { 'src': 'images/cards/' + (state().currentCard().type === 'winter' ? '73' : state().currentCard().id) + '.jpg' }"/>
+                                     data-bind="attr: { 'src': 'images/cards/' + (game().state().currentCard().type === 'winter' ? '73' : game().state().currentCard().id) + '.jpg' }"/>
                                 <!-- /ko -->
                             </div>
                             <!-- /ko -->
@@ -66,7 +78,7 @@
                                 Eligible
                             </div>
                             <ul class="list-inline">
-                                <!-- ko foreach: state().sequenceOfPlay.eligibleFactions() -->
+                                <!-- ko foreach: game().state().sequenceOfPlay.eligibleFactions() -->
                                 <li style="margin:0 0 5px;">
                                     <img style="width:35px"
                                          data-bind="attr: { 'src': 'images/' + $data + 'Pawn.png' }"/>
@@ -78,7 +90,7 @@
                             <div style="font-size:24px;font-weight:300;color:#333;margin-bottom:10px;">Passed
                             </div>
                             <ul class="list-inline">
-                                <!-- ko foreach: state().sequenceOfPlay.passedFactions() -->
+                                <!-- ko foreach: game().state().sequenceOfPlay.passedFactions() -->
                                 <li>
                                     <img style="width:35px"
                                          data-bind="attr: { 'src': 'images/' + $data + 'Pawn.png' }"/>
@@ -93,10 +105,10 @@
                                 1st
                             </div>
                             <ul class="list-inline">
-                                <!-- ko if: state().sequenceOfPlay.firstFaction() -->
+                                <!-- ko if: game().state().sequenceOfPlay.firstFaction() -->
                                 <li>
                                     <img style="width:35px"
-                                         data-bind="attr: { 'src': 'images/' + state().sequenceOfPlay.firstFaction() + 'Pawn.png' }"/>
+                                         data-bind="attr: { 'src': 'images/' + game().state().sequenceOfPlay.firstFaction() + 'Pawn.png' }"/>
                                 </li>
                                 <!-- /ko -->
                             </ul>
@@ -106,10 +118,10 @@
                                 2nd
                             </div>
                             <ul class="list-inline">
-                                <!-- ko if: state().sequenceOfPlay.secondFaction() -->
+                                <!-- ko if: game().state().sequenceOfPlay.secondFaction() -->
                                 <li>
                                     <img style="width:35px"
-                                         data-bind="attr: { 'src': 'images/' + state().sequenceOfPlay.secondFaction() + 'Pawn.png' }"/>
+                                         data-bind="attr: { 'src': 'images/' + game().state().sequenceOfPlay.secondFaction() + 'Pawn.png' }"/>
                                 </li>
                                 <!-- /ko -->
                             </ul>
@@ -121,7 +133,7 @@
                                 Ineligible
                             </div>
                             <ul class="list-inline">
-                                <!-- ko foreach: state().sequenceOfPlay.ineligibleFactions() -->
+                                <!-- ko foreach: game().state().sequenceOfPlay.ineligibleFactions() -->
                                 <li>
                                     <img style="width:35px"
                                          data-bind="attr: { 'src': 'images/' + $data + 'Pawn.png' }"/>
@@ -134,16 +146,16 @@
             </div>
         </div>
         <div class="col-md-8">
-            <!-- ko if: lastTurn() -->
+            <!-- ko if: game().lastTurn() -->
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <h2 style="font-weight:300">Turn <span data-bind="text: lastTurn().number"></span> - <span
-                            data-bind="text: lastTurn().factionId"></span> - <span
-                            data-bind="text: lastTurn().commandAction"></span></h2>
+                    <h2 style="font-weight:300">Turn <span data-bind="text: game().lastTurn().number"></span> - <span
+                            data-bind="text: game().lastTurn().factionId"></span> - <span
+                            data-bind="text: game().lastTurn().commandAction"></span></h2>
                     <table class="table table-striped">
                         <tbody>
-                        <!-- ko foreach: lastTurn().getInstructions(state()) -->
-                        <tr data-bind="css: { info: $data.type === 'command', success: $data.type === 'sa', warning: $data.type === 'event' }">
+                        <!-- ko foreach: game().lastTurn().getInstructions(game().state()) -->
+                        <tr data-bind="css: { info: $data.type === 'command', success: $data.type === 'sa', danger: $data.type === 'event', warning: $data.type === 'phase'}">
                             <td>
                                 <div data-bind="text: $data.instruction, style: { 'margin-left': $data.type === 'action' ? '20px' : 0 } "></div>
                             </td>
@@ -153,6 +165,27 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <!-- /ko -->
+            <!-- ko if: game().state().victor() -->
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h2 style="font-weight:300;text-align:center">The <span data-bind="text: game().state().factionsById[game().state().victor()].name"></span> are victorious!</h2>
+                </div>
+                <table class="table table-striped">
+                        <tbody>
+                        <!-- ko foreach: game().factionsByVictory() -->
+                        <tr data-bind="css: $root.styleSuffixForFaction($data.id)">
+                            <td style="padding-left: 40px;">
+                                <div><h4 style="color: #333;font-weight:300;font-size:24px;"><span data-bind="text:$data.name"></span></h4></div>
+                            </td>
+                            <td style="padding-right: 40px;text-align:right">
+                                <div><h4 style="color: #333;font-weight:300;font-size:24px;"><span data-bind="text:$data.victoryMargin($parent.game().state())"></span></h4></div>
+                            </td>
+                        </tr>
+                        <!-- /ko -->
+                        </tbody>
+                    </table>
             </div>
             <!-- /ko -->
         </div>
@@ -179,25 +212,48 @@
             <div class="panel panel-default" data-bind="visible: activePanel() === ActivePanelIDs.FACTIONS">
                 <div class="panel-body">
                     <ul class="list-inline">
-                        <!-- ko foreach: state().factions -->
+                        <!-- ko foreach: game().state().factions -->
                         <li>
-                            <div class="panel" data-bind="css: 'panel-' + $root.styleSuffixForFaction($data.id)" style="min-width:220px;">
+                            <div class="panel" data-bind="css: 'panel-' + $root.styleSuffixForFaction($data.id)"
+                                 style="min-width:220px;">
                                 <div class="panel-heading" data-bind="text: $data.name">
                                 </div>
                                 <div class="panel-body" style="padding:0">
                                     <ul class="list-group" style="margin-bottom:0">
                                         <!-- ko if: $data.id !== 'Germanic' -->
-                                        <li class="list-group-item">Victory Margin<span class="badge badge-info" data-bind="text:$data.id === 'Germanic' ? 'N/A' : $data.victoryMargin($root.state())"></span></li>
-                                        <li class="list-group-item">Resources<span class="badge badge-info" data-bind="text:$data.resources()"></span></li>
+                                        <li class="list-group-item">Victory Margin<span class="badge badge-info"
+                                                                                        data-bind="text:$data.id === 'Germanic' ? 'N/A' : $data.victoryMargin($root.game().state())"></span>
+                                        </li>
+                                        <li class="list-group-item">Resources<span class="badge badge-info"
+                                                                                   data-bind="text:$data.resources()"></span>
+                                        </li>
                                         <!-- /ko -->
-                                        <li class="list-group-item"><span data-bind="text:$data.id === 'Romans' ? 'Auxilia': 'Warbands'"></span> Available<span class="badge badge-info" data-bind="text:$data.id === 'Romans' ? $data.availableAuxilia().length : $data.availableWarbands().length"></span></li>
-                                        <li class="list-group-item">Allies Available<span class="badge badge-info" data-bind="text:$data.availableAlliedTribes().length"></span></li>
+                                        <li class="list-group-item"><span
+                                                data-bind="text:$data.id === 'Romans' ? 'Auxilia': 'Warbands'"></span>
+                                            Available<span class="badge badge-info"
+                                                           data-bind="text:$data.id === 'Romans' ? $data.availableAuxilia().length : $data.availableWarbands().length"></span>
+                                        </li>
+                                        <li class="list-group-item">Allies Available<span class="badge badge-info"
+                                                                                          data-bind="text:$data.availableAlliedTribes().length"></span>
+                                        </li>
                                         <!-- ko if: $data.id !== 'Germanic' && $data.id !== 'Romans' -->
-                                        <li class="list-group-item">Citadels Available<span class="badge badge-info" data-bind="text:$data.availableCitadels().length"></span></li>
+                                        <li class="list-group-item">Citadels Available<span class="badge badge-info"
+                                                                                            data-bind="text:$data.availableCitadels().length"></span>
+                                        </li>
                                         <!-- /ko -->
                                         <!-- ko if: $data.id === 'Romans' -->
-                                        <li class="list-group-item">Forts Available<span class="badge badge-info" data-bind="text:$data.availableForts().length"></span></li>
-                                        <li class="list-group-item">Dispersal Tokens<span class="badge badge-info" data-bind="text:$data.availableDispersalTokens()"></span></li>
+                                        <li class="list-group-item">Forts Available<span class="badge badge-info"
+                                                                                         data-bind="text:$data.availableForts().length"></span>
+                                        </li>
+                                        <li class="list-group-item">Dispersal Tokens<span class="badge badge-info"
+                                                                                          data-bind="text:$data.availableDispersalTokens()"></span>
+                                        </li>
+                                        <li class="list-group-item">Fallen Legions<span class="badge badge-info"
+                                                                                        data-bind="text:$data.fallenLegions().length"></span>
+                                        </li>
+                                        <li class="list-group-item">Senate<span class="badge badge-info"
+                                                                                data-bind="text:$data.senateApprovalText()"></span>
+                                        </li>
                                         <!-- /ko -->
                                     </ul>
                                 </div>
@@ -210,7 +266,7 @@
             <div class="panel panel-default" data-bind="visible: activePanel() === ActivePanelIDs.CAPABILITIES">
                 <div class="panel-body">
                     <ul class="list-inline">
-                        <!-- ko foreach: state().capabilities() -->
+                        <!-- ko foreach: game().state().capabilities() -->
                         <li>
                             <img style="width:180px"
                                  data-bind="attr: { 'src': 'images/cards/' + $data.id + '.jpg' }"/>
@@ -243,16 +299,22 @@
             <div class="panel panel-default" data-bind="visible: activePanel() === ActivePanelIDs.REGIONS">
                 <div class="panel-body">
                     <ul class="list-inline">
-                        <!-- ko foreach: state().regions -->
+                        <!-- ko foreach: game().state().regions -->
                         <!-- ko if: $data.inPlay() -->
                         <li>
-                            <div class="panel panel-default" style="width:190px;position:relative">
+                            <div class="panel panel-default" style="width:250px;position:relative">
                                 <div class="panel-heading" style="padding-left:10px;">
                                     <h3 class="panel-title" style="font-size:20px;" data-bind="text:$data.name"></h3>
                                 </div>
                                 <div class="panel-body" style="padding:0">
                                     <div style="position:absolute;right:4px;top:4px;">
                                         <ul class="list-inline">
+                                            <!-- ko if: $data.devastated() -->
+                                            <li style="padding-left:2px;padding-right:1px;">
+                                                <img style="width:30px"
+                                                     data-bind="attr: { 'src': 'images/Devastated.png' }"/>
+                                            </li>
+                                            <!-- /ko -->
                                             <!-- ko if: $data.getFort() -->
                                             <li style="padding-left:2px;padding-right:1px;">
                                                 <img style="width:30px"
@@ -337,20 +399,20 @@
                                                         <!-- ko if: $parent.getRevealedPiecesForFaction($data).length > 0 -->
                                                         <li style="text-align:center">
                                                             <div style="position:relative;display:flex;justify-content:center;flex-direction:column;align-items: center;text-align:center;">
-                                                            <img style="width:25px"
-                                                                 data-bind="attr: { 'src': 'images/' + $data + 'Warband-R.png' }"/>
-                                                            <div style="color:#333"
-                                                                 data-bind="text:$parent.getRevealedPiecesForFaction($data).length"></div>
+                                                                <img style="width:25px"
+                                                                     data-bind="attr: { 'src': 'images/' + $data + 'Warband-R.png' }"/>
+                                                                <div style="color:#333"
+                                                                     data-bind="text:$parent.getRevealedPiecesForFaction($data).length"></div>
                                                             </div>
                                                         </li>
                                                         <!-- /ko -->
                                                         <!-- ko if: $parent.getScoutedPiecesForFaction($data).length > 0 -->
                                                         <li style="text-align:center">
                                                             <div style="position:relative;display:flex;justify-content:center;flex-direction:column;align-items: center;text-align:center;">
-                                                            <img style="width:25px"
-                                                                 data-bind="attr: { 'src': 'images/' + $data + 'Warband-S.png' }"/>
-                                                            <div style="color:#333"
-                                                                 data-bind="text:$parent.getScoutedPiecesForFaction($data).length"></div>
+                                                                <img style="width:25px"
+                                                                     data-bind="attr: { 'src': 'images/' + $data + 'Warband-S.png' }"/>
+                                                                <div style="color:#333"
+                                                                     data-bind="text:$parent.getScoutedPiecesForFaction($data).length"></div>
                                                             </div>
                                                         </li>
                                                         <!-- /ko -->
@@ -378,6 +440,6 @@
 </div>
 
 
-<script src="bundle.js"></script>
+<script src="web.js"></script>
 </body>
 </html>
