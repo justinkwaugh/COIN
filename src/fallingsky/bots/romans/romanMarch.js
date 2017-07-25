@@ -342,8 +342,8 @@ class RomanMarch {
                         Math.min(imbalance, regionPieces.numAuxilia - harassmentLosses) / 2);
 
                     if (piecesToMove > 0) {
-                        bigger.numAuxilia -= piecesToMove;
-                        regionPieces.numAuxilia -= piecesToMove;
+                        bigger.numAuxilia -= (piecesToMove + harassmentLosses);
+                        regionPieces.numAuxilia -= piecesToMove + harassmentLosses;
                         smaller.numAuxilia += piecesToMove;
                         smaller.piecesFromRegion[regionPieces.regionId].numAuxilia += piecesToMove;
                         if (harassmentLosses) {

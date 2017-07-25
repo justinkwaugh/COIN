@@ -8,6 +8,9 @@ import BelgaeMarch from './belgaeMarch';
 import CommandIDs from '../../config/commandIds';
 import FactionActions from '../../../common/factionActions';
 import Pass from '../../commands/pass';
+import MovePieces from 'fallingsky/actions/movePieces';
+import RemovePieces from 'fallingsky/actions/removePieces';
+import Map from 'fallingsky/util/map';
 
 const Checkpoints = {
     BATTLE_CHECK : 'battle',
@@ -90,6 +93,185 @@ class BelgaeBot extends Bot {
 
     willHarass(factionId) {
         return factionId === FactionIDs.ROMANS;
+    }
+
+
+    quarters(state) {
+        const devastatedMoveRegions = _(state.regions).filter((region) => {
+            return region.devastated();
+        }).map((region) => {
+            const alliesAndCitadel = region.getAlliesAndCitadelForFaction(this.factionId);
+            const warbands = region.getWarbandsOrAuxiliaForFaction(this.factionId);
+            const leader = region.getLeaderForFaction(this.factionId);
+
+            if (alliesAndCitadel.length > 0) {
+                return;
+            }
+
+            if (warbands.length === 0 && !leader) {
+                return;
+            }
+
+            const targets = this.getValidQuartersTargetsForRegion(state, region);
+
+            return {
+                region,
+                warbands,
+                leader,
+                targets
+            };
+
+        }).compact().value();
+
+        const leaderWillDoDevastationMove = _.find(devastatedMoveRegions, 'leader');
+        const leaderRegion = this.findLeaderRegion(state);
+
+        let massTarget = null;
+        if (leaderRegion) {
+            const massTargets = this.getValidQuartersTargetsForRegion(state, leaderRegion);
+            if (!leaderWillDoDevastationMove) {
+                massTargets.push(leaderRegion);
+            }
+
+            massTarget = _(massTargets).map(region => {
+                let numWarbands = _.reduce(devastatedMoveRegions, (sum, sourceRegion) => {
+                    if (_.find(_.map(sourceRegion.targets), target => target.id === region.id)) {
+                        return sum + sourceRegion.region.getWarbandsOrAuxiliaForFaction(this.factionId).length;
+                    }
+                    else {
+                        return sum;
+                    }
+                }, region.getWarbandsOrAuxiliaForFaction(this.factionId).length);
+
+                let nonDevastatedMove = null;
+                if (region.id === leaderRegion.id) {
+                    nonDevastatedMove = _(leaderRegion.adjacent).reject(adjacent => adjacent.devastated() ||
+                                                                                    adjacent.getWarbandsOrAuxiliaForFaction(
+                                                                                        this.factionId).length < 1).map(
+                        adjacent => {
+                            const numWarbands = adjacent.getWarbandsOrAuxiliaForFaction(this.factionId).length;
+                            const controlMargin = adjacent.controllingMarginByFaction()[this.factionId];
+                            const numToMove = controlMargin < 1 ? numWarbands - 1 : Math.min(numWarbands - 1,
+                                                                                             controlMargin - 1);
+
+                            if(numToMove <= 0) {
+                                return;
+                            }
+
+                            return {
+                                region: adjacent,
+                                numToMove
+                            };
+                        }).compact().sortBy('numToMove').reverse().first();
+                }
+                else if (!leaderWillDoDevastationMove) {
+                    const numLeaderRegionWarbands = leaderRegion.getWarbandsOrAuxiliaForFaction(
+                        this.factionId).length;
+                    const leaderRegionControlMargin = leaderRegion.controllingMarginByFaction()[this.factionId];
+                    const leaderRegionNumToMove = leaderRegionControlMargin < 1 ? numLeaderRegionWarbands - 1 : Math.min(
+                        numLeaderRegionWarbands - 1, leaderRegionControlMargin - 2);
+
+                    if(leaderRegionNumToMove > 0) {
+                        nonDevastatedMove = {
+                            region: leaderRegion,
+                            numToMove: leaderRegionNumToMove,
+                            leader: true
+                        }
+                    }
+                }
+
+                if (nonDevastatedMove) {
+                    numWarbands += nonDevastatedMove.numToMove;
+                }
+
+                const numAdjacentWarbands = _(region.adjacent).reject(
+                    adjacent => _.find(devastatedMoveRegions, {id: adjacent.id})).reduce((sum, adjacent) => {
+                    if (nonDevastatedMove && adjacent.id === nonDevastatedMove.id) {
+                        return sum + adjacent.getWarbandsOrAuxiliaForFaction(
+                                this.factionId).length - nonDevastatedMove.numToMove;
+                    }
+                    else {
+                        return sum + adjacent.getWarbandsOrAuxiliaForFaction(this.factionId).length;
+                    }
+                }, 0);
+
+                const priority = (99 - numWarbands) + '-' + (99 - numAdjacentWarbands);
+
+                return {
+                    region,
+                    nonDevastatedMove,
+                    priority
+                }
+            }).sortBy('priority').first();
+
+        }
+
+        _.each(devastatedMoveRegions, moveRegion => {
+            let destRegionId = null;
+            if(massTarget && _.find(moveRegion.targets, target=> target.id === massTarget.region.id)) {
+                destRegionId = massTarget.region.id;
+            }
+            else if(moveRegion.targets.length > 0) {
+                if(massTarget) {
+                    destRegionId = _(moveRegion.targets).shuffle().sortBy(target=> Map.measureDistanceToRegion(state,moveRegion.region.id, target.id)).first().id;
+                }
+                else {
+                    destRegionId = _.sample(moveRegion.targets).id;
+                }
+            }
+
+            if(!destRegionId) {
+                return;
+            }
+
+            const pieces = moveRegion.region.getMobilePiecesForFaction(this.factionId);
+            MovePieces.execute(state, {
+                        sourceRegionId: moveRegion.region.id,
+                        destRegionId: destRegionId,
+                        pieces: pieces
+                    });
+        });
+
+        if(massTarget && massTarget.nonDevastatedMove) {
+            const warbands = massTarget.nonDevastatedMove.region.getWarbandsOrAuxiliaForFaction(this.factionId);
+            const leader = massTarget.nonDevastatedMove.region.getLeaderForFaction(this.factionId);
+            const pieces = leader ? _.concat(warbands, [leader]) : warbands;
+            MovePieces.execute(state, {
+                        sourceRegionId: massTarget.nonDevastatedMove.region.id,
+                        destRegionId: massTarget.region.id,
+                        pieces: pieces
+                    });
+        }
+
+        _.each(state.region, region=> {
+            if(!region.devastated()) {
+                return;
+            }
+
+            const piecesToRemove = _.filter(region.getWarbandsOrAuxiliaForFaction(this.factionId), warband => _.random(1,6) < 4);
+
+            if (piecesToRemove.length > 0) {
+                    RemovePieces.execute(state, {
+                        factionId: this.factionId,
+                        regionId: region.id,
+                        pieces: piecesToRemove
+                    });
+                }
+
+        });
+
+    }
+
+    getValidQuartersTargetsForRegion(state, region) {
+        return _(region.adjacent).reject((adjacentRegion) => {
+            return adjacentRegion.devastated() || !adjacentRegion.controllingFactionId() || adjacentRegion.controllingFactionId() === FactionIDs.GERMANIC_TRIBES;
+        }).filter(adjacentRegion=> adjacentRegion.controllingFactionId() === this.factionId || state.playersByFaction[adjacentRegion.controllingFactionId()].willAgreeToQuarters(state,this.factionId)).value();
+    }
+
+    findLeaderRegion(state) {
+        return _.find(state.regions, (region) => {
+            return _.find(region.piecesByFaction()[this.factionId], {type: 'leader'});
+        });
     }
 }
 
