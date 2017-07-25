@@ -118,21 +118,23 @@ class Game {
     }
 
     undo() {
-        this.state().victor(false);
+
         const startOfCard = this.state().sequenceOfPlay.isStartOfCard();
         const lastCard = _.last(this.state().discard());
         const lastWasWinter = lastCard && lastCard.type === 'winter';
 
-        this.state().sequenceOfPlay.undo();
+        if(!this.state().victor()) {
+            this.state().sequenceOfPlay.undo();
+        }
 
-        if (!startOfCard || lastWasWinter) {
+        if (this.state().victor() || !startOfCard || lastWasWinter) {
             console.log('*** Undoing the last Turn ***');
             this.state().turnHistory.undoLastTurn();
         }
 
-        const undoDraw = this.state().discard().length > 0 && startOfCard;
+        const undoDraw = this.state().discard().length > 0 && startOfCard && !this.state().victor();
         if (undoDraw) {
-            if (this.state().upcomingCard().type === 'winter') {
+            if (this.state().upcomingCard() && this.state().upcomingCard().type === 'winter') {
                 this.state().frost(false);
             }
             else if (lastWasWinter) {
@@ -150,6 +152,8 @@ class Game {
         else {
             this.lastTurn(this.state().turnHistory.lastTurn());
         }
+
+        this.state().victor(null);
     }
 
     factionsByVictory() {
