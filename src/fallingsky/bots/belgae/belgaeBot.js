@@ -48,7 +48,7 @@ class BelgaeBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.PASS_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && this.canPlayEvent(state) && BelgaeEvent.handleEvent(state)) {
+        if(!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && !modifiers.noEvent && this.canPlayEvent(state) && BelgaeEvent.handleEvent(state)) {
             commandAction = FactionActions.EVENT;
         }
         turn.markCheckpoint(Checkpoints.EVENT_CHECK);
@@ -79,7 +79,9 @@ class BelgaeBot extends Bot {
             Pass.execute(state, {factionId: FactionIDs.BELGAE});
         }
 
-        state.sequenceOfPlay.recordFactionAction(FactionIDs.BELGAE, commandAction);
+        if(!modifiers.outOfSequence) {
+            state.sequenceOfPlay.recordFactionAction(FactionIDs.BELGAE, commandAction);
+        }
         return commandAction;
     }
 

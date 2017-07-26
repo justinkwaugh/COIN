@@ -61,7 +61,7 @@ describe("Aedui Bot", function () {
         state.turnHistory.startTurn(aedui.id);
 
         const turn = state.turnHistory.getCurrentTurn();
-        _.pull(turn.getContext().allowedCommands, CommandIDs.EVENT);
+        turn.getContext().noEvent = true;
 
         let interaction = null;
         try {

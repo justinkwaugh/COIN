@@ -1,10 +1,11 @@
-import _ from '../../../lib/lodash';
-import FactionIDs from '../../config/factionIds';
-import CommandIDs from '../../config/commandIds';
+import _ from 'lib/lodash';
+import FactionIDs from 'fallingsky/config/factionIds';
+import CommandIDs from 'fallingsky/config/commandIds';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import RomanBuild from 'fallingsky/bots/romans/romanBuild';
-import Rally from '../../commands/rally';
+import Rally from 'fallingsky/commands/rally';
 import RemoveResources from 'fallingsky/actions/removeResources';
-import FactionActions from '../../../common/factionActions';
+import FactionActions from 'common/factionActions';
 import RomanScout from 'fallingsky/bots/romans/romanScout';
 
 const Checkpoints = {
@@ -32,8 +33,9 @@ class RomanRecruit {
 
         state.turnHistory.getCurrentTurn().startCommand(CommandIDs.RECRUIT);
         _.each(executableRallyRegions, (rallyRegion) => {
-            if (!modifiers.free && rallyRegion.cost > 0 && !rallyRegion.inSupplyLine) {
-                RemoveResources.execute(state, {factionId: state.romans.id, count: rallyRegion.cost});
+            const cost = state.hasShadedCapability(CapabilityIDs.BALEARIC_SLINGERS) ? 2: rallyRegion.inSupplyLine ? 0 : rallyRegion.cost;
+            if (!modifiers.free && cost > 0) {
+                RemoveResources.execute(state, {factionId: state.romans.id, count: cost});
             }
             Rally.execute(state, {faction: state.romans, regionResult: rallyRegion});
         });
@@ -67,9 +69,6 @@ class RomanRecruit {
             factionId: FactionIDs.ROMANS,
             regions: regions
         });
-
-
-        // Order by supply line
 
         let auxiliaRemaining = state.romans.availableAuxilia().length;
         _.each(rallyRegionResults, (regionResult) => {
@@ -117,9 +116,12 @@ class RomanRecruit {
             regionResult.agreementsNeeded = agreementsForSupplyLine;
         });
 
+        const filteredRegions = state.hasShadedCapability(CapabilityIDs.BALEARIC_SLINGERS) ? _.filter(allRegions, {inSupplyLine: true}) : allRegions;
+
         const affordableRegions = modifiers.free ? allRegions : _.reduce(allRegions, (accumulator, rallyRegion) => {
-            if (accumulator.resourcesRemaining >= rallyRegion.cost) {
-                accumulator.resourcesRemaining -= rallyRegion.cost;
+            const cost = state.hasShadedCapability(CapabilityIDs.BALEARIC_SLINGERS) ? 2 : rallyRegion.cost;
+            if (accumulator.resourcesRemaining >= cost) {
+                accumulator.resourcesRemaining -= cost;
                 accumulator.rallies.push(rallyRegion);
             }
             return accumulator

@@ -8,7 +8,7 @@ class Event12 {
         AddCapability.execute(state,
             {
                 id: CapabilityIDs.TITUS_LABIENUS,
-                state: CapabilityStates.UNSHADED
+                state: CapabilityStates.SHADED
             });
         return true;
     }

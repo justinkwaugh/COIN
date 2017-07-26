@@ -5,6 +5,7 @@ import Event8 from './events/event8';
 import Event9 from './events/event9';
 import Event10 from './events/event10';
 import Event12 from './events/event12';
+import Event13 from './events/event13';
 import Event15 from './events/event15';
 import Event22 from './events/event22';
 import Event24 from './events/event24';
@@ -36,6 +37,7 @@ const EventHandlers = {
     9: Event9,
     10: Event10,
     12: Event12,
+    13: Event13,
     15: Event15,
     22: Event22,
     24: Event24,

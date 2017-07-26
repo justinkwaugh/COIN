@@ -46,7 +46,7 @@ class ArverniBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.THREAT_MARCH_CHECK);
 
-        if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && this.canPlayEvent(
+        if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && !modifiers.noEvent && this.canPlayEvent(
                 state) && ArverniEvent.handleEvent(state)) {
             commandAction = FactionActions.EVENT;
         }
@@ -89,7 +89,9 @@ class ArverniBot extends Bot {
             Pass.execute(state, {factionId: FactionIDs.ARVERNI});
         }
 
-        state.sequenceOfPlay.recordFactionAction(FactionIDs.ARVERNI, commandAction);
+        if(!modifiers.outOfSequence) {
+            state.sequenceOfPlay.recordFactionAction(FactionIDs.ARVERNI, commandAction);
+        }
         return commandAction;
     }
 

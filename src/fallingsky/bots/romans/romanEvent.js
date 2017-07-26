@@ -1,7 +1,7 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 
-const NoEvents = [];
+const NoEvents = [47,53,43,48,35,54,28,20,39,69,29,51];
 const CapabilityEvents = [8,10,12,13,15,25,27,30,38,39,43,55,59,63];
 const EventHandlers = {};
 

@@ -8,6 +8,7 @@ import RomanRecruit from './romanRecruit';
 import RomanSeize from './romanSeize';
 import RomanMarch from './romanMarch';
 import CommandIDs from '../../config/commandIds';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import FactionActions from '../../../common/factionActions';
 import MovePieces from 'fallingsky/actions/movePieces';
 import RemovePieces from 'fallingsky/actions/removePieces';
@@ -65,7 +66,7 @@ class RomanBot extends Bot {
             turn.markCheckpoint(Checkpoints.SEIZE_CHECK);
         }
         else {
-            if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && this.canPlayEvent(
+            if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && !modifiers.noEvent && this.canPlayEvent(
                     state) && RomanEvent.handleEvent(state)) {
                 commandAction = FactionActions.EVENT;
             }
@@ -98,7 +99,9 @@ class RomanBot extends Bot {
             Pass.execute(state, {factionId: FactionIDs.ROMANS});
         }
 
-        state.sequenceOfPlay.recordFactionAction(FactionIDs.ROMANS, commandAction);
+        if(!modifiers.outOfSequence) {
+            state.sequenceOfPlay.recordFactionAction(FactionIDs.ROMANS, commandAction);
+        }
         return commandAction;
     }
 
@@ -213,8 +216,13 @@ class RomanBot extends Bot {
             const pieces = _([]).concat(legions, auxilia).value();
             const orderedPieces = Losses.orderPiecesForRemoval(state, pieces).reverse();
             const pieceCost = (data.hasAlly ? 1 : 2) * (data.devastated ? 1 : 2);
-            const numPiecesToPayFor = Math.min(Math.floor(resourcesAvailable / pieceCost), orderedPieces.length);
 
+            const winterCampaign = !data.devastated && state.hasUnshadedCapability(CapabilityIDs.WINTER_CAMPAIGN);
+            if(winterCampaign) {
+                return;
+            }
+
+            const numPiecesToPayFor = Math.min(Math.floor(resourcesAvailable / pieceCost), orderedPieces.length);
             if(numPiecesToPayFor > 0) {
                 RemoveResources.execute(state, {
                     factionId: this.factionId,

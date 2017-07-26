@@ -63,7 +63,7 @@ class SequenceOfPlay {
 
         const newlyIneligible = [];
         if (this.firstFaction()) {
-            if (_.indexOf(this.forcedEligibleFactionIds(), this.firstFaction().id) >= 0) {
+            if (_.indexOf(this.forcedEligibleFactionIds(), this.firstFaction()) >= 0) {
                 this.eligibleFactions.push(this.firstFaction());
             }
             else {
@@ -71,7 +71,7 @@ class SequenceOfPlay {
             }
         }
         if (this.secondFaction()) {
-            if (_.indexOf(this.forcedEligibleFactionIds(), this.secondFaction().id) >= 0) {
+            if (_.indexOf(this.forcedEligibleFactionIds(), this.secondFaction()) >= 0) {
                 this.eligibleFactions.push(this.secondFaction());
             }
             else {

@@ -1,6 +1,7 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import SpecialAbilityIDs from '../../config/specialAbilityIds';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import Trade from '../../commands/aedui/trade';
 import AddResources from '../../actions/addResources';
 
@@ -20,32 +21,40 @@ class AeduiTrade {
 
 
         const possibleTrades = Trade.test(state);
-        if(!possibleTrades || possibleTrades.length === 0) {
+        if (!possibleTrades || possibleTrades.length === 0) {
             return false;
         }
 
         state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.TRADE);
         console.log('*** Aedui checking trade viability ***');
         const bot = state.playersByFaction[FactionIDs.AEDUI];
-        const agreeingFactionsNeeded = _(possibleTrades).map('agreementsNeeded').flatten().flatten().concat([FactionIDs.ROMANS]).uniq().value();
+        const agreeingFactionsNeeded = _(possibleTrades).map('agreementsNeeded').flatten().flatten().concat(
+            [FactionIDs.ROMANS]).uniq().value();
         const agreements = bot.getSupplyLineAgreements(state, modifiers, agreeingFactionsNeeded);
 
+        let trades = _(possibleTrades).map(trade => {
+            const inSupplyLine = trade.inSupplyLine || _.find(
+                    trade.agreementsNeeded, (factionList) => _.difference(factionList, agreements).length === 0);
 
+            if (!inSupplyLine) {
+                return;
+            }
 
-        const resourcesToBeGained = _.reduce(
-            possibleTrades, function (sum, regionResult) {
-                const inSupplyLine = regionResult.inSupplyLine || _.find(
-                        regionResult.agreementsNeeded, function (factionList) {
-                            return _.difference(factionList, agreements).length === 0;
-                        });
+            const romanAgreement = _.indexOf(agreements, FactionIDs.ROMANS) >= 0;
+            const resourcesGained = romanAgreement ? trade.totalAeduiWithRoman : trade.totalAedui;
+            return {
+                trade,
+                resourcesGained
+            };
+        }).compact().sortBy('resourcesGained').reverse().value();
 
-                if (!inSupplyLine) {
-                    return sum;
-                }
+        if (state.hasShadedCapability(CapabilityIDs.RIVER_COMMERCE)) {
+            trades = _.take(trades, 1);
+        }
 
-                const romanAgreement = _.indexOf(agreements, FactionIDs.ROMANS) >= 0;
-                return sum + (romanAgreement ? regionResult.totalAeduiWithRoman : regionResult.totalAedui);
-            }, 0);
+        const resourcesToBeGained = _.reduce(trades, (sum, trade) => {
+            return sum + trade.resourcesGained;
+        }, 0);
 
         if (resourcesToBeGained <= 2) {
             console.log('*** Aedui cannot viably trade ***');
@@ -54,7 +63,7 @@ class AeduiTrade {
         }
         console.log('*** Aedui Trading ***');
 
-        AddResources.execute(state, { factionId: FactionIDs.AEDUI, count: resourcesToBeGained});
+        AddResources.execute(state, {factionId: FactionIDs.AEDUI, count: resourcesToBeGained});
         state.turnHistory.getCurrentTurn().commitSpecialAbility();
 
         return true;

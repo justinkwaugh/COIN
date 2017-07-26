@@ -2,6 +2,7 @@ import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import CommandIDs from '../../config/commandIds';
 import SpecialAbilityIDs from 'fallingsky/config/specialAbilityIds';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import EnemyFactionPriority from 'fallingsky/bots/romans/enemyFactionPriority';
 import Build from '../../commands/romans/build';
 import RemoveResources from 'fallingsky/actions/removeResources';
@@ -54,13 +55,15 @@ class RomanBuild {
 
         const allBuilds = _.concat(fortPlacements, allyRemovals, allyPlacements);
 
-        return modifiers.free ? allBuilds : _.reduce(allBuilds, (accumulator, build) => {
+        const paidBuilds = modifiers.free ? allBuilds : _.reduce(allBuilds, (accumulator, build) => {
             if (accumulator.resourcesRemaining >= 6) {
                 accumulator.resourcesRemaining -= 2;
                 accumulator.builds.push(build);
             }
             return accumulator
         }, {resourcesRemaining: state.romans.resources(), builds: []}).builds;
+
+        return state.hasShadedCapability(CapabilityIDs.TITUS_LABIENUS) ? _.take(paidBuilds, 1) : paidBuilds
     }
 
     static getFortPlacements(state, possibleBuilds) {

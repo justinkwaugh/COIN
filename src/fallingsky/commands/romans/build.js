@@ -1,6 +1,7 @@
 import _ from '../../../lib/lodash';
 import Command from '../command';
 import FactionIDs from 'fallingsky/config/factionIds';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import BuildResults from './buildResults';
 
 class Build extends Command {
@@ -12,7 +13,7 @@ class Build extends Command {
                 return;
             }
 
-            if (!this.withinRangeOfLeader(region, leaderRegion)) {
+            if (!this.withinRangeOfLeader(state, region, leaderRegion)) {
                 return;
             }
 
@@ -43,7 +44,10 @@ class Build extends Command {
         }).compact().value();
     }
 
-    static withinRangeOfLeader(region, leaderRegion) {
+    static withinRangeOfLeader(state, region, leaderRegion) {
+        if(state.hasUnshadedCapability(CapabilityIDs.TITUS_LABIENUS)) {
+            return true;
+        }
         const leader = leaderRegion.getLeaderForFaction(FactionIDs.ROMANS);
 
         return region.id === leaderRegion.id || (!leader.isSuccessor() &&

@@ -1,17 +1,16 @@
-
+import FactionIDs from '../../../config/factionIds';
 import {CapabilityIDs, CapabilityStates} from '../../../config/capabilities';
 import AddCapability from '../../../actions/addCapability';
 
-class Event12 {
+class Event30 {
     static handleEvent(state) {
-
         AddCapability.execute(state,
             {
-                id: CapabilityIDs.TITUS_LABIENUS,
-                state: CapabilityStates.UNSHADED
+                id: CapabilityIDs.VERCINGETORIXS_ELITE,
+                state: CapabilityStates.SHADED
             });
         return true;
     }
 }
 
-export default Event12
+export default Event30

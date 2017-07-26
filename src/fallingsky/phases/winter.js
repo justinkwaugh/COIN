@@ -1,5 +1,8 @@
 import _ from 'lib/lodash';
 import FactionIDs from '../config/factionIds';
+import CommandIDs from 'fallingsky/config/commandIds';
+import TurnContext from 'common/turnContext';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import UndisperseTribe from '../actions/undisperseTribe';
 import AddResources from '../actions/addResources';
 import HidePieces from '../actions/hidePieces';
@@ -19,6 +22,7 @@ class Winter {
             this.germanPhase(state);
             this.quarters(state);
             this.harvest(state);
+            this.winterCampaign(state);
             this.senate(state);
             this.spring(state);
         }
@@ -105,6 +109,39 @@ class Winter {
                 AddResources.execute(state, {factionId: faction.id, count: resources});
             }
         });
+        turn.commitPhase();
+    }
+
+    static winterCampaign(state) {
+        const turn = state.turnHistory.currentTurn;
+        turn.startPhase('Winter Campaign');
+        if(state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.ARVERNI)) {
+            const arverni = state.playersByFaction[FactionIDs.ARVERNI];
+            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.ARVERNI, noEvent: true, outOfSequence: true }));
+            arverni.takeTurn(state);
+            turn.popContext();
+            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.ARVERNI, noEvent: true, outOfSequence: true }));
+            arverni.takeTurn(state);
+            turn.popContext();
+        }
+        else if(state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.BELGAE)) {
+            const belgae = state.playersByFaction[FactionIDs.BELGAE];
+            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.BELGAE, noEvent: true, outOfSequence: true}));
+            belgae.takeTurn(state);
+            turn.popContext();
+            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.BELGAE, noEvent: true, outOfSequence: true}));
+            belgae.takeTurn(state);
+            turn.popContext();
+        }
+        else if(state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.AEDUI)) {
+            const aedui = state.playersByFaction[FactionIDs.AEDUI];
+            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.AEDUI, noEvent: true, outOfSequence: true}));
+            aedui.takeTurn(state);
+            turn.popContext();
+            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.AEDUI, noEvent: true, outOfSequence: true}));
+            aedui.takeTurn(state);
+            turn.popContext();
+        }
         turn.commitPhase();
     }
 

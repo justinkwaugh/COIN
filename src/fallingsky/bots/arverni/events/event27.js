@@ -1,17 +1,15 @@
-
 import {CapabilityIDs, CapabilityStates} from '../../../config/capabilities';
 import AddCapability from '../../../actions/addCapability';
 
-class Event12 {
+class Event27 {
     static handleEvent(state) {
-
         AddCapability.execute(state,
             {
-                id: CapabilityIDs.TITUS_LABIENUS,
-                state: CapabilityStates.UNSHADED
+                id: CapabilityIDs.MASSED_GALLIC_ARCHERS,
+                state: CapabilityStates.SHADED
             });
         return true;
     }
 }
 
-export default Event12
+export default Event27

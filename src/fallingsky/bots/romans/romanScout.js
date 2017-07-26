@@ -2,6 +2,7 @@ import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 import CommandIDs from '../../config/commandIds';
 import SpecialAbilityIDs from 'fallingsky/config/specialAbilityIds';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import EnemyFactionPriority from 'fallingsky/bots/romans/enemyFactionPriority';
 import Scout from '../../commands/romans/scout';
 import RemoveResources from 'fallingsky/actions/removeResources';
@@ -90,7 +91,10 @@ class RomanScout {
                 });
         });
 
-        const scoutsToReveal = this.getScoutsToReveal(state);
+        let scoutsToReveal = this.getScoutsToReveal(state);
+        if(state.hasShadedCapability(CapabilityIDs.TITUS_LABIENUS)) {
+            scoutsToReveal = _.take(scoutsToReveal, 1);
+        }
         _.each(scoutsToReveal, scout => {
             effective = true;
             RevealPieces.execute(state, { factionId: FactionIDs.ROMANS, regionId: scout.regionId, count: scout.hiddenCount });
@@ -320,10 +324,14 @@ class RomanScout {
 
     static getScoutRegions(state) {
         const leaderRegion = this.findLeaderRegion(state);
-        return _(state.regions).filter(region => this.withinRangeOfLeader(region, leaderRegion)).value();
+        return _(state.regions).filter(region => this.withinRangeOfLeader(state, region, leaderRegion)).value();
     }
 
-    static withinRangeOfLeader(region, leaderRegion) {
+    static withinRangeOfLeader(state, region, leaderRegion) {
+        if(state.hasUnshadedCapability(CapabilityIDs.TITUS_LABIENUS)) {
+            return true;
+        }
+
         if (!leaderRegion) {
             return false;
         }

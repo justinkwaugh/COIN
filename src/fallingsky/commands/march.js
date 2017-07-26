@@ -1,6 +1,7 @@
 import _ from '../../lib/lodash';
 import Command from './command';
 import FactionIDs from '../config/factionIds';
+import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import RegionIDs from '../config/regionIds';
 import RegionGroups from '../config/regionGroups';
 import MarchResults from './marchResults';
@@ -15,6 +16,7 @@ class March extends Command {
     static generateResultsForRegions(state, faction, regions) {
         return _(regions).map(
             (region) => {
+                const isAedui = faction.id === FactionIDs.AEDUI;
                 const isArverni = faction.id === FactionIDs.ARVERNI;
                 const isRomans = faction.id === FactionIDs.ROMANS;
                 const isGermanic = faction.id === FactionIDs.GERMANIC_TRIBES;
@@ -68,6 +70,10 @@ class March extends Command {
 
                 if (isGermanic) {
                     cost = 0;
+                }
+
+                if (isAedui && state.hasShadedCapability(CapabilityIDs.CONVICTOLITAVIS)) {
+                    cost *= 2;
                 }
 
                 return new MarchResults(

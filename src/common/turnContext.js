@@ -8,6 +8,8 @@ class TurnContext {
         this.limited = definition.limited;
         this.allowLimitedSpecial = definition.allowLimitedSpecial;
         this.noSpecial = definition.noSpecial;
+        this.noEvent = definition.noEvent;
+        this.outOfSequence = definition.outOfSequence;
         this.free = definition.free;
         this.winter = definition.winter;
         this.context = definition.context || {};

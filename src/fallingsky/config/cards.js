@@ -95,7 +95,7 @@ const EventCardDefinitions = [
         id: 14,
         type: CardTypes.EVENT,
         initiativeOrder: [romans, belgae, arverni, aedui],
-        title: 'Cloduis Pulcher'
+        title: 'Clodius Pulcher'
     },
     {
         id: 15,
@@ -167,7 +167,7 @@ const EventCardDefinitions = [
         id: 26,
         type: CardTypes.EVENT,
         initiativeOrder: [arverni, aedui, romans, belgae],
-        title: 'Gobannito'
+        title: 'Gobannitio'
     },
     {
         id: 27,

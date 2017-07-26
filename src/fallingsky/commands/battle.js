@@ -122,10 +122,15 @@ class Battle extends Command {
             [(defenderCanRetreat ? worstCaseRetreatDefenderResults.targets.length : worstCaseNoRetreatDefenderResults.targets.length), worstCaseNoRetreatDefenderResults.targets.length, defendingPieces.length]);
         const worstCaseDefenderLossesAmbush = worstCaseNoRetreatDefenderResultsWithAmbush.targets.length;
 
+        let cost = (region.devastated() ? 2 : 1) * (attackingFaction.id === FactionIDs.ROMANS ? 2 : 1);
+
+        if(attackingFaction.id === FactionIDs.AEDUI && state.hasShadedCapability(CapabilityIDs.CONVICTOLITAVIS)) {
+            cost *= 2;
+        }
         return new BattleResults(
             {
                 region: region,
-                cost: (region.devastated() ? 2 : 1) * (attackingFaction.id === FactionIDs.ROMANS ? 2 : 1),
+                cost: cost,
 
                 attackingFaction: attackingFaction,
                 defendingFaction: defendingFaction,
