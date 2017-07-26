@@ -5,17 +5,21 @@ class UndisperseTribe extends Action {
     constructor(args) {
         super(args);
 
-        this.factionId = args.factionId;
         this.tribeId = args.tribeId;
         this.gathering = args.gathering;
         this.subdued = args.subdued;
+        this.wasDispersed = args.wasDispersed;
+        this.fully = args.fully;
     }
 
     doExecute(state) {
-        const faction = state.factionsById[this.factionId];
+        const faction = state.romans;
         const tribe = state.tribesById[this.tribeId];
 
-        if (tribe.isDispersedGathering()) {
+        this.wasDispersed = tribe.isDispersed();
+        this.wasGathering = tribe.isDispersedGathering();
+
+        if (tribe.isDispersedGathering() || this.fully) {
             console.log(tribe.name + ' is now subdued');
             this.subdued = true;
             faction.returnDispersalToken();
@@ -24,16 +28,21 @@ class UndisperseTribe extends Action {
             this.gathering = true;
             console.log(tribe.name + ' is now gathering');
         }
-        tribe.undisperse();
+        tribe.undisperse(this.fully);
     }
 
     doUndo(state) {
-        const faction = state.factionsById[this.factionId];
+        const faction = state.romans;
         const tribe = state.tribesById[this.tribeId];
 
         if(this.subdued) {
             faction.removeDispersalToken();
-            tribe.disperseGathering();
+            if(this.wasDispersed) {
+                tribe.disperse();
+            }
+            else {
+                tribe.disperseGathering();
+            }
             console.log(tribe.name + ' is now back to gathering');
         }
         else {

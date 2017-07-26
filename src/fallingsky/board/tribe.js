@@ -56,6 +56,10 @@ import Location from '../../common/location';
             this.state(TribeStates.DISPERSED_GATHERING);
         }
 
+        raze() {
+            this.state(TribeStates.RAZED);
+        }
+
         makeAllied(alliedTribe) {
             alliedTribe.tribeId = this.id;
             this.alliedFactionId(alliedTribe.factionId);

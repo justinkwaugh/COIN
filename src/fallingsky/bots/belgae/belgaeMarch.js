@@ -128,7 +128,7 @@ class BelgaeMarch {
 
         if (modifiers.context.monsCevenna) {
             const provincia = state.regionsById[RegionIDs.PROVINCIA];
-            const marchRegions = provincia.adjacent;
+            const marchRegions = _.clone(provincia.adjacent);
             marchRegions.push(provincia);
             const marchRegionIds = _.map(marchRegions, 'id');
 
@@ -273,6 +273,23 @@ class BelgaeMarch {
                            modifiers.free ||
                            _.indexOf(marchedFromRegions, marchResult.region.id) >= 0) &&
                            _.indexOf(modifiers.allowedRegions, marchResult.region.id) >= 0);
+
+        if (modifiers.context.monsCevenna) {
+            const provincia = state.regionsById[RegionIDs.PROVINCIA];
+            const marchRegions = _.clone(provincia.adjacent);
+            marchRegions.push(provincia);
+            const marchRegionIds = _.map(marchRegions, 'id');
+
+            marchResults = _.filter(marchResults, marchResult => _.indexOf(marchRegionIds,
+                                                                           marchResult.region.id) >= 0);
+
+            _.each(marchResults, marchResult => {
+                marchResult.destinations = _.filter(marchResult.destinations,
+                                                    destination => _.indexOf(marchRegionIds,
+                                                                             destination.id) >= 0);
+
+            });
+        }
 
 
         const leaderMarch = _.find(marchResults, result => _.find(result.region.piecesByFaction()[FactionIDs.BELGAE],

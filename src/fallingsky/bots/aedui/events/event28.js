@@ -27,8 +27,9 @@ class Event28 {
 
             _.each(subduedCitiesNotRomanControlled, function(city) {
                 PlaceAlliedTribe.execute(state, { factionId: aedui.id, regionId: city.regionId, tribeId: city.id});
+                effective = true;
             });
-            effective = true;
+
         }
 
         if(aedui.hasAvailableCitadel()) {
@@ -38,8 +39,9 @@ class Event28 {
 
             _.each(aeduiAlliedCities, function(city) {
                 PlaceCitadel.execute(state, { factionId: aedui.id, regionId: city.regionId, tribeId: city.id});
+                effective = true;
             });
-            effective = true;
+
         }
 
         return effective;

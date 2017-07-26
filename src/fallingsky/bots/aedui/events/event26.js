@@ -5,6 +5,7 @@ import TribeIDs from '../../../config/tribeIds';
 import RemovePieces from '../../../actions/removePieces';
 import PlaceCitadel from '../../../actions/placeCitadel';
 import PlaceAlliedTribe from '../../../actions/placeAlliedTribe';
+import UndisperseTribe from 'fallingsky/actions/undisperseTribe';
 
 
 class Event26 {
@@ -14,7 +15,7 @@ class Event26 {
         const aedui = state.factionsById[FactionIDs.AEDUI];
 
         const enemyAllyOrCitadel = gergovia.alliedFactionId() && gergovia.alliedFactionId() !== FactionIDs.AEDUI;
-        const canPlaceAllyOrCitadel = aedui.hasAvailableCitadel() || aedui.hasAvailableAlliedTribe();
+        const canPlaceAllyOrCitadel = (aedui.hasAvailableCitadel() || aedui.hasAvailableAlliedTribe());
 
         if (enemyAllyOrCitadel || canPlaceAllyOrCitadel) {
             console.log('*** Playing Gobannitio ***');
@@ -30,6 +31,13 @@ class Event26 {
                         regionId: arverniRegion.id,
                         pieces: [enemyPiece]
                     });
+            }
+
+            if(gergovia.isDispersed() || gergovia.isDispersedGathering() || gergovia.isRazed()) {
+                UndisperseTribe.execute(state, {
+                    tribeId: gergovia.id,
+                    fully: true
+                })
             }
 
             if (aedui.hasAvailableCitadel()) {
