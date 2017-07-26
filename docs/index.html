@@ -170,22 +170,26 @@
             <!-- ko if: game().state().victor() -->
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <h2 style="font-weight:300;text-align:center">The <span data-bind="text: game().state().factionsById[game().state().victor()].name"></span> are victorious!</h2>
+                    <h2 style="font-weight:300;text-align:center">The <span
+                            data-bind="text: game().state().factionsById[game().state().victor()].name"></span> are
+                        victorious!</h2>
                 </div>
                 <table class="table table-striped">
-                        <tbody>
-                        <!-- ko foreach: game().factionsByVictory() -->
-                        <tr data-bind="css: $root.styleSuffixForFaction($data.id)">
-                            <td style="padding-left: 40px;">
-                                <div><h4 style="color: #333;font-weight:300;font-size:24px;"><span data-bind="text:$data.name"></span></h4></div>
-                            </td>
-                            <td style="padding-right: 40px;text-align:right">
-                                <div><h4 style="color: #333;font-weight:300;font-size:24px;"><span data-bind="text:$data.victoryMargin($parent.game().state())"></span></h4></div>
-                            </td>
-                        </tr>
-                        <!-- /ko -->
-                        </tbody>
-                    </table>
+                    <tbody>
+                    <!-- ko foreach: game().factionsByVictory() -->
+                    <tr data-bind="css: $root.styleSuffixForFaction($data.id)">
+                        <td style="padding-left: 40px;">
+                            <div><h4 style="color: #333;font-weight:300;font-size:24px;"><span
+                                    data-bind="text:$data.name"></span></h4></div>
+                        </td>
+                        <td style="padding-right: 40px;text-align:right">
+                            <div><h4 style="color: #333;font-weight:300;font-size:24px;"><span
+                                    data-bind="text:$data.victoryMargin($parent.game().state())"></span></h4></div>
+                        </td>
+                    </tr>
+                    <!-- /ko -->
+                    </tbody>
+                </table>
             </div>
             <!-- /ko -->
         </div>
@@ -268,8 +272,18 @@
                     <ul class="list-inline">
                         <!-- ko foreach: game().state().capabilities() -->
                         <li>
-                            <img style="width:180px"
-                                 data-bind="attr: { 'src': 'images/cards/' + $data.id + '.jpg' }"/>
+                            <div style="position:relative">
+                                <img style="width:184px"
+                                     data-bind="attr: { 'src': 'images/cards/' + $data.id + '.jpg' }"/>
+                                <img style="width:155px;position:absolute;top:0;left:0;" src="images/captopmask.png"/>
+                                <!-- ko if: $data.factionId -->
+                                    <img style="width:27px;position:absolute;top:10px;left:64px;" data-bind="attr: { src: 'images/' + ($data.state === 'shaded' ? 'shaded' : 'unshaded') + '.png' }"/>
+                                    <img style="width:27px;position:absolute;top:10px;left:93px;" data-bind="attr: { src: 'images/faction_' + $data.factionId + '.png' }"/>
+                                <!-- /ko -->
+                                <!-- ko if: !$data.factionId -->
+                                    <img style="width:27px;position:absolute;top:10px;left:79px;" data-bind="attr: { src: 'images/' + ($data.state === 'shaded' ? 'shaded' : 'unshaded') + '.png' }"/>
+                                <!-- /ko -->
+                            </div>
                         </li>
                         <!-- /ko -->
                     </ul>
