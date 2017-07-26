@@ -25,6 +25,7 @@ class BelgaeBattle {
         }
 
         const battles = modifiers.context.battles || this.getBattleList(state, modifiers);
+
         if (battles.length === 0) {
             return false;
         }
@@ -71,12 +72,13 @@ class BelgaeBattle {
         const belgae = state.belgae;
         console.log('*** Are there any effective Belgae Battles? ***');
 
-        const importantBattleRegions = this.findImportantBattleRegions(state, modifiers);
+        let importantBattleRegions = _.filter(this.findImportantBattleRegions(state, modifiers), battle=> _.indexOf(modifiers.allowedRegions, battle.region.id) >= 0);
         if (importantBattleRegions.length === 0) {
             return [];
         }
 
-        const battlegrounds = this.findBattlegrounds(state, modifiers, importantBattleRegions);
+        let battlegrounds =  _.filter(this.findBattlegrounds(state, modifiers, importantBattleRegions), battle=> _.indexOf(modifiers.allowedRegions, battle.region.id) >= 0);
+
         const prioritizedBattles = this.prioritizeBattles(state, battlegrounds);
 
         if (prioritizedBattles.length === 0 || this.isAmbiorixInDangerWithoutBattle(state, importantBattleRegions, battlegrounds)) {

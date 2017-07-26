@@ -56,7 +56,7 @@ class BelgaeRaid {
     }
 
     static getEffectiveRaidRegions(state, modifiers) {
-        const raidResults = Raid.test(state, {factionId: FactionIDs.BELGAE});
+        const raidResults = _.filter(Raid.test(state, {factionId: FactionIDs.BELGAE}), raid=> _.indexOf(modifiers.allowedRegions, raid.region.id) >= 0);
         const hasBaggageTrain = state.hasShadedCapability(CapabilityIDs.BAGGAGE_TRAINS, FactionIDs.BELGAE);
 
         _.each(

@@ -250,6 +250,14 @@ class RomanBot extends Bot {
         });
     }
 
+    takePompeyLosses(state) {
+        throw Error('Need to implement');
+    }
+
+    takeGalliaTogataLosses(state) {
+        throw Error('Need to implement');
+    }
+
 }
 
 export default RomanBot;

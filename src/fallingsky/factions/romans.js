@@ -6,7 +6,7 @@ import FactionIDs from '../config/factionIds';
 import Auxilia from '../pieces/auxilia';
 import PlaceAuxilia from 'fallingsky/actions/placeAuxilia';
 import PlaceLegions from 'fallingsky/actions/placeLegions';
-import ReturnFallenLegions from 'fallingsky/actions/returnFallenLegions';
+import ReturnLegions from 'fallingsky/actions/returnLegions';
 import Fort from '../pieces/fort';
 import Legion from '../pieces/legion';
 import {SenateApprovalStates, SenateApprovalStateNames} from 'fallingsky/config/senateApprovalStates';
@@ -132,6 +132,10 @@ class Romans extends FallingSkyFaction {
         if (state === SenateApprovalStates.ADULATION) {
             this.adulationLegions.push.apply(this.adulationLegions, legions);
         }
+    }
+
+    numLegionsInTrack() {
+        return this.uproarLegions().length + this.intrigueLegions().length + this.adulationLegions().length;
     }
 
     hasAvailableLegions(count) {
@@ -277,7 +281,7 @@ class Romans extends FallingSkyFaction {
         const returning = numFallenLegions - numRemaining;
 
         if(returning > 0) {
-            ReturnFallenLegions.execute(state, {count: returning});
+            ReturnLegions.execute(state, {count: returning});
         }
     }
 

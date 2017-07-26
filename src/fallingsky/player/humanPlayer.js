@@ -9,6 +9,8 @@ import GermanicHorseDeclaration from 'fallingsky/interactions/germanicHorseDecla
 import Harassment from 'fallingsky/interactions/harassment';
 import Losses from 'fallingsky/interactions/losses';
 import Retreat from 'fallingsky/interactions/retreat';
+import Pompey from 'fallingsky/interactions/pompey';
+import GalliaTogata from 'fallingsky/interactions/galliaTogata';
 import {CapabilityIDs} from 'fallingsky/config/capabilities';
 
 class HumanPlayer extends FallingSkyPlayer {
@@ -98,6 +100,18 @@ class HumanPlayer extends FallingSkyPlayer {
                            regionId: battleResults.region.id,
                            losses: attackResults.losses
                        }));
+    }
+
+    takePompeyLosses(state) {
+        throw new PlayerInteractionNeededError(
+            'Please remove 2 Legions to the Legions track ', new Pompey({}));
+
+    }
+
+    takeGalliaTogataLosses(state) {
+        throw new PlayerInteractionNeededError(
+            'Please remove 1 Legions to the Legions track and 2 Auxilia to Available', new GalliaTogata({}));
+
     }
 }
 

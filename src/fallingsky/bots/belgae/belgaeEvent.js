@@ -1,7 +1,13 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 
+import Event1 from './events/event1';
+import Event3 from './events/event3';
+import Event5 from './events/event5';
+import Event6 from './events/event6';
+import Event7 from './events/event7';
 import Event8 from './events/event8';
+import Event9 from './events/event9';
 import Event12 from './events/event12';
 import Event13 from './events/event13';
 import Event15 from './events/event15';
@@ -19,7 +25,13 @@ const WinningArverniOrBotRomans = [7, 1, 5, 33, 3, 24];
 const BotRomans = [40, 13, 15, 12];
 
 const EventHandlers = {
+    1: Event1,
+    3: Event3,
+    5: Event5,
+    6: Event6,
+    7: Event7,
     8: Event8,
+    9: Event9,
     12: Event12,
     13: Event13,
     15: Event15,

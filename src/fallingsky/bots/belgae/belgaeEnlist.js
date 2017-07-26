@@ -12,7 +12,7 @@ import BelgaeGermanicRaid from './belgaeGermanicRaid';
 class BelgaeEnlist {
 
     static enlist(state, modifiers) {
-        const enlistResults = Enlist.test(state);
+        const enlistResults = _.filter(Enlist.test(state), enlist=> _.indexOf(modifiers.allowedRegions, enlist.region.id) >= 0);
         let effective = false;
 
         state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.ENLIST);

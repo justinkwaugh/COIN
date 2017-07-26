@@ -12,6 +12,7 @@ class SequenceOfPlay {
         this.ineligibleFactions = ko.observableArray();
         this.passedFactions = ko.observableArray();
         this.forcedEligibleFactionIds = ko.observableArray();
+        this.forcedIneligibleFactionIds = ko.observableArray();
         this.currentSequenceForCard = ko.observable(new SequenceForCard({ eligible: _.clone(this.eligibleFactions())}));
         this.state = state;
 
@@ -58,7 +59,9 @@ class SequenceOfPlay {
         });
         this.passedFactions([]);
         _.each(this.ineligibleFactions(), (factionId) => {
-            this.eligibleFactions.push(factionId);
+            if(_.indexOf(this.forcedIneligibleFactionIds(), factionId) < 0) {
+                this.eligibleFactions.push(factionId);
+            }
         });
 
         const newlyIneligible = [];
@@ -90,6 +93,7 @@ class SequenceOfPlay {
         this.firstActionChosen(null);
         this.secondActionChosen(null);
         this.forcedEligibleFactionIds([]);
+        this.forcedIneligibleFactionIds([]);
     }
 
     resetEligibility() {
@@ -129,6 +133,16 @@ class SequenceOfPlay {
 
     remainEligible(factionId) {
         this.forcedEligibleFactionIds.push(factionId);
+    }
+
+    ineligibleThroughNext(factionId) {
+        if(this.eligibleFactions.remove(factionId)) {
+            this.ineligibleFactions.push(factionId);
+        }
+        if(this.passedFactions.remove(factionId)) {
+            this.ineligibleFactions.push(factionId);
+        }
+        this.forcedIneligibleFactionIds.push(factionId);
     }
 
     canUndo() {

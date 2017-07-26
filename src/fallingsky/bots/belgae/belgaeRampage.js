@@ -22,8 +22,9 @@ class BelgaeRampage {
     }
 
     static getPrioritizedRampages(state, modifiers) {
+        const rampageResults = _.filter(Rampage.test(state), rampage=> _.indexOf(modifiers.allowedRegions, rampage.region.id) >= 0);
         const rampages = _.each(
-            Rampage.test(state), (possibleRampage) => {
+            rampageResults, (possibleRampage) => {
                 const [chosenFaction, factionData] = _(possibleRampage.enemyFactions).map(
                     factionId => [factionId, this.getRampageFactionData( state, modifiers, possibleRampage.region, factionId)]).sortBy(
                     pair => pair[1].priority).first();
