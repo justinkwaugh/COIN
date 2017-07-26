@@ -47,11 +47,14 @@ class ScoutPieces extends Action {
             console.log('Removed scouted from  ' + totalNumScouted + 'x ' + faction.name + ' warbands in ' + region.name);
         });
 
-        const piecesToHide = _.take(scoutedPieces, this.numScoutedFromHidden);
-        _.each(scoutedPieces, (piece) => {
-            piece.revealed(false);
-            console.log('Hiding (as part of scout undo)  ' + this.numScoutedFromHidden + 'x ' + faction.name + ' warbands in ' + region.name);
-        });
+        if(this.numScoutedFromHidden > 0 ) {
+            const piecesToHide = _.take(scoutedPieces, this.numScoutedFromHidden);
+            _.each(piecesToHide, (piece) => {
+                piece.revealed(false);
+                console.log(
+                    'Hiding (as part of scout undo)  ' + this.numScoutedFromHidden + 'x ' + faction.name + ' warbands in ' + region.name);
+            });
+        }
 
     }
 
