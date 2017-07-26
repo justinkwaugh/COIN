@@ -1,11 +1,35 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 
+import Event8 from './events/event8';
+import Event12 from './events/event12';
+import Event13 from './events/event13';
+import Event15 from './events/event15';
+import Event27 from './events/event27';
+import Event30 from './events/event30';
+import Event38 from './events/event38';
+import Event43 from './events/event43';
+import Event55 from './events/event55';
+import Event59 from './events/event59';
+import Event63 from './events/event63';
 
-const NoEvents = [25,52,10,37,47,4,53,32,17,26,54,20,39,69,21];
-const CapabilityEvents = [8,10,12,13,15,25,27,30,38,39,43,55,59,63];
+const NoEvents = [25, 52, 10, 37, 47, 4, 53, 32, 17, 26, 54, 20, 39, 69, 21];
+const CapabilityEvents = [8, 12, 13, 15, 27, 30, 38, 43, 55, 59, 63];
+const WinningArverniOrBotRomans = [7, 1, 5, 33, 3, 24];
+const BotRomans = [40, 13, 15, 12];
+
 const EventHandlers = {
-
+    8: Event8,
+    12: Event12,
+    13: Event13,
+    15: Event15,
+    27: Event27,
+    30: Event30,
+    38: Event38,
+    43: Event43,
+    55: Event55,
+    59: Event59,
+    63: Event63
 };
 
 class BelgaeEvent {
@@ -18,7 +42,20 @@ class BelgaeEvent {
         }
 
         console.log('*** Is Capability in final year? ***');
-        if(state.isLastYear() && _.indexOf(CapabilityEvents, currentCard.id) >= 0) {
+        if (state.isLastYear() && _.indexOf(CapabilityEvents, currentCard.id) >= 0) {
+            return false;
+        }
+
+        console.log('*** Are Romans a bot? ***');
+        const player = state.playersByFaction[FactionIDs.ROMANS];
+        if (player.isNonPlayer && _.indexOf(BotRomans, currentCard.id) >= 0 || _.indexOf(WinningArverniOrBotRomans,
+                                                                                         currentCard.id) >= 0) {
+            return false;
+        }
+
+        console.log('*** Are Arverni Winning? ***');
+        const arverni = state.factionsById[FactionIDs.ARVERNI];
+        if (arverni.victoryMargin(state) > 0 && _.indexOf(WinningArverniOrBotRomans, currentCard.id) >= 0) {
             return false;
         }
 
@@ -29,7 +66,7 @@ class BelgaeEvent {
 
         state.turnHistory.getCurrentTurn().startEvent(currentCard.id);
         const handled = eventHandler.handleEvent(state);
-        if(!handled) {
+        if (!handled) {
             state.turnHistory.getCurrentTurn().rollbackEvent();
         }
         else {

@@ -3,15 +3,15 @@ import Capability from '../../../../common/capability';
 import {CapabilityIDs, CapabilityStates} from '../../../config/capabilities';
 import AddCapability from '../../../actions/addCapability';
 
-class Event55 {
+class Event59 {
     static handleEvent(state) {
         AddCapability.execute(state,
             {
-                id: CapabilityIDs.COMMIUS,
+                id: CapabilityIDs.GERMANIC_HORSE,
                 state: CapabilityStates.UNSHADED
             });
         return true;
     }
 }
 
-export default Event55
+export default Event59

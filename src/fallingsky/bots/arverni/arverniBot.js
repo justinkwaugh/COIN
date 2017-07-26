@@ -85,11 +85,11 @@ class ArverniBot extends Bot {
 
         commandAction = commandAction || FactionActions.PASS;
 
-        if (commandAction === FactionActions.PASS) {
-            Pass.execute(state, {factionId: FactionIDs.ARVERNI});
-        }
+        if (!modifiers.outOfSequence) {
+            if (commandAction === FactionActions.PASS) {
+                Pass.execute(state, {factionId: FactionIDs.ARVERNI});
+            }
 
-        if(!modifiers.outOfSequence) {
             state.sequenceOfPlay.recordFactionAction(FactionIDs.ARVERNI, commandAction);
         }
         return commandAction;
@@ -157,7 +157,7 @@ class ArverniBot extends Bot {
                             const numToMove = controlMargin < 1 ? numWarbands - 1 : Math.min(numWarbands - 1,
                                                                                              controlMargin - 1);
 
-                            if(numToMove <= 0) {
+                            if (numToMove <= 0) {
                                 return;
                             }
 
@@ -174,7 +174,7 @@ class ArverniBot extends Bot {
                     const leaderRegionNumToMove = leaderRegionControlMargin < 1 ? numLeaderRegionWarbands - 1 : Math.min(
                         numLeaderRegionWarbands - 1, leaderRegionControlMargin - 2);
 
-                    if(leaderRegionNumToMove > 0) {
+                    if (leaderRegionNumToMove > 0) {
                         nonDevastatedMove = {
                             region: leaderRegion,
                             numToMove: leaderRegionNumToMove,
@@ -211,55 +211,57 @@ class ArverniBot extends Bot {
 
         _.each(devastatedMoveRegions, moveRegion => {
             let destRegionId = null;
-            if(massTarget && _.find(moveRegion.targets, target=> target.id === massTarget.region.id)) {
+            if (massTarget && _.find(moveRegion.targets, target => target.id === massTarget.region.id)) {
                 destRegionId = massTarget.region.id;
             }
-            else if(moveRegion.targets.length > 0) {
-                if(massTarget) {
-                    destRegionId = _(moveRegion.targets).shuffle().sortBy(target=> Map.measureDistanceToRegion(state,moveRegion.region.id, target.id)).first().id;
+            else if (moveRegion.targets.length > 0) {
+                if (massTarget) {
+                    destRegionId = _(moveRegion.targets).shuffle().sortBy(
+                        target => Map.measureDistanceToRegion(state, moveRegion.region.id, target.id)).first().id;
                 }
                 else {
                     destRegionId = _.sample(moveRegion.targets).id;
                 }
             }
 
-            if(!destRegionId) {
+            if (!destRegionId) {
                 return;
             }
 
             const pieces = moveRegion.region.getMobilePiecesForFaction(this.factionId);
             MovePieces.execute(state, {
-                        sourceRegionId: moveRegion.region.id,
-                        destRegionId: destRegionId,
-                        pieces: pieces
-                    });
+                sourceRegionId: moveRegion.region.id,
+                destRegionId: destRegionId,
+                pieces: pieces
+            });
         });
 
-        if(massTarget && massTarget.nonDevastatedMove) {
+        if (massTarget && massTarget.nonDevastatedMove) {
             const warbands = massTarget.nonDevastatedMove.region.getWarbandsOrAuxiliaForFaction(this.factionId);
             const leader = massTarget.nonDevastatedMove.region.getLeaderForFaction(this.factionId);
             const pieces = leader ? _.concat(warbands, [leader]) : warbands;
             MovePieces.execute(state, {
-                        sourceRegionId: massTarget.nonDevastatedMove.region.id,
-                        destRegionId: massTarget.region.id,
-                        pieces: pieces
-                    });
+                sourceRegionId: massTarget.nonDevastatedMove.region.id,
+                destRegionId: massTarget.region.id,
+                pieces: pieces
+            });
         }
 
-        _.each(state.region, region=> {
-            if(!region.devastated()) {
+        _.each(state.region, region => {
+            if (!region.devastated()) {
                 return;
             }
 
-            const piecesToRemove = _.filter(region.getWarbandsOrAuxiliaForFaction(this.factionId), warband => _.random(1,6) < 4);
+            const piecesToRemove = _.filter(region.getWarbandsOrAuxiliaForFaction(this.factionId),
+                                            warband => _.random(1, 6) < 4);
 
             if (piecesToRemove.length > 0) {
-                    RemovePieces.execute(state, {
-                        factionId: this.factionId,
-                        regionId: region.id,
-                        pieces: piecesToRemove
-                    });
-                }
+                RemovePieces.execute(state, {
+                    factionId: this.factionId,
+                    regionId: region.id,
+                    pieces: piecesToRemove
+                });
+            }
 
         });
 
@@ -268,7 +270,9 @@ class ArverniBot extends Bot {
     getValidQuartersTargetsForRegion(state, region) {
         return _(region.adjacent).reject((adjacentRegion) => {
             return adjacentRegion.devastated() || !adjacentRegion.controllingFactionId() || adjacentRegion.controllingFactionId() === FactionIDs.GERMANIC_TRIBES;
-        }).filter(adjacentRegion=> adjacentRegion.controllingFactionId() === this.factionId || state.playersByFaction[adjacentRegion.controllingFactionId()].willAgreeToQuarters(state,this.factionId)).value();
+        }).filter(
+            adjacentRegion => adjacentRegion.controllingFactionId() === this.factionId || state.playersByFaction[adjacentRegion.controllingFactionId()].willAgreeToQuarters(
+                state, this.factionId)).value();
     }
 
     findLeaderRegion(state) {

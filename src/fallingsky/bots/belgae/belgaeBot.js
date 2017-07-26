@@ -13,14 +13,14 @@ import RemovePieces from 'fallingsky/actions/removePieces';
 import Map from 'fallingsky/util/map';
 
 const Checkpoints = {
-    BATTLE_CHECK : 'battle',
-    THREAT_MARCH_CHECK : 'threat-march',
+    BATTLE_CHECK: 'battle',
+    THREAT_MARCH_CHECK: 'threat-march',
     PASS_CHECK: 'pass',
-    EVENT_CHECK : 'event',
-    RALLY_CHECK : 'rally',
-    CONTROL_MARCH_CHECK : 'control-march',
-    FIRST_RAID_CHECK : 'first-raid',
-    SECOND_RAID_CHECK : 'second-raid'
+    EVENT_CHECK: 'event',
+    RALLY_CHECK: 'rally',
+    CONTROL_MARCH_CHECK: 'control-march',
+    FIRST_RAID_CHECK: 'first-raid',
+    SECOND_RAID_CHECK: 'second-raid'
 };
 
 class BelgaeBot extends Bot {
@@ -38,48 +38,57 @@ class BelgaeBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.BATTLE_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.THREAT_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH) && modifiers.context.tryThreatMarch) {
+        if (!turn.getCheckpoint(Checkpoints.THREAT_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(
+                CommandIDs.MARCH) && modifiers.context.tryThreatMarch) {
             commandAction = BelgaeMarch.march(state, modifiers);
         }
         turn.markCheckpoint(Checkpoints.THREAT_MARCH_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.PASS_CHECK) && !commandAction && this.shouldPassForNextCard(state)) {
+        if (!turn.getCheckpoint(
+                Checkpoints.PASS_CHECK) && !commandAction && !modifiers.outOfSequence && this.shouldPassForNextCard(
+                state)) {
             commandAction = FactionActions.PASS;
         }
         turn.markCheckpoint(Checkpoints.PASS_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && !modifiers.noEvent && this.canPlayEvent(state) && BelgaeEvent.handleEvent(state)) {
+        if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && !modifiers.noEvent && this.canPlayEvent(
+                state) && BelgaeEvent.handleEvent(state)) {
             commandAction = FactionActions.EVENT;
         }
         turn.markCheckpoint(Checkpoints.EVENT_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.RALLY_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.RALLY)) {
+        if (!turn.getCheckpoint(Checkpoints.RALLY_CHECK) && !commandAction && modifiers.isCommandAllowed(
+                CommandIDs.RALLY)) {
             commandAction = BelgaeRally.rally(state, modifiers);
         }
         turn.markCheckpoint(Checkpoints.RALLY_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.FIRST_RAID_CHECK) && !commandAction && state.belgae.resources() < 4 && modifiers.isCommandAllowed(CommandIDs.RAID)) {
+        if (!turn.getCheckpoint(
+                Checkpoints.FIRST_RAID_CHECK) && !commandAction && state.belgae.resources() < 4 && modifiers.isCommandAllowed(
+                CommandIDs.RAID)) {
             commandAction = BelgaeRaid.raid(state, modifiers) || FactionActions.PASS;
         }
         turn.markCheckpoint(Checkpoints.FIRST_RAID_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.CONTROL_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.MARCH)) {
+        if (!turn.getCheckpoint(Checkpoints.CONTROL_MARCH_CHECK) && !commandAction && modifiers.isCommandAllowed(
+                CommandIDs.MARCH)) {
             commandAction = BelgaeMarch.march(state, modifiers);
         }
         turn.markCheckpoint(Checkpoints.CONTROL_MARCH_CHECK);
 
-        if(!turn.getCheckpoint(Checkpoints.SECOND_RAID_CHECK) && !commandAction && modifiers.isCommandAllowed(CommandIDs.RAID)) {
+        if (!turn.getCheckpoint(Checkpoints.SECOND_RAID_CHECK) && !commandAction && modifiers.isCommandAllowed(
+                CommandIDs.RAID)) {
             commandAction = BelgaeRaid.raid(state, modifiers);
         }
         turn.markCheckpoint(Checkpoints.SECOND_RAID_CHECK);
 
         commandAction = commandAction || FactionActions.PASS;
 
-        if (commandAction === FactionActions.PASS) {
-            Pass.execute(state, {factionId: FactionIDs.BELGAE});
-        }
+        if (!modifiers.outOfSequence) {
+            if (commandAction === FactionActions.PASS) {
+                Pass.execute(state, {factionId: FactionIDs.BELGAE});
+            }
 
-        if(!modifiers.outOfSequence) {
             state.sequenceOfPlay.recordFactionAction(FactionIDs.BELGAE, commandAction);
         }
         return commandAction;
@@ -156,7 +165,7 @@ class BelgaeBot extends Bot {
                             const numToMove = controlMargin < 1 ? numWarbands - 1 : Math.min(numWarbands - 1,
                                                                                              controlMargin - 1);
 
-                            if(numToMove <= 0) {
+                            if (numToMove <= 0) {
                                 return;
                             }
 
@@ -173,7 +182,7 @@ class BelgaeBot extends Bot {
                     const leaderRegionNumToMove = leaderRegionControlMargin < 1 ? numLeaderRegionWarbands - 1 : Math.min(
                         numLeaderRegionWarbands - 1, leaderRegionControlMargin - 2);
 
-                    if(leaderRegionNumToMove > 0) {
+                    if (leaderRegionNumToMove > 0) {
                         nonDevastatedMove = {
                             region: leaderRegion,
                             numToMove: leaderRegionNumToMove,
@@ -210,55 +219,57 @@ class BelgaeBot extends Bot {
 
         _.each(devastatedMoveRegions, moveRegion => {
             let destRegionId = null;
-            if(massTarget && _.find(moveRegion.targets, target=> target.id === massTarget.region.id)) {
+            if (massTarget && _.find(moveRegion.targets, target => target.id === massTarget.region.id)) {
                 destRegionId = massTarget.region.id;
             }
-            else if(moveRegion.targets.length > 0) {
-                if(massTarget) {
-                    destRegionId = _(moveRegion.targets).shuffle().sortBy(target=> Map.measureDistanceToRegion(state,moveRegion.region.id, target.id)).first().id;
+            else if (moveRegion.targets.length > 0) {
+                if (massTarget) {
+                    destRegionId = _(moveRegion.targets).shuffle().sortBy(
+                        target => Map.measureDistanceToRegion(state, moveRegion.region.id, target.id)).first().id;
                 }
                 else {
                     destRegionId = _.sample(moveRegion.targets).id;
                 }
             }
 
-            if(!destRegionId) {
+            if (!destRegionId) {
                 return;
             }
 
             const pieces = moveRegion.region.getMobilePiecesForFaction(this.factionId);
             MovePieces.execute(state, {
-                        sourceRegionId: moveRegion.region.id,
-                        destRegionId: destRegionId,
-                        pieces: pieces
-                    });
+                sourceRegionId: moveRegion.region.id,
+                destRegionId: destRegionId,
+                pieces: pieces
+            });
         });
 
-        if(massTarget && massTarget.nonDevastatedMove) {
+        if (massTarget && massTarget.nonDevastatedMove) {
             const warbands = massTarget.nonDevastatedMove.region.getWarbandsOrAuxiliaForFaction(this.factionId);
             const leader = massTarget.nonDevastatedMove.region.getLeaderForFaction(this.factionId);
             const pieces = leader ? _.concat(warbands, [leader]) : warbands;
             MovePieces.execute(state, {
-                        sourceRegionId: massTarget.nonDevastatedMove.region.id,
-                        destRegionId: massTarget.region.id,
-                        pieces: pieces
-                    });
+                sourceRegionId: massTarget.nonDevastatedMove.region.id,
+                destRegionId: massTarget.region.id,
+                pieces: pieces
+            });
         }
 
-        _.each(state.region, region=> {
-            if(!region.devastated()) {
+        _.each(state.region, region => {
+            if (!region.devastated()) {
                 return;
             }
 
-            const piecesToRemove = _.filter(region.getWarbandsOrAuxiliaForFaction(this.factionId), warband => _.random(1,6) < 4);
+            const piecesToRemove = _.filter(region.getWarbandsOrAuxiliaForFaction(this.factionId),
+                                            warband => _.random(1, 6) < 4);
 
             if (piecesToRemove.length > 0) {
-                    RemovePieces.execute(state, {
-                        factionId: this.factionId,
-                        regionId: region.id,
-                        pieces: piecesToRemove
-                    });
-                }
+                RemovePieces.execute(state, {
+                    factionId: this.factionId,
+                    regionId: region.id,
+                    pieces: piecesToRemove
+                });
+            }
 
         });
 
@@ -267,7 +278,9 @@ class BelgaeBot extends Bot {
     getValidQuartersTargetsForRegion(state, region) {
         return _(region.adjacent).reject((adjacentRegion) => {
             return adjacentRegion.devastated() || !adjacentRegion.controllingFactionId() || adjacentRegion.controllingFactionId() === FactionIDs.GERMANIC_TRIBES;
-        }).filter(adjacentRegion=> adjacentRegion.controllingFactionId() === this.factionId || state.playersByFaction[adjacentRegion.controllingFactionId()].willAgreeToQuarters(state,this.factionId)).value();
+        }).filter(
+            adjacentRegion => adjacentRegion.controllingFactionId() === this.factionId || state.playersByFaction[adjacentRegion.controllingFactionId()].willAgreeToQuarters(
+                state, this.factionId)).value();
     }
 
     findLeaderRegion(state) {

@@ -13,8 +13,11 @@ import Event25 from './events/event25';
 import Event26 from './events/event26';
 import Event27 from './events/event27';
 import Event28 from './events/event28';
+import Event30 from './events/event30';
 import Event35 from './events/event35';
 import Event36 from './events/event36';
+import Event38 from './events/event38';
+import Event39 from './events/event39';
 import Event40 from './events/event40';
 import Event41 from './events/event41';
 import Event42 from './events/event42';
@@ -27,6 +30,8 @@ import Event51 from './events/event51';
 import Event52 from './events/event52';
 import Event55 from './events/event55';
 import Event56 from './events/event56';
+import Event59 from './events/event59';
+import Event63 from './events/event63';
 
 const NoEvents = [58, 47, 1, 53, 32, 17, 72, 54, 20, 23, 69, 29];
 const CapabilityEvents = [8,10,12,13,15,25,27,30,38,39,43,55,59,63];
@@ -45,8 +50,11 @@ const EventHandlers = {
     26: Event26,
     27: Event27,
     28: Event28,
+    30: Event30,
     35: Event35,
     36: Event36,
+    38: Event38,
+    39: Event39,
     40: Event40,
     41: Event41,
     42: Event42,
@@ -58,7 +66,9 @@ const EventHandlers = {
     51: Event51,
     52: Event52,
     55: Event55,
-    56: Event56
+    56: Event56,
+    59: Event59,
+    63: Event63
 };
 
 class AeduiEvent {

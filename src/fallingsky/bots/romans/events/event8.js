@@ -3,15 +3,16 @@ import Capability from '../../../../common/capability';
 import {CapabilityIDs, CapabilityStates} from '../../../config/capabilities';
 import AddCapability from '../../../actions/addCapability';
 
-class Event55 {
+class Event8 {
     static handleEvent(state) {
         AddCapability.execute(state,
             {
-                id: CapabilityIDs.COMMIUS,
-                state: CapabilityStates.UNSHADED
+                id: CapabilityIDs.BAGGAGE_TRAINS,
+                state: CapabilityStates.UNSHADED,
+                factionId: FactionIDs.ROMANS
             });
         return true;
     }
 }
 
-export default Event55
+export default Event8

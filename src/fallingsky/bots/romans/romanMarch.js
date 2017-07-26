@@ -106,7 +106,7 @@ class RomanMarch {
     }
 
     static getAffordableMarches(state, modifiers, allMarches) {
-        return modifiers.free || state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS) ? allMarches : _.reduce(allMarches, (accumulator, march) => {
+        return modifiers.free || state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS, FactionIDs.ROMANS) ? allMarches : _.reduce(allMarches, (accumulator, march) => {
             if (accumulator.resourcesRemaining >= march.cost) {
                 accumulator.resourcesRemaining -= march.cost;
                 accumulator.marches.push(march);
@@ -461,7 +461,7 @@ class RomanMarch {
             return sum + data.march.cost;
         }, 0);
 
-        if (!modifiers.free  && !state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS) && state.romans.resources() < cost) {
+        if (!modifiers.free  && !state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS, FactionIDs.ROMANS) && state.romans.resources() < cost) {
             return [];
         }
 
@@ -502,7 +502,7 @@ class RomanMarch {
             march.cost = marchResult.march.cost;
         });
 
-        return modifiers.free || state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS)? marches : _.reduce(marches, (accumulator, march) => {
+        return modifiers.free || state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS, FactionIDs.ROMANS)? marches : _.reduce(marches, (accumulator, march) => {
             if (accumulator.resourcesRemaining >= march.cost) {
                 accumulator.resourcesRemaining -= march.cost;
                 accumulator.marches.push(march);
@@ -689,11 +689,11 @@ class RomanMarch {
 
         if (!alreadyMarchedById[march.region.id]) {
             alreadyMarchedById[march.region.id] = true;
-            if (romans.resources() < march.cost && !modifiers.free && !state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS)) {
+            if (romans.resources() < march.cost && !modifiers.free && !state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS, FactionIDs.ROMANS)) {
                 return false;
             }
 
-            if (!modifiers.free && !state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS)) {
+            if (!modifiers.free && !state.hasUnshadedCapability(CapabilityIDs.BAGGAGE_TRAINS,FactionIDs.ROMANS)) {
                 RemoveResources.execute(state, {factionId: FactionIDs.ROMANS, count: march.cost});
             }
             HidePieces.execute(

@@ -1,17 +1,16 @@
-import FactionIDs from '../../../config/factionIds';
 import Capability from '../../../../common/capability';
 import {CapabilityIDs, CapabilityStates} from '../../../config/capabilities';
 import AddCapability from '../../../actions/addCapability';
 
-class Event55 {
+class Event27 {
     static handleEvent(state) {
         AddCapability.execute(state,
             {
-                id: CapabilityIDs.COMMIUS,
+                id: CapabilityIDs.VERCINGETORIXS_ELITE,
                 state: CapabilityStates.UNSHADED
             });
         return true;
     }
 }
 
-export default Event55
+export default Event27

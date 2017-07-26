@@ -66,7 +66,8 @@ class RomanBot extends Bot {
             turn.markCheckpoint(Checkpoints.SEIZE_CHECK);
         }
         else {
-            if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !commandAction && !modifiers.noEvent && this.canPlayEvent(
+            if (!turn.getCheckpoint(
+                    Checkpoints.EVENT_CHECK) && !commandAction && !modifiers.noEvent && this.canPlayEvent(
                     state) && RomanEvent.handleEvent(state)) {
                 commandAction = FactionActions.EVENT;
             }
@@ -95,11 +96,11 @@ class RomanBot extends Bot {
 
         commandAction = commandAction || FactionActions.PASS;
 
-        if (commandAction === FactionActions.PASS) {
-            Pass.execute(state, {factionId: FactionIDs.ROMANS});
-        }
+        if (!modifiers.outOfSequence) {
+            if (commandAction === FactionActions.PASS) {
+                Pass.execute(state, {factionId: FactionIDs.ROMANS});
+            }
 
-        if(!modifiers.outOfSequence) {
             state.sequenceOfPlay.recordFactionAction(FactionIDs.ROMANS, commandAction);
         }
         return commandAction;
@@ -186,7 +187,7 @@ class RomanBot extends Bot {
         });
 
         const leaderRegion = this.findLeaderRegion(state);
-        if(leaderRegion && leaderRegion.id !== RegionIDs.PROVINCIA) {
+        if (leaderRegion && leaderRegion.id !== RegionIDs.PROVINCIA) {
 
             MovePieces.execute(state, {
                 sourceRegionId: leaderRegion.id,
@@ -197,19 +198,20 @@ class RomanBot extends Bot {
 
         // Pay for those staying
         const regionsToStay = _(regionData).filter(
-            data => data.region.id !== RegionIDs.PROVINCIA && !data.hasSupply && !data.adjacentToSupply).sortBy(data=> {
+            data => data.region.id !== RegionIDs.PROVINCIA && !data.hasSupply && !data.adjacentToSupply).sortBy(
+            data => {
                 if (data.hasAlly) {
                     return 'a';
                 }
-                else if(!data.devastated) {
+                else if (!data.devastated) {
                     return 'b';
                 }
                 else {
                     return 'c';
                 }
-        }).value();
+            }).value();
 
-        _.each(regionsToStay, data=> {
+        _.each(regionsToStay, data => {
             const resourcesAvailable = state.romans.resources();
             const legions = data.region.getLegions();
             const auxilia = _.take(data.region.getWarbandsOrAuxiliaForFaction(this.factionId), data.numAuxiliaToMove);
@@ -218,20 +220,20 @@ class RomanBot extends Bot {
             const pieceCost = (data.hasAlly ? 1 : 2) * (data.devastated ? 1 : 2);
 
             const winterCampaign = !data.devastated && state.hasUnshadedCapability(CapabilityIDs.WINTER_CAMPAIGN);
-            if(winterCampaign) {
+            if (winterCampaign) {
                 return;
             }
 
             const numPiecesToPayFor = Math.min(Math.floor(resourcesAvailable / pieceCost), orderedPieces.length);
-            if(numPiecesToPayFor > 0) {
+            if (numPiecesToPayFor > 0) {
                 RemoveResources.execute(state, {
                     factionId: this.factionId,
                     count: numPiecesToPayFor * pieceCost
                 });
             }
 
-            const piecesToRemove = _(orderedPieces).drop(numPiecesToPayFor).filter(piece=> _.random(1,6) < 4).value();
-            if(piecesToRemove.length > 0) {
+            const piecesToRemove = _(orderedPieces).drop(numPiecesToPayFor).filter(piece => _.random(1, 6) < 4).value();
+            if (piecesToRemove.length > 0) {
                 RemovePieces.execute(state, {
                     factionId: this.factionId,
                     regionId: data.region.id,

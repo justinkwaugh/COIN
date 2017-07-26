@@ -36,11 +36,13 @@ class AeduiBot extends Bot {
         const turn = state.turnHistory.currentTurn;
         const modifiers = turn.getContext();
 
-        if (!turn.getCheckpoint(Checkpoints.PASS_CHECK) && this.shouldPassForNextCard(state)) {
+        if (!turn.getCheckpoint(Checkpoints.PASS_CHECK) && !modifiers.outOfSequence && this.shouldPassForNextCard(
+                state)) {
             action = FactionActions.PASS;
         }
         turn.markCheckpoint(Checkpoints.PASS_CHECK);
-        if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !action && !modifiers.noEvent && this.canPlayEvent(state) && AeduiEvent.handleEvent(state)) {
+        if (!turn.getCheckpoint(Checkpoints.EVENT_CHECK) && !action && !modifiers.noEvent && this.canPlayEvent(
+                state) && AeduiEvent.handleEvent(state)) {
             action = FactionActions.EVENT;
         }
         turn.markCheckpoint(Checkpoints.EVENT_CHECK);
@@ -49,11 +51,10 @@ class AeduiBot extends Bot {
             action = this.executeCommand(state, turn);
         }
 
-        if (action === FactionActions.PASS) {
-            Pass.execute(state, {factionId: FactionIDs.AEDUI});
-        }
-
-        if(!modifiers.outOfSequence) {
+        if (!modifiers.outOfSequence) {
+            if (action === FactionActions.PASS) {
+                Pass.execute(state, {factionId: FactionIDs.AEDUI});
+            }
             state.sequenceOfPlay.recordFactionAction(FactionIDs.AEDUI, action);
         }
         return action;

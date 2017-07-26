@@ -1,9 +1,33 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 
+import Event8 from './events/event8';
+import Event10 from './events/event10';
+import Event12 from './events/event12';
+import Event13 from './events/event13';
+import Event15 from './events/event15';
+import Event27 from './events/event27';
+import Event30 from './events/event30';
+import Event38 from './events/event38';
+import Event55 from './events/event55';
+import Event59 from './events/event59';
+import Event63 from './events/event63';
+
 const NoEvents = [47,53,43,48,35,54,28,20,39,69,29,51];
-const CapabilityEvents = [8,10,12,13,15,25,27,30,38,39,43,55,59,63];
-const EventHandlers = {};
+const CapabilityEvents = [8,10,12,13,15,27,30,38,55,59,63];
+const EventHandlers = {
+    8: Event8,
+    10: Event10,
+    12: Event12,
+    13: Event13,
+    15: Event15,
+    27: Event27,
+    30: Event30,
+    38: Event38,
+    55: Event55,
+    59: Event59,
+    63: Event63
+};
 
 class RomanEvent {
 
