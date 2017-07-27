@@ -1,6 +1,7 @@
 import Bot from '../bot';
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import CommandIDs from 'fallingsky/config/commandIds';
 import RegionIDs from '../../config/regionIds';
 import GermanicRally from './germanicRally';
 import GermanicMarch from './germanicMarch';
@@ -15,7 +16,11 @@ class GermanicBot extends Bot {
     }
 
     takeTurn(state) {
-        GermanicRally.rally(state, new TurnContext({winter: true}));
+        const turn = state.turnHistory.currentTurn;
+        const modifiers = turn.getContext();
+        if (!modifiers.isCommandAllowed(CommandIDs.RALLY)) {
+            GermanicRally.rally(state, new TurnContext({winter: true}));
+        }
         GermanicMarch.march(state, new TurnContext({winter: true}));
         GermanicRaid.raid(state, new TurnContext({winter: true}));
         GermanicBattle.battle(state, new TurnContext({winter: true}));

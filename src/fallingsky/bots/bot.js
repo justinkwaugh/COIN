@@ -34,17 +34,30 @@ class Bot extends FallingSkyPlayer {
 
     }
 
-    placeLeader(state) {
+    placeLeader(state, allowMove = false) {
         const faction = state.factionsById[this.factionId];
-        if (faction.hasAvailableLeader()) {
-            const region = _(state.regions).map((region) => {
+        const region = _(state.regions).map((region) => {
                 const pieces = region.piecesByFaction()[this.factionId] || [];
                 return {
                     region: region,
                     numPieces: pieces.length
                 }
             }).sortBy('numPieces').groupBy('numPieces').map(_.shuffle).flatten().map('region').reverse().first();
+
+        if (faction.hasAvailableLeader()) {
             PlaceLeader.execute(state, {factionId: faction.id, regionId: region.id});
+        }
+        else if(allowMove) {
+            const leaderRegion = _.find(state.regions, region=> region.getLeaderForFaction(this.factionId));
+            if(leaderRegion && leaderRegion.id !== region.id) {
+                const leader = leaderRegion.getLeaderForFaction(this.factionId);
+                MovePieces.execute(state, {
+                    factionId: this.factionId,
+                    sourceRegionId: leaderRegion.id,
+                    destRegionId: region.id,
+                    pieces: [leader]
+                });
+            }
         }
     }
 

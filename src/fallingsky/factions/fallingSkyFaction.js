@@ -93,7 +93,6 @@ class FallingSkyFaction extends Faction {
         this.availableLeader(leader);
     }
 
-
     hasAvailableWarbands(count) {
         return count <= this.availableWarbands().length;
     }
