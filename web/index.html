@@ -8,37 +8,39 @@
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <button type="button" class="btn btn-primary navbar-btn" style="margin-right:10px;"
-                    data-bind="click:start, text: game().state().currentCard() ? 'Restart' : 'Start'"></button>
-            <!-- ko if: !agreement() && !game().running() -->
-            <!-- ko if: game().state().currentCard() && !game().state().victor() -->
-            <button type="button" class="btn btn-success navbar-btn" style="margin-right:10px;"
-                    data-bind="click:nextTurn, text: game().endOfCard() ? 'Draw Card' : game().winterNext() ? 'Winter' : 'Next Faction'"></button>
-            <!-- /ko -->
-            <!-- ko if: canUndo() -->
-            <button type="button" class="btn btn-danger navbar-btn"
-                    data-bind="click:undo">Undo
-            </button>
-            <!-- /ko -->
-            <button type="button" class="btn btn-warning navbar-btn" data-bind="click:run">Run
-            </button>
-            <!-- /ko -->
 
-            <!-- ko if: game().running() -->
-            <button type="button" class="btn btn-danger navbar-btn" data-bind="click:stop">Stop
-            </button>
-            <!-- /ko -->
+        <button type="button" class="btn btn-primary navbar-btn" style="margin-right:10px;"
+                data-bind="click:start, text: game().state().currentCard() ? 'Restart' : 'Start'"></button>
+        <!-- ko if: !agreement() && !game().running() -->
+        <!-- ko if: canUndo() -->
+        <button type="button" class="btn btn-danger navbar-btn" style="margin-right:10px;"
+                data-bind="click:undo">Undo
+        </button>
+        <!-- /ko -->
+        <!-- ko if: game().state().currentCard() && !game().state().victor() -->
+        <button type="button" class="btn btn-success navbar-btn" style="margin-right:10px;"
+                data-bind="click:nextTurn, text: game().endOfCard() ? 'Draw Card' : game().winterNext() ? 'Winter' : 'Next Faction'"></button>
+        <!-- /ko -->
 
-            <!-- ko if: agreement() -->
-            <button type="button" class="btn btn-success navbar-btn" style="margin-right:10px;"
-                    data-bind="click:agree">Agree
-            </button>
-            <button type="button" class="btn btn-danger navbar-btn"
-                    data-bind="click:refuse">Refuse
-            </button>
-            <!-- /ko -->
-        </div>
+        <button type="button" class="btn btn-warning navbar-btn navbar-right" style="margin-right:0px;"
+                data-bind="click:run">Run
+        </button>
+        <!-- /ko -->
+
+        <!-- ko if: game().running() -->
+        <button type="button" class="btn btn-danger navbar-btn navbar-right" style="margin-right:0px;"
+                data-bind="click:stop">Stop
+        </button>
+        <!-- /ko -->
+
+        <!-- ko if: agreement() -->
+        <button type="button" class="btn btn-success navbar-btn" style="margin-right:10px;"
+                data-bind="click:agree">Agree
+        </button>
+        <button type="button" class="btn btn-danger navbar-btn"
+                data-bind="click:refuse">Refuse
+        </button>
+        <!-- /ko -->
     </div>
 </nav>
 <div class="container-fluid">
@@ -284,11 +286,14 @@
                                      data-bind="attr: { 'src': 'images/cards/' + $data.id + '.jpg' }"/>
                                 <img style="width:155px;position:absolute;top:0;left:0;" src="images/captopmask.png"/>
                                 <!-- ko if: $data.factionId -->
-                                    <img style="width:27px;position:absolute;top:10px;left:64px;" data-bind="attr: { src: 'images/' + ($data.state === 'shaded' ? 'shaded' : 'unshaded') + '.png' }"/>
-                                    <img style="width:27px;position:absolute;top:10px;left:93px;" data-bind="attr: { src: 'images/faction_' + $data.factionId + '.png' }"/>
+                                <img style="width:27px;position:absolute;top:10px;left:64px;"
+                                     data-bind="attr: { src: 'images/' + ($data.state === 'shaded' ? 'shaded' : 'unshaded') + '.png' }"/>
+                                <img style="width:27px;position:absolute;top:10px;left:93px;"
+                                     data-bind="attr: { src: 'images/faction_' + $data.factionId + '.png' }"/>
                                 <!-- /ko -->
                                 <!-- ko if: !$data.factionId -->
-                                    <img style="width:27px;position:absolute;top:10px;left:79px;" data-bind="attr: { src: 'images/' + ($data.state === 'shaded' ? 'shaded' : 'unshaded') + '.png' }"/>
+                                <img style="width:27px;position:absolute;top:10px;left:79px;"
+                                     data-bind="attr: { src: 'images/' + ($data.state === 'shaded' ? 'shaded' : 'unshaded') + '.png' }"/>
                                 <!-- /ko -->
                             </div>
                         </li>
