@@ -25,17 +25,22 @@ class Game {
         this.running = ko.observable(false);
 
         Events.on('turnComplete', () => {
-            if(!this.running()) {
+            if (!this.running()) {
                 return;
             }
 
-            if(this.state().victor()) {
-                this.start();
+            const gameEnd = this.state().victor();
+            if (gameEnd) {
+                _.delay(() => {
+                    this.start();
+                    this.nextTurn();
+                }, 2000);
+                return;
             }
-            else if(this.endOfCard()) {
+            else if (this.endOfCard()) {
                 this.drawCard();
             }
-            _.delay(_.bind(this.nextTurn,this), 100);
+            _.delay(_.bind(this.nextTurn, this), 100);
         })
     }
 
@@ -50,7 +55,10 @@ class Game {
 
     run() {
         this.running(true);
-        if(this.endOfCard()) {
+        if(!this.state().currentCard()) {
+            this.start();
+        }
+        if (this.endOfCard()) {
             this.drawCard();
         }
         this.nextTurn();
@@ -158,7 +166,7 @@ class Game {
         const lastCard = _.last(this.state().discard());
         const lastWasWinter = lastCard && lastCard.type === 'winter';
 
-        if(!this.state().victor()) {
+        if (!this.state().victor()) {
             this.state().sequenceOfPlay.undo();
         }
 
@@ -192,7 +200,7 @@ class Game {
     }
 
     factionsByVictory() {
-        return _(this.state().factions).reject(faction=>faction.id === FactionIDs.GERMANIC_TRIBES).sortBy(
+        return _(this.state().factions).reject(faction => faction.id === FactionIDs.GERMANIC_TRIBES).sortBy(
             (faction) => {
                 let priority = '' + (50 - faction.victoryMargin(this.state()));
                 if (this.state().playersByFaction[faction.id].isNonPlayer) {

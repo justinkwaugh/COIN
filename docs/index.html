@@ -11,7 +11,7 @@
         <div class="navbar-header">
             <button type="button" class="btn btn-primary navbar-btn" style="margin-right:10px;"
                     data-bind="click:start, text: game().state().currentCard() ? 'Restart' : 'Start'"></button>
-            <!-- ko if: !agreement() -->
+            <!-- ko if: !agreement() && !game().running() -->
             <!-- ko if: game().state().currentCard() && !game().state().victor() -->
             <button type="button" class="btn btn-success navbar-btn" style="margin-right:10px;"
                     data-bind="click:nextTurn, text: game().endOfCard() ? 'Draw Card' : game().winterNext() ? 'Winter' : 'Next Faction'"></button>
@@ -21,6 +21,13 @@
                     data-bind="click:undo">Undo
             </button>
             <!-- /ko -->
+            <button type="button" class="btn btn-warning navbar-btn" data-bind="click:run">Run
+            </button>
+            <!-- /ko -->
+
+            <!-- ko if: game().running() -->
+            <button type="button" class="btn btn-danger navbar-btn" data-bind="click:stop">Stop
+            </button>
             <!-- /ko -->
 
             <!-- ko if: agreement() -->
