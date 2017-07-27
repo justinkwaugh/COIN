@@ -8,6 +8,8 @@ class Event48 {
                 {
                     id: 'e48',
                     free: true,
+                    noEvent: true,
+                    outOfSequence: true,
                     limited: true,
                     allowLimitedSpecial: true
                 }));
