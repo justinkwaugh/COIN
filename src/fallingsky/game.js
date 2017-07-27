@@ -23,6 +23,7 @@ class Game {
         });
 
         this.running = ko.observable(false);
+        this.timerId = null;
 
         Events.on('turnComplete', () => {
             if (!this.running()) {
@@ -31,16 +32,13 @@ class Game {
 
             const gameEnd = this.state().victor();
             if (gameEnd) {
-                _.delay(() => {
+                this.timerId = _.delay(() => {
                     this.start();
                     this.nextTurn();
                 }, 2000);
                 return;
             }
-            else if (this.endOfCard()) {
-                this.drawCard();
-            }
-            _.delay(_.bind(this.nextTurn, this), 100);
+            this.timerId = _.delay(_.bind(this.nextTurn, this), 100);
         })
     }
 
@@ -58,14 +56,15 @@ class Game {
         if(!this.state().currentCard()) {
             this.start();
         }
-        if (this.endOfCard()) {
-            this.drawCard();
-        }
         this.nextTurn();
     }
 
     stop() {
         this.running(false);
+        if(this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = null;
+        }
     }
 
 
