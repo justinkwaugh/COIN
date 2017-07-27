@@ -18,7 +18,7 @@ class Event29 {
 
         const turn = state.turnHistory.currentTurn;
         turn.pushContext(new TurnContext({id: 'e29', free: true, noEvent: true, outOfSequence: true, restrictedCommands: [CommandIDs.RALLY]}));
-        state.playersByFaction[FactionIDs.germanic].takeTurn(state);
+        state.playersByFaction[FactionIDs.GERMANIC_TRIBES].takeTurn(state);
         turn.popContext();
 
         return true;

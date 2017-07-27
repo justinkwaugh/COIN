@@ -15,12 +15,12 @@ class Event19 {
     }
 
     static findLeader(state ) {
-        const faction = state.factionsById[this.factionId];
+        const faction = state.factionsById[FactionIDs.ARVERNI];
         let leader = faction.hasAvailableLeader();
         if(!leader) {
-            const leaderRegion = _.find(state.regions, region=> region.getLeaderForFaction(this.factionId));
+            const leaderRegion = _.find(state.regions, region=> region.getLeaderForFaction(FactionIDs.ARVERNI));
             if(leaderRegion) {
-                leader = leaderRegion.getLeaderForFaction(this.factionId);
+                leader = leaderRegion.getLeaderForFaction(FactionIDs.ARVERNI);
             }
         }
         return leader;

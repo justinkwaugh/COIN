@@ -20,6 +20,7 @@ class Event22 {
             };
 
         }).compact().sortBy({group: RegionGroups.BELGICA}).value();
+        debugger;
 
         if (subduedTribeData.length === 0) {
             return false;
@@ -48,7 +49,7 @@ class Event22 {
 
             if (state.belgae.availableWarbands().length > 0) {
                 const numWarbandsToPlace = Math.min(state.belgae.availableWarbands().length, alliesPlacedInRegion);
-                PlaceWarbands.execute({
+                PlaceWarbands.execute(state, {
                                           factionId: FactionIDs.BELGAE,
                                           regionId: tribeData.region.id,
                                           count: numWarbandsToPlace

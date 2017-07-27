@@ -23,7 +23,7 @@ class CommonEvent28 {
                         region.tribes, function (tribe) {
                             return tribe.isSubdued() && tribe.isCity;
                         });
-                }).compact().sampleSize(aedui.availableAlliedTribes().length).value();
+                }).compact().sampleSize(faction.availableAlliedTribes().length).value();
 
             _.each(subduedCitiesNotRomanControlled, function(city) {
                 PlaceAlliedTribe.execute(state, { factionId: factionId, regionId: city.regionId, tribeId: city.id});

@@ -81,7 +81,7 @@ class SequenceOfPlay {
                 newlyIneligible.push(this.secondFaction());
             }
         }
-        this.ineligibleFactions(newlyIneligible);
+        this.ineligibleFactions(_.union(newlyIneligible, this.forcedIneligibleFactionIds()));
         this.history.push(this.currentSequenceForCard());
         this.currentSequenceForCard(new SequenceForCard({
             eligible: _.clone(this.eligibleFactions()),
