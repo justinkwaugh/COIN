@@ -49,9 +49,19 @@ class RomanBuild {
     static getExecutableBuilds(state, modifiers) {
         const seizeRegions = modifiers.context.seizeRegions || [];
         const possibleBuilds = _.shuffle(Build.test(state));
-        const fortPlacements = this.getFortPlacements(state, possibleBuilds);
-        const allyRemovals = this.getAllyRemovals(state, possibleBuilds, fortPlacements, seizeRegions);
-        const allyPlacements = this.getAllyPlacements(state, possibleBuilds, fortPlacements, seizeRegions);
+
+        const agreementsNeeded = _(possibleBuilds).map('agreementsNeeded').flatten().uniq().value();
+        const agreements = state.playersByFaction[FactionIDs.ROMANS].getSupplyLineAgreements(state, modifiers, agreementsNeeded);
+
+        const allowedBuilds = _.filter(possibleBuilds, build=> {
+            const supplied = build.region.hasValidSupplyLine(FactionIDs.ROMANS,agreements);
+            return build.hasAlly || supplied;
+        });
+
+
+        const fortPlacements = this.getFortPlacements(state, allowedBuilds);
+        const allyRemovals = this.getAllyRemovals(state, allowedBuilds, fortPlacements, seizeRegions);
+        const allyPlacements = this.getAllyPlacements(state, allowedBuilds, fortPlacements, seizeRegions);
 
         const allBuilds = _.concat(fortPlacements, allyRemovals, allyPlacements);
 

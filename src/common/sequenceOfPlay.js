@@ -136,10 +136,10 @@ class SequenceOfPlay {
     }
 
     ineligibleThroughNext(factionId) {
-        if(this.eligibleFactions.remove(factionId)) {
+        if(this.eligibleFactions.remove(factionId).length > 0) {
             this.ineligibleFactions.push(factionId);
         }
-        if(this.passedFactions.remove(factionId)) {
+        if(this.passedFactions.remove(factionId).length > 0) {
             this.ineligibleFactions.push(factionId);
         }
         this.forcedIneligibleFactionIds.push(factionId);
