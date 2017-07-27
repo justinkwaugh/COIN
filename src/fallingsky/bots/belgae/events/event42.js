@@ -11,7 +11,7 @@ class Event42 {
             }
 
             const romanAllies = region.getAlliesForFaction(FactionIDs.ROMANS);
-            const aeduiAllies = regions.getAlliesForFaction(FactionIDs.AEDUI);
+            const aeduiAllies = region.getAlliesForFaction(FactionIDs.AEDUI);
 
             if(romanAllies.length === 0 && aeduiAllies.length === 0) {
                 return;
