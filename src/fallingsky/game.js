@@ -21,6 +21,22 @@ class Game {
         this.canUndo = ko.pureComputed(() => {
             return this.state().sequenceOfPlay.canUndo() || this.state().discard().length > 0;
         });
+
+        this.running = ko.observable(false);
+
+        Events.on('turnComplete', () => {
+            if(!this.running()) {
+                return;
+            }
+
+            if(this.state().victor()) {
+                this.start();
+            }
+            else if(this.endOfCard()) {
+                this.drawCard();
+            }
+            _.delay(_.bind(this.nextTurn,this), 100);
+        })
     }
 
     start() {
@@ -31,6 +47,19 @@ class Game {
         this.drawCard();
         this.drawCard();
     }
+
+    run() {
+        this.running(true);
+        if(this.endOfCard()) {
+            this.drawCard();
+        }
+        this.nextTurn();
+    }
+
+    stop() {
+        this.running(false);
+    }
+
 
     drawCard() {
         console.log('Drawing Card');
@@ -57,46 +86,52 @@ class Game {
     }
 
     nextTurn() {
-        if (this.endOfCard()) {
-            this.state().sequenceOfPlay.updateEligibility();
-            this.drawCard();
-            this.lastTurn(null);
-            return;
-        }
-
-        if (this.state().currentCard().type === 'winter') {
-            this.state().frost(false);
-            Winter.executeWinter(this.state());
-            if(this.state().victor()) {
-                this.lastTurn(null);
-            }
-            else {
-                this.lastTurn(this.state().turnHistory.lastTurn());
-                this.state().startYear();
-                this.drawCard();
-            }
-            return;
-        }
-
-        const nextFaction = this.state().sequenceOfPlay.nextFaction(this.state().currentCard());
-        console.log('Next Faction: ' + nextFaction);
-
-        const player = this.state().playersByFaction[nextFaction];
-        this.state().turnHistory.startTurn(nextFaction);
         try {
-            player.takeTurn(this.state(), this.state().turnHistory.currentTurn);
-            this.lastTurn(this.state().turnHistory.lastTurn());
+            if (this.endOfCard()) {
+                this.state().sequenceOfPlay.updateEligibility();
+                this.drawCard();
+                this.lastTurn(null);
+                return;
+            }
+
+            if (this.state().currentCard().type === 'winter') {
+                this.state().frost(false);
+                Winter.executeWinter(this.state());
+                if (this.state().victor()) {
+                    this.lastTurn(null);
+                }
+                else {
+                    this.lastTurn(this.state().turnHistory.lastTurn());
+                    this.state().startYear();
+                    this.drawCard();
+                }
+                return;
+            }
+
+            const nextFaction = this.state().sequenceOfPlay.nextFaction(this.state().currentCard());
+            console.log('Next Faction: ' + nextFaction);
+
+            const player = this.state().playersByFaction[nextFaction];
+            this.state().turnHistory.startTurn(nextFaction);
+            try {
+                player.takeTurn(this.state(), this.state().turnHistory.currentTurn);
+                this.lastTurn(this.state().turnHistory.lastTurn());
+            }
+            catch (err) {
+                if (err.name === 'PlayerInteractionNeededError') {
+                    Events.emit('PlayerInteractionRequested', err.interaction);
+                }
+                else {
+                    this.state().turnHistory.rollbackTurn();
+                    throw err;
+                }
+            }
         }
-        catch (err) {
-            if (err.name === 'PlayerInteractionNeededError') {
-                Events.emit('PlayerInteractionRequested', err.interaction);
-            }
-            else {
-                this.state().turnHistory.rollbackTurn();
-                throw err;
-            }
+        finally {
+            Events.emit('turnComplete', {});
         }
     }
+
 
     resumeTurn(interaction) {
         const nextFaction = this.state().sequenceOfPlay.nextFaction(this.state().currentCard());

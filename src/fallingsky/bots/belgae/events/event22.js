@@ -19,8 +19,7 @@ class Event22 {
                 group: region.group
             };
 
-        }).compact().sortBy({group: RegionGroups.BELGICA}).value();
-        debugger;
+        }).compact().sortBy({group: RegionGroups.BELGICA}).reverse().value();
 
         if (subduedTribeData.length === 0) {
             return false;

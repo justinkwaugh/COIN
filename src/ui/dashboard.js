@@ -63,6 +63,14 @@ class Dashboard {
         this.game().undo();
     }
 
+    run() {
+        this.game().run();
+    }
+
+    stop() {
+        this.game().stop();
+    }
+
     styleSuffixForFaction(factionId) {
         if(factionId === FactionIDs.ROMANS) {
             return 'danger';
