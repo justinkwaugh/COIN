@@ -11,7 +11,7 @@ class Event48 {
                     limited: true,
                     allowLimitedSpecial: true
                 }));
-        const commandAction = player.executeCommand(state, turn);
+        const commandAction = player.takeTurn(state, turn);
         turn.popContext();
         if (commandAction) {
             state.sequenceOfPlay.remainEligible(factionId);
