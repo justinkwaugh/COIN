@@ -54,6 +54,9 @@ class Romans extends FallingSkyFaction {
         this.intrigueLegions = ko.observableArray();
         this.adulationLegions = ko.observableArray();
         this.fallenLegions = ko.observableArray();
+        this.lostEagle = ko.observable();
+        this.lostEagleYear = ko.observable(-1);
+
 
         this.senateApprovalText = ko.pureComputed(() => {
             return (this.senateFirm() ? 'Firm ' : '') + SenateApprovalStateNames[this.senateApprovalState()];
@@ -62,6 +65,7 @@ class Romans extends FallingSkyFaction {
         this.offMapLegions = ko.pureComputed(
             () => {
                 return this.availableLegions().length +
+                       (this.lostEagle() ? 1: 0) +
                        this.fallenLegions().length +
                        this.adulationLegions().length +
                        this.intrigueLegions().length +
@@ -245,6 +249,9 @@ class Romans extends FallingSkyFaction {
         if (newSenateApprovalFromVictoryMargin > currentSenateApproval) {
             if (this.fallenLegions().length > 0) {
                 console.log('No change in approval due to fallen legions');
+            }
+            else if (this.lostEagleYear() === state.year()) {
+                console.log('No change in approval due to lost eagle');
             }
             else if (currentSenateApproval === SenateApprovalStates.UPROAR && this.senateFirm()) {
                 newFirm = false;

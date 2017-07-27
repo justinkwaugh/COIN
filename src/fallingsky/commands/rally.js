@@ -18,7 +18,8 @@ class Rally extends Command {
     static doTest(state, args) {
         const faction = args.faction;
         const regions = args.regions;
-        return this.generateResultsForRegions(state, faction, regions || state.regions);
+        const acco = args.acco;
+        return this.generateResultsForRegions(state, faction, regions || state.regions, acco);
     }
 
     static doExecute(state, args) {
@@ -87,7 +88,7 @@ class Rally extends Command {
         }
     }
 
-    static generateResultsForRegions(state, faction, regions) {
+    static generateResultsForRegions(state, faction, regions, acco) {
         return _(regions).map(
             function (region) {
 
@@ -106,23 +107,25 @@ class Rally extends Command {
                 const hasVercingetorix = hasLeader && isArverni;
                 const hasCaesar = hasLeader && isRomans;
 
-                if (!region.inPlay() || (region.devastated() && !hasVercingetorix)) {
+                if (!region.inPlay() || (region.devastated() && !hasVercingetorix && !acco)) {
                     return;
                 }
 
                 const isBelgaeOutsideOfBelgica = (isBelgae && region.group !== RegionGroups.BELGICA);
                 let cost = isRomans ? 2 : isGermanic ? 0 : (region.devastated() || isBelgaeOutsideOfBelgica ? 2 : 1);
 
-                if(isAedui && state.hasShadedCapability(CapabilityIDs.CONVICTOLITAVIS)) {
+                if (isAedui && state.hasShadedCapability(CapabilityIDs.CONVICTOLITAVIS)) {
                     cost *= 2;
                 }
 
-                if(isBelgae && state.hasShadedCapability(CapabilityIDs.COMMIUS)) {
+                if (isBelgae && state.hasShadedCapability(CapabilityIDs.COMMIUS)) {
                     cost = 0;
                 }
 
-                const belgaeControlFromCommius = state.hasShadedCapability(CapabilityIDs.COMMIUS) && region.getPiecesForFaction(FactionIDs.BELGAE).length > 0;
-                const romanControlFromCommius = state.hasUnshadedCapability(CapabilityIDs.COMMIUS) && region.group === RegionGroups.BELGICA;
+                const belgaeControlFromCommius = state.hasShadedCapability(
+                        CapabilityIDs.COMMIUS) && region.getPiecesForFaction(FactionIDs.BELGAE).length > 0;
+                const romanControlFromCommius = state.hasUnshadedCapability(
+                        CapabilityIDs.COMMIUS) && region.group === RegionGroups.BELGICA;
 
                 let allyAdded = false;
                 let citadelAdded = false;
@@ -134,7 +137,12 @@ class Rally extends Command {
                 }
 
                 const hasSubduedTribe = region.subduedTribesForFaction(faction.id).length > 0;
-                if (hasSubduedTribe && faction.availableAlliedTribes().length > 0 && (region.controllingFactionId() === faction.id || hasVercingetorix || hasCaesar || belgaeControlFromCommius || romanControlFromCommius)) {
+                if (hasSubduedTribe && faction.availableAlliedTribes().length > 0 && (region.controllingFactionId() === faction.id ||
+                                                                                      hasVercingetorix ||
+                                                                                      hasCaesar ||
+                                                                                      belgaeControlFromCommius ||
+                                                                                      romanControlFromCommius ||
+                                                                                      acco)) {
                     allyAdded = true;
                 }
 
@@ -151,7 +159,7 @@ class Rally extends Command {
                 }
 
                 if (isRomans) {
-                    if(state.hasUnshadedCapability(CapabilityIDs.COMMIUS)) {
+                    if (state.hasUnshadedCapability(CapabilityIDs.COMMIUS)) {
                         numWarbandsOrAuxiliaAdded += 1;
                     }
 

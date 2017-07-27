@@ -63,6 +63,7 @@ class FallingSkyGameState extends GameState {
         this.upcomingCard = ko.observable();
         this.frost = ko.observable();
 
+        this.year = ko.observable(0);
         this.yearsRemaining = ko.observable();
         this.isLastYear = ko.pureComputed(() => {
             return this.yearsRemaining() === 0;
@@ -80,11 +81,13 @@ class FallingSkyGameState extends GameState {
     }
 
     startYear() {
+        this.year(this.year+1);
         this.yearsRemaining(this.yearsRemaining() - 1);
     }
 
     undoYear() {
         this.yearsRemaining(this.yearsRemaining() + 1);
+        this.year(this.year-1);
     }
 
     cloneGameState(state) {

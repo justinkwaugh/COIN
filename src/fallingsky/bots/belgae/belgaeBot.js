@@ -82,9 +82,9 @@ class BelgaeBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.SECOND_RAID_CHECK);
 
-        commandAction = commandAction || FactionActions.PASS;
-
         if (!modifiers.outOfSequence) {
+            commandAction = commandAction || FactionActions.PASS;
+
             if (commandAction === FactionActions.PASS) {
                 Pass.execute(state, {factionId: FactionIDs.BELGAE});
             }

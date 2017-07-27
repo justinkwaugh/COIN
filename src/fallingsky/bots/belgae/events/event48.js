@@ -3,7 +3,7 @@ import CommonEvent48 from 'fallingsky/bots/events/commonEvent48';
 
 class Event48 {
     static handleEvent(state) {
-        return CommonEvent48.handleEvent(state, FactionIDs.AEDUI);
+        return CommonEvent48.handleEvent(state, FactionIDs.BELGAE);
     }
 }
 

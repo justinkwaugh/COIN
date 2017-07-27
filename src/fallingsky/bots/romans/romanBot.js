@@ -94,9 +94,9 @@ class RomanBot extends Bot {
             turn.markCheckpoint(Checkpoints.SEIZE_CHECK);
         }
 
-        commandAction = commandAction || FactionActions.PASS;
-
         if (!modifiers.outOfSequence) {
+            commandAction = commandAction || FactionActions.PASS;
+
             if (commandAction === FactionActions.PASS) {
                 Pass.execute(state, {factionId: FactionIDs.ROMANS});
             }

@@ -34,9 +34,9 @@ class Bot extends FallingSkyPlayer {
 
     }
 
-    placeLeader(state, allowMove = false) {
+    placeLeader(state, allowMove = false, regionIds = null) {
         const faction = state.factionsById[this.factionId];
-        const region = _(state.regions).map((region) => {
+        const region = _(state.regions).filter(region=> regionIds ? _.indexOf(regionIds, region.id) >= 0 : true).map((region) => {
                 const pieces = region.piecesByFaction()[this.factionId] || [];
                 return {
                     region: region,

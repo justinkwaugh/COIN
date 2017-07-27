@@ -30,7 +30,10 @@ class BelgaeRally {
     }
 
     static getCitadelRegions(state, modifiers) {
-        const rallyRegionResults = Rally.test(state, {factionId: FactionIDs.BELGAE});
+        const rallyRegionResults = Rally.test(state, {
+            factionId: FactionIDs.BELGAE,
+            acco: modifiers.context.acco
+        });
         const citadelRegions = _(rallyRegionResults).filter({canAddCitadel: true}).shuffle().value();
         _.each(citadelRegions, (regionResult) => {
             regionResult.addCitadel = true;
@@ -42,7 +45,8 @@ class BelgaeRally {
         const regions = _.filter(state.regions, region => _.indexOf(ralliedRegionIds, region.id) < 0);
         const rallyRegionResults = Rally.test(state, {
             factionId: FactionIDs.BELGAE,
-            regions: regions
+            regions: regions,
+            acco: modifiers.context.acco
         });
         const allyRegions = _(rallyRegionResults).filter({canAddAlly: true}).shuffle().value();
         _.each(allyRegions, (regionResult) => {
@@ -55,7 +59,8 @@ class BelgaeRally {
         const regions = _.filter(state.regions, region => _.indexOf(ralliedRegionIds, region.id) < 0);
         const rallyRegionResults = Rally.test(state, {
             factionId: FactionIDs.BELGAE,
-            regions: regions
+            regions: regions,
+            acco: modifiers.context.acco
         });
 
         const warbandRegions = _(rallyRegionResults).filter(result => result.canAddNumWarbands > 0).map(
@@ -73,7 +78,7 @@ class BelgaeRally {
             }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().map('regionResult').value();
 
         let warbandsRemaining = state.belgae.availableWarbands().length;
-        _.each(rallyRegionResults, (regionResult) => {
+        _.each(warbandRegions, (regionResult) => {
             regionResult.addNumWarbands = Math.min(regionResult.canAddNumWarbands, warbandsRemaining);
             warbandsRemaining -= regionResult.addNumWarbands;
             if (warbandsRemaining === 0) {
@@ -127,7 +132,13 @@ class BelgaeRally {
         ralliedRegions.push.apply(ralliedRegions, _.map(allyRegions, rallyRegion => rallyRegion.region.id));
         const warbandRegions = this.getWarbandRegions(state, modifiers, ralliedRegions);
 
-        const allRegions = _(citadelRegions).concat(allyRegions).concat(warbandRegions).filter(rallyRegion => _.indexOf(modifiers.allowedRegions, rallyRegion.region.id) >= 0).value();
+        let allRegions = _(citadelRegions).concat(allyRegions).concat(warbandRegions).filter(
+            rallyRegion => _.indexOf(modifiers.allowedRegions, rallyRegion.region.id) >= 0).value();
+
+        if(modifiers.context.acco) {
+            allRegions = _.take(allRegions, 3);
+        }
+
         const affordableRegions = modifiers.free ? allRegions : _.reduce(allRegions, (accumulator, rallyRegion) => {
             if (accumulator.resourcesRemaining >= rallyRegion.cost) {
                 accumulator.resourcesRemaining -= rallyRegion.cost;

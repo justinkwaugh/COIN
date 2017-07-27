@@ -23,9 +23,19 @@ import Event27 from './events/event27';
 import Event28 from './events/event28';
 import Event29 from './events/event29';
 import Event30 from './events/event30';
+import Event31 from './events/event31';
+import Event33 from './events/event33';
+import Event34 from './events/event34';
+import Event35 from './events/event35';
 import Event38 from './events/event38';
+import Event40 from './events/event40';
+import Event41 from './events/event41';
+import Event42 from './events/event42';
 import Event43 from './events/event43';
+import Event46 from './events/event46';
+import Event48 from './events/event48';
 import Event55 from './events/event55';
+import Event56 from './events/event56';
 import Event59 from './events/event59';
 import Event63 from './events/event63';
 
@@ -57,9 +67,19 @@ const EventHandlers = {
     28: Event28,
     29: Event29,
     30: Event30,
+    31: Event31,
+    33: Event33,
+    34: Event34,
+    35: Event35,
     38: Event38,
+    40: Event40,
+    41: Event41,
+    42: Event42,
     43: Event43,
+    46: Event46,
+    48: Event48,
     55: Event55,
+    56: Event56,
     59: Event59,
     63: Event63
 };

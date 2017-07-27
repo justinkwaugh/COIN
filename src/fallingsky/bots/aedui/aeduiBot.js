@@ -94,7 +94,9 @@ class AeduiBot extends Bot {
         }
         turn.markCheckpoint(Checkpoints.SECOND_RAID_CHECK);
 
-        commandAction = commandAction || FactionActions.PASS;
+        if (!modifiers.outOfSequence) {
+            commandAction = commandAction || FactionActions.PASS;
+        }
 
         return commandAction
     }

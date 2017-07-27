@@ -70,6 +70,7 @@ class BelgaeMarch {
                 if (!modifiers.free) {
                     RemoveResources.execute(state, {factionId: FactionIDs.BELGAE, count: march.cost});
                 }
+
                 const destination = _(solutions).map(
                     (arr) => {
                         const adjacentRegionsById = _.keyBy(march.region.adjacent, 'id');
@@ -106,6 +107,9 @@ class BelgaeMarch {
                 }
                 effective = true;
 
+                if(modifiers.limited) {
+                    return false;
+                }
             });
 
         if (!effective) {
@@ -157,7 +161,7 @@ class BelgaeMarch {
             this.doMarch(state, firstControlMarch, modifiers);
             const secondControlMarch = this.getControlMarch(state, modifiers, _.reject(marchResults,
                                                                                        march => march.region.id === firstControlMarch.region.id));
-            if (!modifiers.context.monsCevenna && secondControlMarch) {
+            if (!modifiers.limited && !modifiers.context.monsCevenna && secondControlMarch) {
                 marchedFromRegions.push(secondControlMarch.region.id);
                 marchedToRegions.push(secondControlMarch.destination.id);
                 this.doMarch(state, secondControlMarch, modifiers);
@@ -165,7 +169,7 @@ class BelgaeMarch {
             effective = true;
         }
 
-        if ((!firstControlMarch || !modifiers.context.monsCevenna) && this.doLeaderMarch(state, modifiers,
+        if ((!firstControlMarch || !modifiers.context.monsCevenna) && !modifiers.limited && this.doLeaderMarch(state, modifiers,
                                                                                          marchedFromRegions,
                                                                                          marchedToRegions)) {
             effective = true;
