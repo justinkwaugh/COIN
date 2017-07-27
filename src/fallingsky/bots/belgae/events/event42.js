@@ -23,7 +23,7 @@ class Event42 {
                     ally,
                     priority: (region.group === RegionGroups.BELGICA ? 'a' : 'b') + (ally.factionId === FactionIDs.ROMANS ? '1': '2')
                 };
-            });
+            }).value();
 
         }).compact().flatten().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().take(3).value();
 

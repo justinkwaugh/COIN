@@ -130,6 +130,7 @@ class Game {
                 }
                 else {
                     this.state().turnHistory.rollbackTurn();
+                    this.stop();
                     throw err;
                 }
             }
