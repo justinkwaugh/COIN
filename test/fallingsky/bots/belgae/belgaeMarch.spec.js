@@ -51,9 +51,11 @@ describe("Belgae March", function () {
         context.context.threatRegions = [RegionIDs.SUGAMBRI,RegionIDs.NERVII,RegionIDs.CARNUTES];
 
         const command = BelgaeMarch.march(state, turn.getContext());
+
+        // Need to make it pick something specific and do assertions
     });
 
-    it.only('wants to threat march, fewest regions is one and one', function () {
+    it('wants to threat march, fewest regions is one and one', function () {
         const sugambriRegion = state.regionsById[RegionIDs.SUGAMBRI];
         PlaceLeader.execute(state, {factionId: belgae.id, regionId: sugambriRegion.id});
         PlaceWarbands.execute(state, {factionId: belgae.id, regionId: sugambriRegion.id, count: 5});
@@ -66,5 +68,6 @@ describe("Belgae March", function () {
         context.context.threatRegions = [RegionIDs.SUGAMBRI,RegionIDs.NERVII,RegionIDs.CARNUTES];
 
         const command = BelgaeMarch.march(state, turn.getContext());
+        // Need to make it pick something specific and do assertions
     });
 });
