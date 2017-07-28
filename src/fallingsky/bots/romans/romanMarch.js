@@ -296,7 +296,7 @@ class RomanMarch {
                        if (!choiceData.canSplit && choiceData.placed) {
                            return;
                        }
-                       // Legions we know exactly how many so we can just do them.
+
                        const ordered = _([first, second]).sortBy('numAuxilia').value();
                        const target = _.first(ordered);
                        const targetDest = (first.destination.id === choiceData.firstDest.destination.id) ? choiceData.firstDest : choiceData.secondDest;
@@ -305,16 +305,19 @@ class RomanMarch {
                        // We've placed legions to the best of our ability so we go ahead and place the leader if he hasn't already gone
                        if (!first.leader && !second.leader && choiceData.data.leader) {
                            let leaderTarget;
+                           let leaderTargetDest;
                            if (first.numLegions === second.numLegions) {
                                leaderTarget = choiceData.firstDest.distance > choiceData.secondDest.distance ? first : second;
+                               leaderTargetDest = choiceData.firstDest.distance > choiceData.secondDest.distance ? choiceData.firstDest : choiceData.secondDest;
                            }
                            else {
                                leaderTarget = first.numLegions > second.numLegions ? first : second;
+                               leaderTargetDest = first.numLegions > second.numLegions ? choiceData.firstDest  : choiceData.secondDest;
                            }
                            leaderTarget.leader = choiceData.data.leader;
                            leaderTarget.piecesFromRegion[choiceData.data.march.region.id].leader = true;
-                           if (targetDest.harassmentLosses > 0 && leaderTarget.piecesFromRegion[choiceData.data.march.region.id].numAuxilia === 0) {
-                               leaderTarget.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia = targetDest.harassmentLosses;
+                           if (leaderTargetDest.harassmentLosses > 0 && leaderTarget.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia === 0) {
+                               leaderTarget.piecesFromRegion[choiceData.data.march.region.id].harassedAuxilia = leaderTargetDest.harassmentLosses;
                            }
                        }
 
