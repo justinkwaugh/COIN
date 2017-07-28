@@ -2,6 +2,10 @@ import _ from '../../lib/lodash';
 
 class Map {
 
+    static cartesianProduct(arr) {
+        return arr.reduce((a, b) => a.map(x => b.map(y => x.concat(y))).reduce((a, b) => a.concat(b), []), [[]]);
+    }
+
     static findMinimumAdjacent(regions) {
         const numRegions = regions.length;
         const regionIds = _.map(regions, 'id');
@@ -27,6 +31,11 @@ class Map {
                     return false;
                 }
             });
+
+        if(solutions.length === 0) {
+            // No combinations with larger groups worked, so cartesian product it is.
+            solutions = this.cartesianProduct(_(regions).map('adjacent').value());
+        }
         return solutions;
     }
 
