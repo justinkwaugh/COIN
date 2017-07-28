@@ -255,8 +255,8 @@ class RomanMarch {
                        const ordered = _([first, second]).sortBy('numLegions').value();
                        const target = _.first(ordered);
                        const otherTarget = _.last(ordered);
-                       const targetDest = (first.destination.id === choiceData.firstDest.destination.id) ? choiceData.firstDest : choiceData.secondDest;
-                       const otherDest = (first.destination.id === choiceData.firstDest.destination.id) ? choiceData.secondDest : choiceData.firstDest;
+                       const targetDest = (target.destination.id === choiceData.firstDest.destination.id) ? choiceData.firstDest : choiceData.secondDest;
+                       const otherDest = (target.destination.id === choiceData.firstDest.destination.id) ? choiceData.secondDest : choiceData.firstDest;
 
                        if (!choiceData.canSplit) {
                            target.numLegions += choiceData.data.numLegions;
@@ -299,7 +299,7 @@ class RomanMarch {
 
                        const ordered = _([first, second]).sortBy('numAuxilia').value();
                        const target = _.first(ordered);
-                       const targetDest = (first.destination.id === choiceData.firstDest.destination.id) ? choiceData.firstDest : choiceData.secondDest;
+                       const targetDest = (target.destination.id === choiceData.firstDest.destination.id) ? choiceData.firstDest : choiceData.secondDest;
                        const otherTarget = _.last(ordered);
 
                        // We've placed legions to the best of our ability so we go ahead and place the leader if he hasn't already gone
