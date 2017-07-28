@@ -100,12 +100,39 @@ class MovePieces extends Action {
             }).keyBy('type').value();
     }
 
+    getPieceListText(moveData) {
+        return _(moveData).map((data, type) =>{
+            if(type === 'leader') {
+                return data.data.title;
+            }
+            else if(type === 'legion') {
+                return data.data + 'x Legions';
+            }
+            else if(type === 'warband') {
+                const sum = _.reduce(data.data, (sum, count) => {
+                    return sum + count;
+                }, 0);
+                return sum + 'x Warbands (' +
+                (data.data.hidden || 0) + ' hidden, ' +
+                (data.data.revealed || 0) + ' revealed, ' +
+                (data.data.scouted || 0) + ' scouted)'
+            }
+            else if(type === 'auxilia') {
+                const sum = _.reduce(data.data, (sum, count) => {
+                    return sum + count;
+                }, 0);
+                return sum + 'x Auxilia (' +
+                (data.data.hidden || 0) + ' hidden, ' +
+                (data.data.revealed || 0) + ' revealed))'
+            }
+        }).value();
+    }
+
     instructions(state) {
         const sourceRegion = state.regionsById[this.sourceRegionId];
         const destRegion = state.regionsById[this.destRegionId];
-        const pieces = this.pieces;
-        const faction = state.factionsById[pieces[0].factionId];
-        return _.map(Logging.getPiecesList(pieces), pieceString => 'Move ' + faction.name + ' ' + pieceString + ' from ' + sourceRegion.name + ' to ' + destRegion.name);
+        const faction = state.factionsById[this.factionId];
+        return _.map(this.getPieceListText(this.moveData), pieceString => 'Move ' + faction.name + ' ' + pieceString + ' from ' + sourceRegion.name + ' to ' + destRegion.name);
     }
 }
 

@@ -17,6 +17,7 @@ class Battle extends Command {
 
         const attackingFaction = args.attackingFaction;
         const defendingFaction = args.defendingFaction;
+        const aduataca = args.aduataca;
 
         let attackingPieces = region.getPiecesForFaction(attackingFaction.id);
         if (enlistingGermans) {
@@ -24,9 +25,7 @@ class Battle extends Command {
             attackingPieces = _.concat(attackingPieces, germanicPieces);
         }
         let defendingPieces = args.defendingPieces || region.getPiecesForFaction(defendingFaction.id);
-        const canAmbush = !enlistingGermans &&
-                          this.canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces);
-
+        const canAmbush = aduataca || (!enlistingGermans && this.canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces));
 
         if(defendingFaction.id === FactionIDs.ROMANS && state.hasUnshadedCapability(CapabilityIDs.BALEARIC_SLINGERS)) {
             attackingPieces = this.simulateBalearicSlingers(state, region, attackingFaction, attackingPieces, defendingFaction);
@@ -54,7 +53,7 @@ class Battle extends Command {
 
         // No Retreat
         let noRetreatDefenderLosses = unmodifiedDefenderLosses;
-        if (this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id))) {
+        if (!aduataca && this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id))) {
             noRetreatDefenderLosses /= 2;
         }
         else if (withGermanicHorse && state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE, attackingFaction.id) && !this.defenderHasCitadelOrFort(state, defendingPieces)) {
@@ -208,7 +207,7 @@ class Battle extends Command {
             }
             // No Retreat
             let noRetreatDefenderLosses = unmodifiedDefenderLosses;
-            if (this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id))) {
+            if (!battleResults.aduataca && this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id))) {
                 noRetreatDefenderLosses /= 2;
             }
             else if (battleResults.willApplyGermanicHorse && attackingFaction.id !== FactionIDs.ROMANS && state.hasShadedCapability(

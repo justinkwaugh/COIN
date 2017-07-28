@@ -41,19 +41,16 @@ class Logging {
         let status;
         const warbands = piecesByType.warband;
         if (warbands) {
-            status = _.groupBy(warbands, function (warband) {
-                    return warband.revealed() ? 'revealed' : 'hidden';
-                });
+            status = _.groupBy(warbands, warband=> warband.status());
             list.push(warbands.length + 'x Warbands (' +
                 (status.hidden ? status.hidden.length : 0) + ' hidden, ' +
-                (status.revealed ? status.revealed.length : 0) + ' revealed)');
+                (status.revealed ? status.revealed.length : 0) + ' revealed, ' +
+                (status.scouted ? status.scouted.length : 0) + ' scouted)');
         }
 
         const auxilia = piecesByType.auxilia;
         if (auxilia) {
-            status = _.groupBy(auxilia, function (auxilia) {
-                    return auxilia.revealed() ? 'revealed' : 'hidden';
-                });
+            status = _.groupBy(auxilia, oneAuxilia => oneAuxilia.status());
             list.push(auxilia.length + 'x Auxilia (' +
                 (status.hidden ? status.hidden.length : 0) + ' hidden, ' +
                 (status.revealed ? status.revealed.length : 0) + ' revealed)');

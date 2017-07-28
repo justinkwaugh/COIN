@@ -31,6 +31,7 @@ class BattleResults {
         this.willBesiege = definition.willBesiege;
         this.willApplyGermanicHorse = definition.willApplyGermanicHorse;
         this.willApplyBalearicSlingers = definition.willApplyBalearicSlingers;
+        this.aduataca = definition.aduataca;
 
         this.paid = definition.paid;
         this.handledBalearicSlingers = definition.handledBalearicSlingers;

@@ -17,7 +17,14 @@ class Event29 {
         this.handleSuebi(state, suebiSouth, RegionIDs.UBII);
 
         const turn = state.turnHistory.currentTurn;
-        turn.pushContext(new TurnContext({id: 'e29', free: true, noEvent: true, outOfSequence: true, restrictedCommands: [CommandIDs.RALLY]}));
+        turn.pushContext(new TurnContext({
+                                             id: 'e29',
+                                             currentFactionId: FactionIDs.GERMANIC_TRIBES,
+                                             free: true,
+                                             noEvent: true,
+                                             outOfSequence: true,
+                                             restrictedCommands: [CommandIDs.RALLY]
+                                         }));
         state.playersByFaction[FactionIDs.GERMANIC_TRIBES].takeTurn(state);
         turn.popContext();
 
@@ -25,14 +32,14 @@ class Event29 {
     }
 
     static handleSuebi(state, tribe, regionId) {
-        if(tribe.isDispersed()) {
+        if (tribe.isDispersed()) {
             UndisperseTribe.execute(state, {
                 tribeId: tribe.id,
                 fully: true
             });
         }
 
-        if(tribe.isSubdued() && state.germanic.hasAvailableAlliedTribe()) {
+        if (tribe.isSubdued() && state.germanic.hasAvailableAlliedTribe()) {
             PlaceAlliedTribe.execute(state, {
                 factionId: FactionIDs.GERMANIC_TRIBES,
                 regionId,

@@ -13,6 +13,8 @@ class GermanicBattle {
         }
         const turn = state.turnHistory.getCurrentTurn();
         turn.startCommand(CommandIDs.BATTLE);
+        turn.startSpecialAbility(SpecialAbilityIDs.AMBUSH);
+        turn.commitSpecialAbility();
         _.each(effectiveBattles, (battle) => {
                 Battle.execute(
                     state, {

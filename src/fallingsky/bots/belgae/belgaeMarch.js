@@ -96,6 +96,12 @@ class BelgaeMarch {
                     }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
 
                 const piecesToMove = march.region.getMobilePiecesForFaction(FactionIDs.BELGAE);
+
+                HidePieces.execute(state, {
+                    factionId: belgae.id,
+                    regionId: march.region.id
+                });
+
                 MovePieces.execute(
                     state, {
                         sourceRegionId: march.region.id,
@@ -107,7 +113,7 @@ class BelgaeMarch {
                 }
                 effective = true;
 
-                if(modifiers.limited) {
+                if (modifiers.limited) {
                     return false;
                 }
             });
@@ -169,9 +175,10 @@ class BelgaeMarch {
             effective = true;
         }
 
-        if ((!firstControlMarch || !modifiers.context.monsCevenna) && !modifiers.limited && this.doLeaderMarch(state, modifiers,
-                                                                                         marchedFromRegions,
-                                                                                         marchedToRegions)) {
+        if ((!firstControlMarch || !modifiers.context.monsCevenna) && !modifiers.limited && this.doLeaderMarch(state,
+                                                                                                               modifiers,
+                                                                                                               marchedFromRegions,
+                                                                                                               marchedToRegions)) {
             effective = true;
         }
 
@@ -211,6 +218,11 @@ class BelgaeMarch {
         if (modifiers.context.monsCevenna) {
             modifiers.context.marchDestination = marchData.destination.id;
         }
+
+        HidePieces.execute(state, {
+            factionId: belgae.id,
+            regionId: marchData.region.id
+        });
 
         MovePieces.execute(
             state, {
@@ -274,8 +286,8 @@ class BelgaeMarch {
         let marchResults = _.filter(
             March.test(state, {factionId: FactionIDs.BELGAE}),
             marchResult => ((belgae.resources() >= marchResult.cost) ||
-                           modifiers.free ||
-                           _.indexOf(marchedFromRegions, marchResult.region.id) >= 0) &&
+                            modifiers.free ||
+                            _.indexOf(marchedFromRegions, marchResult.region.id) >= 0) &&
                            _.indexOf(modifiers.allowedRegions, marchResult.region.id) >= 0);
 
         if (modifiers.context.monsCevenna) {
@@ -339,6 +351,12 @@ class BelgaeMarch {
             if (modifiers.context.monsCevenna) {
                 modifiers.context.marchDestination = destinationData.destination.id;
             }
+
+            HidePieces.execute(state, {
+                factionId: belgae.id,
+                regionId: leaderMarch.region.id
+            });
+
             MovePieces.execute(
                 state, {
                     sourceRegionId: leaderMarch.region.id,
