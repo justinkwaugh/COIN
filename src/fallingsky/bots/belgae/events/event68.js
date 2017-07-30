@@ -35,7 +35,7 @@ class Event68 {
         const regionId = chosenTribe.id === TribeIDs.MANDUBII ? RegionIDs.MANDUBII : RegionIDs.CARNUTES;
         const region = state.regionsById[regionId];
 
-        const pieceToRemove = _.find(region.getAlliesAndCitadels(), piece => piece.tribeId === chosenTribe);
+        const pieceToRemove = _.find(region.getAlliesAndCitadels(), piece => piece.tribeId === chosenTribe.id);
 
         RemovePieces.execute(state, {
             factionId: pieceToRemove.factionId,
