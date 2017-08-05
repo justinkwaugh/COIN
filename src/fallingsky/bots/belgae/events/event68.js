@@ -37,11 +37,13 @@ class Event68 {
 
         const pieceToRemove = _.find(region.getAlliesAndCitadels(), piece => piece.tribeId === chosenTribe.id);
 
-        RemovePieces.execute(state, {
-            factionId: pieceToRemove.factionId,
-            regionId,
-            pieces: [pieceToRemove]
-        });
+        if(pieceToRemove) {
+            RemovePieces.execute(state, {
+                factionId: pieceToRemove.factionId,
+                regionId,
+                pieces: [pieceToRemove]
+            });
+        }
 
         PlaceCitadel.execute(state, {
             factionId: FactionIDs.BELGAE,
