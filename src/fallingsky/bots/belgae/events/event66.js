@@ -35,7 +35,7 @@ class Event66 {
                 return {
                     region: dest,
                     tribe: subduedTribe,
-                    numWarbands: Math.abs(margin + 1)
+                    numWarbands: Math.abs(margin) + 1
                 };
 
             }).compact().first();
