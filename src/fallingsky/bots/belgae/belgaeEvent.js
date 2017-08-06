@@ -46,6 +46,7 @@ import Event64 from './events/event64';
 import Event65 from './events/event65';
 import Event66 from './events/event66';
 import Event68 from './events/event68';
+import Event71 from './events/event71';
 
 const NoEvents = [25, 52, 10, 37, 47, 4, 53, 32, 17, 26, 54, 20, 39, 69, 21];
 const CapabilityEvents = [8, 12, 13, 15, 27, 30, 38, 43, 55, 59, 63];
@@ -97,7 +98,8 @@ const EventHandlers = {
     64: Event64,
     65: Event65,
     66: Event66,
-    68: Event68
+    68: Event68,
+    71: Event71
 };
 
 class BelgaeEvent {

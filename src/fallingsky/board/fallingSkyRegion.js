@@ -12,10 +12,10 @@ class FallingSkyRegion extends Region {
 
         // Immutable
         this.group = definition.group;
-        this.tribes = _.map(
+        this.tribes = ko.observableArray(_.map(
             definition.tribes, function (tribeId) {
                 return tribesById[tribeId];
-            });
+            }));
         this.controlValue = definition.controlValue;
         this.adjacent = definition.adjacent;
         this.supplyLines = [];
@@ -75,6 +75,12 @@ class FallingSkyRegion extends Region {
         colony.regionId = this.id;
         this.tribes.push(colony);
         this.controlValue += 1;
+    }
+
+    removeColony() {
+        const colony = this.tribes.pop();
+        colony.regionId = null;
+        this.controlValue -= 1;
     }
 
     addPiece(piece) {
@@ -154,17 +160,17 @@ class FallingSkyRegion extends Region {
     }
 
     subduedTribesForFaction(factionId) {
-        return _(this.tribes).filter(function(tribe) {
+        return _(this.tribes()).filter(function(tribe) {
             return tribe.isSubdued() && (!tribe.factionRestriction || tribe.factionRestriction === factionId);
         }).value();
     }
 
     getSubduedTribes() {
-        return _(this.tribes).filter(tribe => tribe.isSubdued()).value();
+        return _(this.tribes()).filter(tribe => tribe.isSubdued()).value();
     }
 
     getAlliedCityForFaction(factionId) {
-        return _(this.tribes).find(function(tribe) {
+        return _(this.tribes()).find(function(tribe) {
             return tribe.isAllied() && tribe.isCity && tribe.alliedFactionId() === factionId;
         });
     }
@@ -234,7 +240,7 @@ class FallingSkyRegion extends Region {
         console.log('Controlling Faction: ' + (this.controllingFactionId() || 'No Control'));
         console.log('Tribes: ');
         _.each(
-            this.tribes, function (tribe) {
+            this.tribes(), function (tribe) {
                 console.log('    ' + tribe.toString());
             });
         _.each(

@@ -15,7 +15,7 @@ class Suborn extends Command {
             function (region) {
                 const canPlaceAlly = region.subduedTribesForFaction(FactionIDs.AEDUI).length > 0;
 
-                const factionsWithAlliesToRemove = _(region.tribes).map(
+                const factionsWithAlliesToRemove = _(region.tribes()).map(
                     function (tribe) {
                         if (tribe.isAllied() && tribe.alliedFactionId() !== FactionIDs.AEDUI) {
                             return tribe.alliedFactionId();

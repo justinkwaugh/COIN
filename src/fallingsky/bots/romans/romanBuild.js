@@ -112,8 +112,9 @@ class RomanBuild {
                 return;
             }
 
-            const tribe = _(build.region.tribes).reject(tribe=>tribe.alliedFactionId() === FactionIDs.ROMANS).sortBy(
+            const tribe = _(build.region.tribes()).reject(tribe=>tribe.alliedFactionId() === FactionIDs.ROMANS).sortBy(
                 tribe => _.findIndex(enemyFactionPriority, tribe.alliedFactionId())).first();
+
 
 
 

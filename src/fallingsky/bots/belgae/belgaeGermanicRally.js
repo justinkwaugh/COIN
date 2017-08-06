@@ -54,7 +54,7 @@ class BelgaeGermanicRally {
     }
 
     static getAllyDestinationTribe(region) {
-        const subdued = _(region.tribes).filter(
+        const subdued = _(region.tribes()).filter(
             function (tribe) {
                 return tribe.isSubdued();
             }).value();

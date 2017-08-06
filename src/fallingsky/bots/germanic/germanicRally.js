@@ -23,7 +23,7 @@ class GermanicRally {
             function (rallyResult) {
                 let priority = 'c';
                 const subduedSuebi = _.find(
-                    rallyResult.region.tribes, function (tribe) {
+                    rallyResult.region.tribes(), function (tribe) {
                         return tribe.isSubdued() && tribe.id === TribeIDs.SUEBI_NORTH || tribe.id === TribeIDs.SUEBI_SOUTH;
                     });
                 if (subduedSuebi) {
@@ -49,7 +49,7 @@ class GermanicRally {
     }
 
     static getAllyDestinationTribe( region ) {
-        const subdued = _(region.tribes).filter(
+        const subdued = _(region.tribes()).filter(
                 function (tribe) {
                     return tribe.isSubdued();
                 }).value();

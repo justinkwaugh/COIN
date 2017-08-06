@@ -23,7 +23,7 @@ class Build extends Command {
             const romanControlMargin = region.controllingMarginByFaction()[FactionIDs.ROMANS];
             const requiresFortForControl = canPlaceFort && romanControlMargin === 0;
 
-            const canRemoveAlly = _.find(region.tribes,
+            const canRemoveAlly = _.find(region.tribes(),
                                          tribe => tribe.isAllied() && tribe.alliedFactionId() !== FactionIDs.ROMANS) &&
                                   (romanControlMargin > 0 || requiresFortForControl);
 

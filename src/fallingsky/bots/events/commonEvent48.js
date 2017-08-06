@@ -1,6 +1,6 @@
 import TurnContext from 'common/turnContext'
 
-class Event48 {
+class CommonEvent48 {
     static handleEvent(state,factionId) {
         const player = state.playersByFaction[factionId];
         const turn = state.turnHistory.currentTurn;
@@ -23,4 +23,4 @@ class Event48 {
     }
 }
 
-export default Event48;
+export default CommonEvent48;

@@ -24,7 +24,7 @@ class AeduiSuborn {
                 let priority = 'z';
                 if ((aeduiFaction.resources() >= 2 || modifiers.free) && aeduiFaction.hasAvailableAlliedTribe() && subornResult.canPlaceAlly) {
                     const hasSubduedCity = _.find(
-                        subornResult.region.tribes, function (tribe) {
+                        subornResult.region.tribes(), function (tribe) {
                             return tribe.isSubdued() && tribe.isCity && (!tribe.factionRestriction || tribe.factionRestriction === FactionIDs.AEDUI);
                         });
                     if (hasSubduedCity) {

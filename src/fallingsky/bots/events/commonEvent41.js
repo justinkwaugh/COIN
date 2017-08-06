@@ -4,7 +4,7 @@ import PlaceAlliedTribe from 'fallingsky/actions/placeAlliedTribe';
 import PlaceCitadel from 'fallingsky/actions/placeCitadel';
 import AddResources from 'fallingsky/actions/addResources';
 
-class Event41 {
+class CommonEvent41 {
     static handleEvent(state, factionId) {
         const faction = state.factionsById[factionId];
 
@@ -72,4 +72,4 @@ class Event41 {
     }
 }
 
-export default Event41;
+export default CommonEvent41;

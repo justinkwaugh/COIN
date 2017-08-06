@@ -20,7 +20,7 @@ class CommonEvent28 {
                 }).map(
                 function (region) {
                     return _.find(
-                        region.tribes, function (tribe) {
+                        region.tribes(), function (tribe) {
                             return tribe.isSubdued() && tribe.isCity;
                         });
                 }).compact().sampleSize(faction.availableAlliedTribes().length).value();

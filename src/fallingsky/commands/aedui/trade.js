@@ -18,7 +18,7 @@ class Trade extends Command {
                 const isAeduiControlled = region.controllingFactionId() === FactionIDs.AEDUI;
                 if (isAeduiControlled) {
                     totalAedui += _.filter(
-                        region.tribes, function (tribe) {
+                        region.tribes(), function (tribe) {
                             return tribe.isSubdued();
                         }).length;
 

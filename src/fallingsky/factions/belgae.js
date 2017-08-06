@@ -22,7 +22,7 @@ class Belgae extends FallingSkyFaction {
         return _.reduce(state.getControlledRegionsForFaction(FactionIDs.BELGAE), function (sum, region) {
             let controlValue = region.controlValue;
             _.each(
-                region.tribes, function (tribe) {
+                region.tribes(), function (tribe) {
                     if (tribe.isDispersed() && tribe.id !== TribeIDs.SUEBI_NORTH && tribe.id !== TribeIDs.SUEBI_SOUTH) {
                         controlValue -= 1;
                     }

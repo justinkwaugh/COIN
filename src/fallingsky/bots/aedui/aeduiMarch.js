@@ -196,7 +196,7 @@ class AeduiMarch {
 
                 // First by most winning enemy tribe
                 _.each(
-                    destination.tribes, function (tribe) {
+                    destination.tribes(), function (tribe) {
                         if (tribe.alliedFactionId() && tribe.alliedFactionId() !== FactionIDs.AEDUI) {
                             const possiblePriority = 'a' + 10 + enemyFactionRankById[tribe.alliedFactionId()];
                             if (possiblePriority < destinationPriority) {
