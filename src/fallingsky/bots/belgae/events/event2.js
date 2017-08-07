@@ -36,9 +36,9 @@ class Event2 {
                                              noSpecial: true
                                          }));
         turn.startCommand(CommandIDs.BATTLE);
-        targetBattle.legiones = true;
+        targetBattle.result.legiones = true;
         Battle.execute(state, {
-            battleResults: targetBattle.battleResults
+            battleResults: targetBattle.result
         });
         turn.commitCommand();
         turn.popContext();
