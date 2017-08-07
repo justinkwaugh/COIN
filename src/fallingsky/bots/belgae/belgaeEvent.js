@@ -2,6 +2,7 @@ import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
 
 import Event1 from './events/event1';
+import Event2 from './events/event2';
 import Event3 from './events/event3';
 import Event5 from './events/event5';
 import Event6 from './events/event6';
@@ -27,6 +28,7 @@ import Event31 from './events/event31';
 import Event33 from './events/event33';
 import Event34 from './events/event34';
 import Event35 from './events/event35';
+import Event36 from './events/event36';
 import Event38 from './events/event38';
 import Event40 from './events/event40';
 import Event41 from './events/event41';
@@ -55,6 +57,7 @@ const BotRomans = [40, 13, 15, 12];
 
 const EventHandlers = {
     1: Event1,
+    2: Event2,
     3: Event3,
     5: Event5,
     6: Event6,
@@ -80,6 +83,7 @@ const EventHandlers = {
     33: Event33,
     34: Event34,
     35: Event35,
+    36: Event36,
     38: Event38,
     40: Event40,
     41: Event41,

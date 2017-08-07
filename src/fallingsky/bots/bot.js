@@ -240,9 +240,17 @@ class Bot extends FallingSkyPlayer {
         const helpingFactionId = (amAttacker && battleResults.willEnlistGermans) ? FactionIDs.GERMANIC_TRIBES : null;
 
         const targets = _.clone(Losses.orderPiecesForRemoval(state, myPieces, battleResults.willRetreat, helpingFactionId));
-        const losses = attackResults.losses;
+        let losses = attackResults.losses;
 
         const removed = [];
+
+        if(battleResults.legiones) {
+            const legionIndex = _.findIndex(targets, { type: 'legion'});
+            if(legionIndex >= 0) {
+                losses -= 1;
+                removed.push(_.first(_.pullAt(targets,[legionIndex])));
+            }
+        }
 
         if(targets.length > 0) {
             _.each(_.range(0, losses), (index) => {

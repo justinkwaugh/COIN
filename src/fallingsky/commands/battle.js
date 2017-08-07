@@ -18,6 +18,7 @@ class Battle extends Command {
         const attackingFaction = args.attackingFaction;
         const defendingFaction = args.defendingFaction;
         const aduataca = args.aduataca;
+        const shadedMorasses = args.shadedMorasses;
 
         let attackingPieces = region.getPiecesForFaction(attackingFaction.id);
         if (enlistingGermans) {
@@ -25,7 +26,7 @@ class Battle extends Command {
             attackingPieces = _.concat(attackingPieces, germanicPieces);
         }
         let defendingPieces = args.defendingPieces || region.getPiecesForFaction(defendingFaction.id);
-        const canAmbush = aduataca || (!enlistingGermans && this.canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces));
+        const canAmbush = shadedMorasses || aduataca || (!enlistingGermans && this.canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces));
 
         if(defendingFaction.id === FactionIDs.ROMANS && state.hasUnshadedCapability(CapabilityIDs.BALEARIC_SLINGERS)) {
             attackingPieces = this.simulateBalearicSlingers(state, region, attackingFaction, attackingPieces, defendingFaction);
