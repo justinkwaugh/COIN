@@ -38,6 +38,10 @@ class Event65 {
                 pieces: [allyData.ally]
             });
 
+            if (state.belgae.availableAlliedTribes().length === 0) {
+                return false;
+            }
+
             PlaceAlliedTribe.execute(state, {
                 factionId: FactionIDs.BELGAE,
                 regionId: allyData.regionId,

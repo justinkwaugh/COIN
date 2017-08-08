@@ -58,10 +58,10 @@ class BelgaeRaid {
     static getEffectiveRaidRegions(state, modifiers) {
         const raidResults = _.filter(Raid.test(state, {factionId: FactionIDs.BELGAE}), raid=> _.indexOf(modifiers.allowedRegions, raid.region.id) >= 0);
         const hasBaggageTrain = state.hasShadedCapability(CapabilityIDs.BAGGAGE_TRAINS, FactionIDs.BELGAE);
-
+        const warbandsPerRegion = modifiers.context.warbandsPerRegion || {};
         _.each(
             raidResults, function (result) {
-                const numHiddenWarbands = result.region.getHiddenPiecesForFaction(FactionIDs.BELGAE).length;
+                const numHiddenWarbands = warbandsPerRegion[result.region.id] || result.region.getHiddenPiecesForFaction(FactionIDs.BELGAE).length;
 
                 if (numHiddenWarbands <= 1) {
                     result.resourcesGained = 0;
