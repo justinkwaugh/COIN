@@ -52,7 +52,7 @@ class Event62 {
 
             const belgicWarbands = sourceRegion.getWarbandsOrAuxiliaForFaction(FactionIDs.BELGAE);
             if (belgicWarbands.length === 0) {
-                return sum;
+                return;
             }
 
             const controlMargin = sourceRegion.controllingMarginByFaction()[FactionIDs.BELGAE];
