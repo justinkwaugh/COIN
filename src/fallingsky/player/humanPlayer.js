@@ -11,6 +11,7 @@ import Losses from 'fallingsky/interactions/losses';
 import Retreat from 'fallingsky/interactions/retreat';
 import Pompey from 'fallingsky/interactions/pompey';
 import GalliaTogata from 'fallingsky/interactions/galliaTogata';
+import RemovePieces from 'fallingsky/interactions/removePieces';
 import {CapabilityIDs} from 'fallingsky/config/capabilities';
 
 class HumanPlayer extends FallingSkyPlayer {
@@ -54,10 +55,10 @@ class HumanPlayer extends FallingSkyPlayer {
     willApplyGermanicHorse(state, region, attackingFaction, defendingFaction) {
         throw new PlayerInteractionNeededError('Use Germanic Horse Capability?',
                                                new GermanicHorseDeclaration({
-                                                                                   requestingFactionId: attackingFaction.id,
-                                                                                   respondingFactionId: this.factionId,
-                                                                                   regionId: region.id
-                                                                               }));
+                                                                                requestingFactionId: attackingFaction.id,
+                                                                                respondingFactionId: this.factionId,
+                                                                                regionId: region.id
+                                                                            }));
     }
 
     willApplyBalearicSlingers(state, region, attackingFaction, defendingFaction) {
@@ -113,6 +114,14 @@ class HumanPlayer extends FallingSkyPlayer {
         throw new PlayerInteractionNeededError(
             'Please remove 1 Legions to the Legions track and 2 Auxilia to Available', new GalliaTogata({}));
 
+    }
+
+    removePieces(state, region, numPieces) {
+        throw new PlayerInteractionNeededError(
+            'Please remove ' + numPieces + ' pieces from region ' + region.name, new RemovePieces({
+                                                                                                            regionId: region.id,
+                                                                                                            count: numPieces
+                                                                                                        }));
     }
 }
 

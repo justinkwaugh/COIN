@@ -373,6 +373,16 @@ class Bot extends FallingSkyPlayer {
             }).sortBy('numFriendly').groupBy('numFriendly').map(_.shuffle).flatten().reverse().map('region').first();
 
     }
+
+    removePieces(state, region, numPieces) {
+        const pieces = region.getPiecesForFaction(this.factionId);
+        const piecesToRemove = _.take(Losses.orderPiecesForRemoval(state, pieces), numPieces);
+        RemovePieces.execute(state, {
+            factionId: this.factionId,
+            regionId: region.id,
+            pieces: piecesToRemove
+        });
+    }
 }
 
 export default Bot;

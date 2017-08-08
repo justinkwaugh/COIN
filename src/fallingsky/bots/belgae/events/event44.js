@@ -16,7 +16,7 @@ class Event44 {
             }
 
             const auxilia = _(region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS)).sortBy(
-                piece => (piece.hidden() ? 'a' : 'b')).take(numToReplace).value();
+                piece => (piece.revealed() ? 'b' : 'a')).take(numToReplace).value();
             if (auxilia.length === 0) {
                 return;
             }
@@ -26,7 +26,7 @@ class Event44 {
             return {
                 factionId: FactionIDs.ROMANS,
                 regionId: region.id,
-                pieces
+                pieces: auxilia
             }
         }).compact().value();
 
@@ -37,7 +37,7 @@ class Event44 {
                 }
 
                 const warbands = _(region.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI)).sortBy(
-                    piece => (piece.hidden() ? 'a' : piece.revealed() ? 'b' : 'c')).take(numToReplace).value();
+                    piece => (piece.scouted() ? 'c' : piece.revealed() ? 'b' : 'a')).take(numToReplace).value();
                 if (warbands.length === 0) {
                     return;
                 }
@@ -47,7 +47,7 @@ class Event44 {
                 return {
                     factionId: FactionIDs.AEDUI,
                     regionId: region.id,
-                    pieces
+                    pieces: warbands
                 }
             }).compact().value();
 

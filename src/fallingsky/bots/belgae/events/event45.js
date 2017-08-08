@@ -7,7 +7,6 @@ import Battle from 'fallingsky/commands/battle';
 
 class Event45 {
     static handleEvent(state) {
-        debugger;
         const targetBattle = _(state.regions).filter(region=>region.getLegions().length > 0 && (region.getMobilePiecesForFaction(FactionIDs.BELGAE).length > 0 || region.getMobilePiecesForFaction(FactionIDs.AEDUI).length > 0)).map(region=> {
             const result = Battle.test(state, {
                                 region: region,
