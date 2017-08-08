@@ -39,6 +39,7 @@ import Event45 from './events/event45';
 import Event46 from './events/event46';
 import Event48 from './events/event48';
 import Event49 from './events/event49';
+import Event50 from './events/event50';
 import Event55 from './events/event55';
 import Event56 from './events/event56';
 import Event57 from './events/event57';
@@ -97,6 +98,7 @@ const EventHandlers = {
     46: Event46,
     48: Event48,
     49: Event49,
+    50: Event50,
     55: Event55,
     57: Event57,
     58: Event58,
