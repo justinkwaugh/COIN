@@ -1,5 +1,6 @@
 import _ from '../../../lib/lodash';
 import FactionIDs from '../../config/factionIds';
+import SpecialAbilityIDs from 'fallingsky/config/specialAbilityIds';
 import CommandIDs from '../../config/commandIds';
 import Battle from '../../commands/battle';
 
@@ -48,7 +49,7 @@ class GermanicBattle {
     }
 
     static isEffectiveBattle(battleResult) {
-        return battleResult.canAmbush && battleResult.bestDefenderLosses > 0;
+        return battleResult.canAmbush && battleResult.mostDefenderLosses() > 0;
     }
 }
 
