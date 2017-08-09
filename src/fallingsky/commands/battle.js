@@ -20,6 +20,7 @@ class Battle extends Command {
         const helpingFactionId = enlistingGermans ? FactionIDs.GERMANIC_TRIBES : args.helpingFactionId;
         const aduataca = args.aduataca;
         const shadedMorasses = args.shadedMorasses;
+        const ignoreSARegionCondition = args.ignoreSARegionCondition;
 
         let attackingPieces = region.getPiecesForFaction(attackingFaction.id);
         if(helpingFactionId) {
@@ -27,7 +28,7 @@ class Battle extends Command {
             attackingPieces = _.concat(attackingPieces, helpingPieces)
         }
         let defendingPieces = args.defendingPieces || region.getPiecesForFaction(defendingFaction.id);
-        const canAmbush = shadedMorasses || aduataca || (!enlistingGermans && this.canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces));
+        const canAmbush = shadedMorasses || aduataca || (!enlistingGermans && this.canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces,ignoreSARegionCondition));
 
         if(defendingFaction.id === FactionIDs.ROMANS && state.hasUnshadedCapability(CapabilityIDs.BALEARIC_SLINGERS)) {
             attackingPieces = this.simulateBalearicSlingers(state, region, attackingFaction, attackingPieces, defendingFaction);
@@ -582,13 +583,13 @@ class Battle extends Command {
             });
     }
 
-    static canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces) {
+    static canAmbush(state, region, attackingFaction, attackingPieces, defendingPieces, ignoreSARegionCondition) {
 
         if(attackingFaction.id === FactionIDs.ROMANS) {
             return false;
         }
 
-        if (attackingFaction.id === FactionIDs.BELGAE || attackingFaction.id === FactionIDs.ARVERNI) {
+        if (!ignoreSARegionCondition && (attackingFaction.id === FactionIDs.BELGAE || attackingFaction.id === FactionIDs.ARVERNI)) {
             const leaderRegion = _.find(state.regions, region => region.getLeaderForFaction(attackingFaction.id));
             if (!leaderRegion) {
                 return false;

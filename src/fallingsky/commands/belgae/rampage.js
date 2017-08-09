@@ -8,26 +8,26 @@ import Losses from 'fallingsky/util/losses';
 class Rampage extends Command {
 
     static doTest(state, args) {
-        const leaderRegion = this.findLeaderRegion(state);
-        if (!leaderRegion) {
-            return [];
-        }
-
-        const leader = leaderRegion.getLeaderForFaction(FactionIDs.BELGAE);
-        const isAmbiorix = leader && !leader.isSuccessor();
-        const validRegionIds = isAmbiorix ? _(leaderRegion.adjacent).concat([leaderRegion]).map('id').value() : [leaderRegion];
+        const ignoreSARegionCondition = args.ignoreSARegionCondition;
+        const validRegionIds = this.getValidRegionIds(state);
 
         return _(state.regions).map(
             (region) => {
-                const isValidRegion = _.indexOf(validRegionIds, region.id) >= 0;
+                if(!ignoreSARegionCondition) {
+                    if(_.indexOf(validRegionIds, region.id) < 0) {
+                        return;
+                    }
+                }
+
                 const hiddenWarbands = region.getHiddenPiecesForFaction(FactionIDs.BELGAE);
-                if(hiddenWarbands.length === 0 || !isValidRegion) {
+                if (hiddenWarbands.length === 0) {
                     return;
                 }
 
-                const enemyFactions = _(FactionIDs).filter((factionId) => this.isValidEnemyFaction(region, factionId)).value();
+                const enemyFactions = _(FactionIDs).filter(
+                    (factionId) => this.isValidEnemyFaction(region, factionId)).value();
 
-                if(enemyFactions.length > 0) {
+                if (enemyFactions.length > 0) {
                     return new RampageResults(
                         {
                             region,
@@ -42,7 +42,8 @@ class Rampage extends Command {
         const rampage = args.rampage;
         const mobileEnemyPieces = rampage.region.getMobilePiecesForFaction(rampage.chosenFaction);
         const enemyPlayer = state.playersByFaction[rampage.chosenFaction];
-        const piecesToRetreatOrRemove = _.take(Losses.orderPiecesForRemoval(state, mobileEnemyPieces, false), rampage.count);
+        const piecesToRetreatOrRemove = _.take(Losses.orderPiecesForRemoval(state, mobileEnemyPieces, false),
+                                               rampage.count);
 
         console.log('*** Belgae Rampaging in ' + rampage.region.name);
 
@@ -51,13 +52,13 @@ class Rampage extends Command {
     }
 
     static isValidEnemyFaction(region, factionId) {
-        if(factionId === FactionIDs.GERMANIC_TRIBES || factionId === FactionIDs.BELGAE) {
+        if (factionId === FactionIDs.GERMANIC_TRIBES || factionId === FactionIDs.BELGAE) {
             return false;
         }
 
         const groupedPieces = _.groupBy(region.piecesByFaction()[factionId], 'type');
 
-        if(!groupedPieces.warband && !groupedPieces.auxilia && !groupedPieces.legion) {
+        if (!groupedPieces.warband && !groupedPieces.auxilia && !groupedPieces.legion) {
             return false;
         }
 
@@ -65,11 +66,21 @@ class Rampage extends Command {
     }
 
     static findLeaderRegion(state) {
-        return _.find(state.regions, function(region) {
-            return _.find(region.piecesByFaction()[FactionIDs.BELGAE], { type : 'leader' });
+        return _.find(state.regions, function (region) {
+            return _.find(region.piecesByFaction()[FactionIDs.BELGAE], {type: 'leader'});
         });
     }
 
+    static getValidRegionIds(state) {
+        const leaderRegion = this.findLeaderRegion(state);
+        if (!leaderRegion) {
+            return [];
+        }
+
+        const leader = leaderRegion.getLeaderForFaction(FactionIDs.BELGAE);
+        const isAmbiorix = leader && !leader.isSuccessor();
+        return isAmbiorix ? _(leaderRegion.adjacent).concat([leaderRegion]).map('id').value() : [leaderRegion];
+    }
 }
 
 export default Rampage;

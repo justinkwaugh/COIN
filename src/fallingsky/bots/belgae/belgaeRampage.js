@@ -9,12 +9,12 @@ class BelgaeRampage {
     static rampage(state, modifiers) {
 
         const prioritizedRampages = this.getPrioritizedRampages(state, modifiers);
-        if(prioritizedRampages.length === 0) {
+        if (prioritizedRampages.length === 0) {
             return false;
         }
         state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.RAMPAGE);
-        _.each(prioritizedRampages, function(rampage) {
-            Rampage.execute(state, { rampage });
+        _.each(prioritizedRampages, function (rampage) {
+            Rampage.execute(state, {rampage});
         });
         state.turnHistory.getCurrentTurn().commitSpecialAbility();
 
@@ -22,33 +22,37 @@ class BelgaeRampage {
     }
 
     static getPrioritizedRampages(state, modifiers) {
-        const rampageResults = _.filter(Rampage.test(state), rampage=> _.indexOf(modifiers.allowedRegions, rampage.region.id) >= 0);
+        const rampageResults = _.filter(Rampage.test(state, {
+            ignoreSARegionCondition: modifiers.context.ignoreSARegionCondition
+        }), rampage => _.indexOf(modifiers.allowedRegions, rampage.region.id) >= 0);
         const rampages = _.each(
             rampageResults, (possibleRampage) => {
                 const [chosenFaction, factionData] = _(possibleRampage.enemyFactions).map(
-                    factionId => [factionId, this.getRampageFactionData( state, modifiers, possibleRampage.region, factionId)]).sortBy(
+                    factionId => [factionId, this.getRampageFactionData(state, modifiers, possibleRampage.region,
+                                                                        factionId)]).sortBy(
                     pair => pair[1].priority).first();
 
                 possibleRampage.chosenFaction = chosenFaction;
                 possibleRampage.priority = factionData.priority;
                 possibleRampage.agreeingFactionId = factionData.agreeingFactionId;
-                possibleRampage.count = Math.min(possibleRampage.hiddenWarbands.length, (factionData.mobileEnemyPieces.length - (factionData.isBattling ? 1 : 0)));
+                possibleRampage.count = Math.min(possibleRampage.hiddenWarbands.length,
+                                                 (factionData.mobileEnemyPieces.length - (factionData.isBattling ? 1 : 0)));
             });
 
-        return _(rampages).reject({priority : 'z'}).sortBy('priority').value();
+        return _(rampages).reject({priority: 'z'}).sortBy('priority').value();
     }
 
     static getRampageFactionData(state, modifiers, region, factionId) {
 
         const battles = modifiers.context.battles;
-        const isBattling = _.find(battles, function(battleResult) {
+        const isBattling = _.find(battles, function (battleResult) {
             return battleResult.region.id === region.id && battleResult.defendingFaction.id === factionId;
         });
         const mobileEnemyPieces = region.getMobilePiecesForFaction(factionId);
 
         let priority = 'z';
         let agreeingFactionId = null;
-        if(!isBattling || mobileEnemyPieces.length >= 2) {
+        if (!isBattling || mobileEnemyPieces.length >= 2) {
 
             agreeingFactionId = this.factionCanRetreat(state, region, factionId);
 
@@ -84,7 +88,7 @@ class BelgaeRampage {
                 return adjacentRegion.controllingFactionId() && adjacentRegion.controllingFactionId() === factionId;
             });
 
-        if(canRetreatToSelf) {
+        if (canRetreatToSelf) {
             return factionId;
         }
         else {

@@ -163,7 +163,8 @@ class BelgaeBattle {
                             state, {
                                 region: region,
                                 attackingFactionId: FactionIDs.BELGAE,
-                                defendingFactionId: factionId
+                                defendingFactionId: factionId,
+                                ignoreSARegionCondition: modifiers.context.ignoreSARegionCondition
                             });
 
                         if (!this.isEffectiveBattle(battleResult)) {

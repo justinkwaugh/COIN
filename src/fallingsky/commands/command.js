@@ -20,7 +20,7 @@ class Command {
 
     static resolveIds(state, args) {
         if (!args) {
-            return;
+            return {};
         }
 
         const resolvedArgs = _.clone(args);

@@ -8,28 +8,24 @@ import EnlistResults from './enlistResults';
 class Enlist extends Command {
 
     static doTest(state, args) {
-        const leaderRegion = this.findLeaderRegion(state);
-        if (!leaderRegion) {
-            return false;
-        }
-
-        const validGermanicRegionIds = this.findValidGermanicRegions(state);
-        const leader = leaderRegion.getLeaderForFaction(FactionIDs.BELGAE);
-        const isAmbiorix = leader && !leader.isSuccessor();
-        const validRegionIds = isAmbiorix ? _(leaderRegion.adjacent).concat([leaderRegion]).map('id').value() : [leaderRegion];
+        const ignoreSARegionCondition = args.ignoreSARegionCondition;
+        const validRegionIds = this.getValidRegionIds(state);
 
         return _(state.regions).map(
             (region) => {
-                const isValidRegion = _.indexOf(validRegionIds, region.id) >= 0;
-                if (!isValidRegion) {
-                    return;
+                if (!ignoreSARegionCondition) {
+                    if (_.indexOf(validRegionIds, region.id) < 0) {
+                        return;
+                    }
                 }
+
                 const germanicPieces = region.piecesByFaction()[FactionIDs.GERMANIC_TRIBES];
-                if(!germanicPieces || _.indexOf(validGermanicRegionIds, region.id) < 0) {
+                if (!germanicPieces) {
                     return;
                 }
 
-                const enemyFactions = _(FactionIDs).filter((factionId) => this.isValidEnemyFaction(region, factionId)).value();
+                const enemyFactions = _(FactionIDs).filter(
+                    (factionId) => this.isValidEnemyFaction(region, factionId)).value();
                 return new EnlistResults(
                     {
                         region,
@@ -74,6 +70,21 @@ class Enlist extends Command {
 
                 return (region.piecesByFaction()[FactionIDs.GERMANIC_TRIBES] || []).length > 0;
             }).map('id').value();
+    }
+
+    static getValidRegionIds(state) {
+        const leaderRegion = this.findLeaderRegion(state);
+        if (!leaderRegion) {
+            return [];
+        }
+        const leader = leaderRegion.getLeaderForFaction(FactionIDs.BELGAE);
+        const isAmbiorix = leader && !leader.isSuccessor();
+
+        const validGermanicRegionIds = this.findValidGermanicRegions(state);
+        const validLeaderRegionIds = isAmbiorix ? _(leaderRegion.adjacent).concat([leaderRegion]).map(
+            'id').value() : [leaderRegion];
+
+        return _.concat(validGermanicRegionIds, validLeaderRegionIds);
     }
 
 }

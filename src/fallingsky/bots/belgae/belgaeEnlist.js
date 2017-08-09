@@ -12,18 +12,20 @@ import BelgaeGermanicRaid from './belgaeGermanicRaid';
 class BelgaeEnlist {
 
     static enlist(state, modifiers) {
-        const enlistResults = _.filter(Enlist.test(state), enlist=> _.indexOf(modifiers.allowedRegions, enlist.region.id) >= 0);
+        const enlistResults = _.filter(Enlist.test(state, {
+            ignoreSARegionCondition: modifiers.context.ignoreSARegionCondition
+        }), enlist => _.indexOf(modifiers.allowedRegions, enlist.region.id) >= 0);
         let effective = false;
 
         state.turnHistory.getCurrentTurn().startSpecialAbility(SpecialAbilityIDs.ENLIST);
-        if(modifiers.context.battles) {
+        if (modifiers.context.battles) {
             effective = this.enlistForBattle(state, modifiers, enlistResults);
         }
         else {
             effective = this.enlistForCommand(state, modifiers, enlistResults);
         }
 
-        if(!effective) {
+        if (!effective) {
             state.turnHistory.getCurrentTurn().rollbackSpecialAbility();
         }
         else {
@@ -35,7 +37,8 @@ class BelgaeEnlist {
 
     static enlistForBattle(state, modifiers, enlistResults) {
         const battleResults = modifiers.context.battles;
-        _.each(battleResults, battleResult => this.checkAndUpdateBattleResult(state, modifiers, enlistResults, battleResult));
+        _.each(battleResults,
+               battleResult => this.checkAndUpdateBattleResult(state, modifiers, enlistResults, battleResult));
         return _.find(battleResults, {willEnlistGermans: true});
     }
 
@@ -47,7 +50,8 @@ class BelgaeEnlist {
     }
 
     static checkAndUpdateBattleResult(state, modifiers, enlistResults, battleResults) {
-        const enlistResultForBattleRegion = _.find(enlistResults, result => result.region.id === battleResults.region.id);
+        const enlistResultForBattleRegion = _.find(enlistResults,
+                                                   result => result.region.id === battleResults.region.id);
         if (enlistResultForBattleRegion) {
             const enlistedBattleResults = Battle.test(
                 state, {

@@ -54,6 +54,7 @@ import Event65 from './events/event65';
 import Event66 from './events/event66';
 import Event67 from './events/event67';
 import Event68 from './events/event68';
+import Event70 from './events/event70';
 import Event71 from './events/event71';
 
 const NoEvents = [25, 52, 10, 37, 47, 4, 53, 32, 17, 26, 54, 20, 39, 69, 21];
@@ -115,6 +116,7 @@ const EventHandlers = {
     66: Event66,
     67: Event67,
     68: Event68,
+    70: Event70,
     71: Event71
 };
 
