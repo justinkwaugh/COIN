@@ -49,7 +49,7 @@ class GermanicBattle {
     }
 
     static isEffectiveBattle(battleResult) {
-        return battleResult.canAmbush && battleResult.mostDefenderLosses() > 0;
+        return battleResult.canAmbush && battleResult.mostDefenderLosses() > 0 && battleResult.defendingPieces.length > 0;
     }
 }
 
