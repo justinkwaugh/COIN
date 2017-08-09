@@ -47,7 +47,7 @@ class BelgaeGermanicBattle {
     }
 
     static isEffectiveBattle(battleResult) {
-        return battleResult.canAmbush && battleResult.worstCaseDefenderLosses.ambush > 0;
+        return battleResult.canAmbush && battleResult.worstCaseDefenderLosses.ambush > 0 && battleResult.defendingPieces.length > 0;
     }
 }
 
