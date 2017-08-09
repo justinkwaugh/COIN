@@ -33,7 +33,7 @@ class BelgaeBot extends Bot {
         const turn = state.turnHistory.currentTurn;
         const modifiers = turn.getContext();
 
-        if (!turn.getCheckpoint(Checkpoints.BATTLE_CHECK) && modifiers.isCommandAllowed(CommandIDs.BATTLE)) {
+        if (!turn.getCheckpoint(Checkpoints.BATTLE_CHECK)) {
             commandAction = BelgaeBattle.battle(state, modifiers);
         }
         turn.markCheckpoint(Checkpoints.BATTLE_CHECK);

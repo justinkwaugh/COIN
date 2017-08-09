@@ -26,7 +26,8 @@ class BelgaeBattle {
 
         const battles = modifiers.context.battles || this.getBattleList(state, modifiers);
 
-        if (battles.length === 0) {
+        // Allow battle list to be attempted first, because it has a side effect that it might signify the need to threat march
+        if (!modifiers.isCommandAllowed(CommandIDs.BATTLE) || battles.length === 0) {
             return false;
         }
 

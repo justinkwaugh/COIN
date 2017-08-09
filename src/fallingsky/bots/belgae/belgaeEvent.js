@@ -52,6 +52,7 @@ import Event63 from './events/event63';
 import Event64 from './events/event64';
 import Event65 from './events/event65';
 import Event66 from './events/event66';
+import Event67 from './events/event67';
 import Event68 from './events/event68';
 import Event71 from './events/event71';
 
@@ -112,6 +113,7 @@ const EventHandlers = {
     64: Event64,
     65: Event65,
     66: Event66,
+    67: Event67,
     68: Event68,
     71: Event71
 };

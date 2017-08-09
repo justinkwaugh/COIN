@@ -56,7 +56,7 @@ class BelgaeMarch {
             }).sortBy(marchResult => marchResult.region.getLeaderForFaction(FactionIDs.BELGAE) ? 'a' : 'b').value();
 
         const marchFromRegions = _(necessaryMarches).map(march => march.region).value();
-        const solutions = Map.findMinimumAdjacent(marchFromRegions);
+        const solutions = Map.findMinimumAdjacent(marchFromRegions, modifiers.context.allowedDestRegions);
 
         let effective = false;
         let wasBritannia = false;
@@ -73,8 +73,15 @@ class BelgaeMarch {
 
                 const destination = _(solutions).map(
                     (arr) => {
-                        const adjacentRegionsById = _.keyBy(march.region.adjacent, 'id');
+                        let adjacentRegionsById = _.keyBy(march.region.adjacent, 'id');
+                        if(modifiers.context.allowedDestRegions) {
+                            adjacentRegionsById = _.filter(adjacentRegionsById, (region, id)=>_.indexOf(modifiers.context.allowedDestRegions, id) >= 0);
+                        }
                         const solutionDestination = _.find(arr, solution => adjacentRegionsById[solution.id]);
+                        if(!solutionDestination) {
+                            return;
+                        }
+
                         const region = state.regionsById[solutionDestination.id];
                         const numBelgaeForRegion = (region.piecesByFaction()[FactionIDs.BELGAE] || []).length;
                         const numAdjacentWithBelgic = _(region.adjacent).reject(
@@ -93,7 +100,11 @@ class BelgaeMarch {
                             numAdjacentWithBelgic: numAdjacentWithBelgic,
                             priority
                         }
-                    }).sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
+                    }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
+
+                if(!destination) {
+                    return;
+                }
 
                 const piecesToMove = march.region.getMobilePiecesForFaction(FactionIDs.BELGAE);
 
@@ -150,6 +161,14 @@ class BelgaeMarch {
                                                     destination => _.indexOf(marchRegionIds,
                                                                              destination.id) >= 0);
 
+            });
+        }
+
+        if(modifiers.context.allowedDestRegions) {
+            _.each(marchResults, marchResult => {
+                marchResult.destinations = _.filter(marchResult.destinations,
+                                                    destination => _.indexOf(modifiers.context.allowedDestRegions,
+                                                                             destination.id) >= 0);
             });
         }
 
@@ -307,6 +326,13 @@ class BelgaeMarch {
             });
         }
 
+        if(modifiers.context.allowedDestRegions) {
+            _.each(marchResults, marchResult => {
+                marchResult.destinations = _.filter(marchResult.destinations,
+                                                    destination => _.indexOf(modifiers.context.allowedDestRegions,
+                                                                             destination.id) >= 0);
+            });
+        }
 
         const leaderMarch = _.find(marchResults, result => _.find(result.region.piecesByFaction()[FactionIDs.BELGAE],
                                                                   {type: 'leader'}));

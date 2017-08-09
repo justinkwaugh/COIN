@@ -6,11 +6,16 @@ class Map {
         return arr.reduce((a, b) => a.map(x => b.map(y => x.concat(y))).reduce((a, b) => a.concat(b), []), [[]]);
     }
 
-    static findMinimumAdjacent(regions) {
+    static findMinimumAdjacent(regions, allowedDestRegions) {
         const numRegions = regions.length;
         const regionIds = _.map(regions, 'id');
-        const possibleDestinationIds = _(regions).map(
+        let possibleDestinationIds = _(regions).map(
             region => _(region.adjacent).map('id').reject(id => _.indexOf(regionIds, id) >= 0).value()).value();
+
+        if(allowedDestRegions) {
+            possibleDestinationIds = _.filter(possibleDestinationIds, regionId=>_.indexOf(allowedDestRegions, regionId) >=0);
+        }
+
         const union = _.reduce(possibleDestinationIds, (union, destinations) => _.union(union, destinations), []);
         const rankings = this.generateRankings(union, possibleDestinationIds);
         const groupedRankings = _.groupBy(rankings, 'count');
