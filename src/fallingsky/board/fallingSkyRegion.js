@@ -4,6 +4,7 @@ import Region from '../../common/region';
 import Logging from '../util/logging';
 import FactionIDs from '../config/factionIds';
 import RegionIDs from 'fallingsky/config/regionIds';
+import FactionPieceFactory from '../../common/factionPieceFactory';
 
 class FallingSkyRegion extends Region {
     constructor(definition, tribesById) {
@@ -60,6 +61,28 @@ class FallingSkyRegion extends Region {
             () => {
                 return _.find(this.pieces(), {type: 'fort'});
             });
+    }
+
+    toJSON() {
+        return Object.assign(super.toJSON(), {
+            inPlay: this.inPlay(),
+            pieces: this.pieces(),
+            devastated: this.devastated()
+        });
+    }
+    
+    loadGameState(json) {
+        const self = this;
+
+        super.loadGameState(json);
+        
+        self.inPlay(json.inPlay);
+        json.pieces.forEach(function(value) {
+            const piece = FactionPieceFactory.create(value.type, value);
+            piece.loadGameState(value);
+            self.pieces.push(piece);
+        });
+        self.devastated(json.devastated);
     }
 
     isControlledByFaction(factionId) {
@@ -237,6 +260,7 @@ class FallingSkyRegion extends Region {
 
     logState() {
         console.log('*** ' + this.name + ' Region ***');
+        if (this.devastated()) console.log('Devastated');
         console.log('Controlling Faction: ' + (this.controllingFactionId() || 'No Control'));
         console.log('Tribes: ');
         _.each(

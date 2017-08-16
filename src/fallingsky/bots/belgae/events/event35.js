@@ -35,4 +35,4 @@ class Event35 {
 
 }
 
-export default Event35
+export default Event35;

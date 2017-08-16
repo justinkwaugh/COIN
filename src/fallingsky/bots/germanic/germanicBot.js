@@ -15,6 +15,10 @@ class GermanicBot extends Bot {
         super({factionId: FactionIDs.GERMANIC_TRIBES});
     }
 
+    toJSON() {
+        return Object.assign(super.toJSON(), {});
+    }
+
     takeTurn(state) {
         const turn = state.turnHistory.currentTurn;
         const modifiers = turn.getContext();

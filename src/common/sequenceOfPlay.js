@@ -52,6 +52,42 @@ class SequenceOfPlay {
         });
     }
 
+    toJSON() {
+        return {
+            history: this.history(),
+            eligibleFactions: this.eligibleFactions(),
+            ineligibleFactions: this.ineligibleFactions(),
+            passedFactions: this.passedFactions(),
+            forcedEligibleFactionIds: this.forcedEligibleFactionIds(),
+            forcedIneligibleFactionIds: this.forcedIneligibleFactionIds(),
+            currentSequenceForCard: this.currentSequenceForCard(),
+            firstFaction: this.firstFaction(),
+            secondFaction: this.secondFaction(),
+            firstActionChosen: this.firstActionChosen(),
+            secondActionChosen: this.secondActionChosen()
+        };
+    }
+
+    loadGameState(json) {
+        const self = this;
+
+        json.history.forEach((value) => {
+            self.history.push(new SequenceForCard(value));
+        });
+        self.eligibleFactions(json.eligibleFactions);
+        self.ineligibleFactions(json.ineligibleFactions);
+        self.passedFactions(json.passedFactions);
+        self.forcedEligibleFactionIds(json.forcedEligibleFactionIds);
+        self.forcedIneligibleFactionIds(json.forcedIneligibleFactionIds);
+        const currentSequenceForCard = new SequenceForCard(json.currentSequenceForCard);
+        currentSequenceForCard.loadGameState(json.currentSequenceForCard);
+        self.currentSequenceForCard(currentSequenceForCard);
+        self.firstFaction(json.firstFaction);
+        self.secondFaction(json.secondFaction);
+        self.firstActionChosen(json.firstActionChosen);
+        self.secondActionChosen(json.secondActionChosen);
+    }
+
     updateEligibility() {
 
         _.each(this.passedFactions(), (factionId) => {

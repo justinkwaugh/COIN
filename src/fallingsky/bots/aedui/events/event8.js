@@ -15,4 +15,4 @@ class Event8 {
     }
 }
 
-export default Event8
+export default Event8;

@@ -28,6 +28,10 @@ class BelgaeBot extends Bot {
         super({factionId: FactionIDs.BELGAE});
     }
 
+    toJSON() {
+        return Object.assign(super.toJSON(), {});
+    }
+
     takeTurn(state) {
         let commandAction = null;
         const turn = state.turnHistory.currentTurn;

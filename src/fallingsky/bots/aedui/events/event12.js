@@ -14,4 +14,4 @@ class Event12 {
     }
 }
 
-export default Event12
+export default Event12;

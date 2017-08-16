@@ -1,6 +1,7 @@
 import ActionGroup from './actionGroup';
 import _ from '../lib/lodash';
 import Checkpoint from './checkpoint';
+import TurnContext from './turnContext';
 
 class Turn extends ActionGroup {
 
@@ -15,6 +16,54 @@ class Turn extends ActionGroup {
         this.checkpoints = definition.checkpoints || [];
         this.contexts = definition.contexts || [];
         this.currentContext = null;
+    }
+
+    toJSON() {
+        let currentContext = this.currentContext;
+        if (currentContext === null || currentContext === undefined)
+            currentContext = false;
+        else
+            currentContext = currentContext.id;
+        return Object.assign(super.toJSON(), {
+            number: this.number,
+            commandAction: this.commandAction,
+            actionGroups: this.actionGroups,
+            inProgress: this.inProgress,
+            checkpoints: this.checkpoints,
+            contexts: this.contexts,
+            currentContext: currentContext
+        });
+    }
+
+    loadGameState(json) {
+        const self = this;
+        super.loadGameState(json);
+
+        self.number = json.number;
+        self.commandAction = json.commandAction;
+        self.actionGroups = json.actionGroups;
+        self.inProgress = json.inProgress;
+        json.checkpoints.forEach(function(value) {
+            const checkpoint = new Checkpoint(value);
+            checkpoint.loadGameState(value);
+            self.checkpoints.push(checkpoint);
+        });
+        self.contexts = [];
+        json.contexts.forEach(function(value) {
+            const context = new TurnContext(value);
+            context.loadGameState(value);
+            self.contexts.push(context);
+        });
+        if (!json.currentContext)
+            self.currentContext = null;
+        else {
+            self.contexts.forEach((context) => {
+                if (context.id === json.currentContext)
+                    self.currentContext = context;
+            });
+            // self.currentContext = new TurnContext(json.currentContext);
+            // self.currentContext.loadGameState(json.currentContext);
+        }
     }
 
     undo() {

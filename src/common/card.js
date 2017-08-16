@@ -11,6 +11,17 @@ class Card {
         this.eventText = definition.eventText;
     }
 
+    toJSON() {
+        return {
+            id: this.id,
+            type: this.type,
+            number: this.number,
+            initiativeOrder: this.initiativeOrder,
+            title: this.title,
+            eventText: this.eventText
+        };
+    }
+
     toString() {
         if (this.type === 'event') {
             return 'Card ' + this.id + ' - ' + this.title + ' (' + _.join(this.initiativeOrder, '/') + ')';
@@ -21,4 +32,4 @@ class Card {
     }
 }
 
-export default Card
+export default Card;

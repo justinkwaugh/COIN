@@ -36,6 +36,10 @@ class RomanBot extends Bot {
         super({factionId: FactionIDs.ROMANS});
     }
 
+    toJSON() {
+        return Object.assign(super.toJSON(), {});
+    }
+
     takeTurn(state) {
         let commandAction = null;
         const turn = state.turnHistory.currentTurn;

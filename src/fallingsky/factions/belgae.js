@@ -37,4 +37,4 @@ class Belgae extends FallingSkyFaction {
     }
 }
 
-export default Belgae
+export default Belgae;

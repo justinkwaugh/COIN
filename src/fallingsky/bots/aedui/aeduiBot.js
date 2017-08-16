@@ -27,6 +27,10 @@ class AeduiBot extends Bot {
         super({factionId: FactionIDs.AEDUI});
     }
 
+    toJSON() {
+        return Object.assign(super.toJSON(), {});
+    }
+
     willHarass(factionId) {
         return factionId === FactionIDs.ARVERNI;
     }

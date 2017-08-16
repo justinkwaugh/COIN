@@ -1,8 +1,23 @@
 import _ from '../lib/lodash';
+
 class ActionHistory {
     constructor(state) {
         this.state = state;
         this.actions = [];
+    }
+
+    toJSON() {
+        return {
+            actions: this.actions
+        };
+    }
+    
+    loadGameState(json) {
+        const self = this;
+
+        json.actions.forEach((value) => {
+            self.actions.push(value);
+        });
     }
 
     addAction(action) {

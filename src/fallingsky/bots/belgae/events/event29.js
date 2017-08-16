@@ -49,4 +49,4 @@ class Event29 {
     }
 }
 
-export default Event29
+export default Event29;

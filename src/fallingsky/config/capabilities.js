@@ -41,5 +41,5 @@ export {
     CapabilityStates,
     CapabilityIDs,
     CapabilityTitles
-}
+};
 

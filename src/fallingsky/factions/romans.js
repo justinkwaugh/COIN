@@ -73,6 +73,40 @@ class Romans extends FallingSkyFaction {
             });
     }
 
+    toJSON() {
+        return Object.assign(super.toJSON(), {
+            availableAuxilia: this.availableAuxilia() || 0,
+            availableForts: this.availableForts() || 0,
+            availableLegions: this.availableLegions() || 0,
+            availableDispersalTokens: this.availableDispersalTokens() || 0,
+            senateApprovalState: this.senateApprovalState(),
+            senateFirm: this.senateFirm(),
+            uproarLegions: this.uproarLegions(),
+            intrigueLegions: this.intrigueLegions(),
+            adulationLegions: this.adulationLegions(),
+            fallenLegions: this.fallenLegions(),
+            lostEagle: this.lostEagle(),
+            lostEagleYear: this.lostEagleYear() || -1
+        });
+    }
+
+    loadGameState(json) {
+        super.loadGameState(json);
+        
+        this.availableAuxilia(json.availableAuxilia);
+        this.availableForts(json.availableForts);
+        this.availableLegions(json.availableLegions);
+        this.availableDispersalTokens(json.availableDispersalTokens);
+        this.senateApprovalState(json.senateApprovalState);
+        this.senateFirm(json.senateFirm);
+        this.uproarLegions(json.uproarLegions);
+        this.intrigueLegions(json.intrigueLegions);
+        this.adulationLegions(json.adulationLegions);
+        this.fallenLegions(json.fallenLegions);
+        this.lostEagle(json.lostEagle);
+        this.lostEagleYear(json.lostEagleYear);
+    }
+
     victoryMargin(state) {
         return this.victoryScore(state) - 15;
     }

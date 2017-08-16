@@ -30,6 +30,10 @@ class ArverniBot extends Bot {
         super({factionId: FactionIDs.ARVERNI});
     }
 
+    toJSON() {
+        return Object.assign(super.toJSON(), {});
+    }
+
     takeTurn(state) {
         let commandAction = null;
         const turn = state.turnHistory.currentTurn;

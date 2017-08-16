@@ -252,7 +252,7 @@ class Battle extends Command {
                 }
             }
 
-            battleResults.calculatedDefenderResults = defenderResults
+            battleResults.calculatedDefenderResults = defenderResults;
         }
 
         if (battleResults.willBesiege && !battleResults.besieged) {

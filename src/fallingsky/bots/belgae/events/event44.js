@@ -100,4 +100,4 @@ class Event44 {
 
 }
 
-export default Event44
+export default Event44;

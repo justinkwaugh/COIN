@@ -44,6 +44,13 @@ import Location from '../../common/location';
             });
         }
 
+        toJSON() {
+            return Object.assign(super.toJSON(), {
+                state: this.state(),
+                alliedFactionId: this.alliedFactionId
+            });
+        }
+
         isAlliedToFaction(factionId) {
             return this.isAllied() && this.alliedFactionId() === factionId;
         }

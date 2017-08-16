@@ -2,9 +2,11 @@ import _ from 'lib/lodash';
 import CommandIDs from 'fallingsky/config/commandIds';
 import RegionIDs from 'fallingsky/config/regionIds';
 
+import uuidv4 from 'uuid';
+
 class TurnContext {
     constructor(definition = {}) {
-        this.id = definition.id || '' + Math.random(); // need to make uuid
+        this.id = definition.id || uuidv4();
         this.limited = definition.limited;
         this.allowLimitedSpecial = definition.allowLimitedSpecial;
         this.noSpecial = definition.noSpecial;
@@ -14,6 +16,7 @@ class TurnContext {
         this.winter = definition.winter;
         this.context = definition.context || {};
         this.currentFactionId = definition.currentFactionId;
+
         this.allowedRegions = _(RegionIDs).values().filter(function(regionId) {
             return !definition.allowedRegions || _.indexOf(definition.allowedRegions , regionId) >= 0;
         }).reject(function(regionId) {
@@ -25,6 +28,40 @@ class TurnContext {
         }).reject(function(commandId) {
             return definition.restrictedCommands && _.indexOf(definition.restrictedCommands, commandId) >= 0;
         }).value();
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            limited: this.limited,
+            allowLimitedSpecial: this.allowLimitedSpecial,
+            noSpecial: this.noSpecial,
+            noEvent: this.noEvent,
+            outOfSequence: this.outOfSequence,
+            free: this.free,
+            winter: this.winter,
+            context: this.context,
+            currentFactionId: this.currentFactionId,
+            allowedRegions: this.allowedRegions,
+            allowedCommands: this.allowedCommands
+        };
+    }
+
+    loadGameState(json) {
+        const self = this;
+        
+        self.id = json.id;
+        self.limited = json.limited || false;
+        self.allowLimitedSpecial = json.allowLimitedSpecial || false;
+        self.noSpecial = json.noSpecial || false;
+        self.noEvent = json.noEvent || false;
+        self.outOfSequence = json.outOfSequence || false;
+        self.free = json.free || false;
+        self.winter = json.winter || false;
+        self.context = json.context || {};
+        self.currentFactionId = json.currentFactionId || null;
+        self.allowedRegions = json.allowedRegions;
+        self.allowedCommands = json.allowedCommands;
     }
 
     canDoSpecial() {

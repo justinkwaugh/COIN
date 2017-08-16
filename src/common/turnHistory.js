@@ -1,6 +1,6 @@
 import _ from '../lib/lodash';
 import Turn from './turn';
-import TurnContext from 'common/turnContext'
+import TurnContext from 'common/turnContext';
 
 
 class TurnHistory {
@@ -8,6 +8,27 @@ class TurnHistory {
         this.state = state;
         this.turns = [];
         this.currentTurn = null;
+    }
+
+    toJSON() {
+        return {
+            turns: this.turns,
+            currentTurn: this.currentTurn
+        };
+    }
+
+    loadGameState(json) {
+        const self = this;
+
+        json.turns.forEach((value) => {
+            self.turns.push(new Turn(self.state, value));
+        });
+        if (json.currentTurn === null)
+            self.currentTurn = null;
+        else {
+            self.currentTurn = new Turn(self.state, json.currentTurn);
+            self.currentTurn.loadGameState(json.currentTurn);
+        }
     }
 
     startTurn(factionId) {

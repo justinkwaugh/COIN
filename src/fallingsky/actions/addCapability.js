@@ -32,4 +32,4 @@ class AddCapability extends Action {
 
 }
 
-export default AddCapability
+export default AddCapability;

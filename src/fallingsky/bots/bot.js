@@ -21,6 +21,10 @@ class Bot extends FallingSkyPlayer {
         this.factionId = definition.factionId;
     }
 
+    toJSON() {
+        return Object.assign(super.toJSON(), {});
+    }
+
     takeTurn(state) {
 
     }

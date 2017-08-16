@@ -298,12 +298,21 @@ class FallingSkyVassal {
     ];
   }
 
-  tribeId(x, y) {
-    for (let i = 0; i < this.tribes.length; i++)
-      if (this.tribes[i].x == x && this.tribes[i].y == y)
-        return this.tribes[i].id;
+  tribeId(state, pieceName, regionId, x, y) {
+    for (let i = 0; i < this.tribes.length; i++) {
+      let tribe = state.tribesById[this.tribes[i].id];
 
-    throw 'Could not find valid tribe for location ' + x + ', ' + y;
+      if (this.tribes[i].x == x && this.tribes[i].y == y && tribe.regionId == regionId)
+        return this.tribes[i].id;
+    }
+
+    // if coordinates don't match, then it might be a colony tribe
+
+    var colony = state.tribesById[TribeIDs.COLONY];
+    if (colony !== null && colony.regionId == regionId)
+      return TribeIDs.COLONY;
+
+    throw 'Could not find valid tribe for piece ' + pieceName + ' at location ' + x + ', ' + y + ' in region ' + regionId;
   }
 }
 

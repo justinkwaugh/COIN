@@ -17,8 +17,8 @@ class FallingSkyFaction extends Faction {
         this.passResources = definition.passResources || 1;
 
         this.availableLeader = ko.observable();
-        if(this.hasLeader) {
-            this.availableLeader (new Leader({factionId: definition.id, name: definition.leaderName}));
+        if (this.hasLeader) {
+            this.availableLeader(new Leader({factionId: definition.id, name: definition.leaderName}));
         }
 
         this.availableWarbands = ko.observableArray(
@@ -42,6 +42,30 @@ class FallingSkyFaction extends Faction {
                 return (this.numStartingAlliedTribes + this.numStartingCitadels) -
                        (this.availableAlliedTribes().length + this.availableCitadels().length);
             });
+    }
+
+    toJSON() {
+        let availableLeader = this.availableLeader();
+        if (availableLeader === undefined || availableLeader === null)
+            availableLeader = false;
+
+        return Object.assign(super.toJSON(), {
+            resources: this.resources(),
+            availableLeader: availableLeader,
+            availableWarbands: this.availableWarbands(),
+            availableAlliedTribes: this.availableAlliedTribes(),
+            availableCitadels: this.availableCitadels()
+        });
+    }
+
+    loadGameState(json) {
+        super.loadGameState(json);
+        
+        this.resources(json.resources);
+        // this.availableLeader // TODO: availableLeader object? check with available leader in toJSON()
+        this.availableWarbands(json.availableWarbands);
+        this.availableAlliedTribes(json.availableAlliedTribes);
+        this.availableCitadels(json.availableCitadels);
     }
 
     victoryMargin(state) {

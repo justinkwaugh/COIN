@@ -40,11 +40,11 @@ class RomanBattle {
 
         _.each(battles, (battle) => {
             if (!battle.complete) {
+                Battle.execute(state, {battleResults: battle});
                 if (!battle.paid && !modifiers.free) {
                     RemoveResources.execute(state, {factionId: FactionIDs.ROMANS, count: battle.cost});
                     battle.paid = true;
                 }
-                Battle.execute(state, {battleResults: battle});
             }
         });
 
@@ -82,7 +82,7 @@ class RomanBattle {
                 accumulator.resourcesRemaining -= battle.cost;
                 accumulator.battles.push(battle);
             }
-            return accumulator
+            return accumulator;
         }, {resourcesRemaining: romans.resources(), battles: []}).battles;
 
         if (battles.length > 0 && modifiers.limited) {

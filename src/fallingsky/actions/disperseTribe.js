@@ -41,4 +41,4 @@ class DisperseTribe extends Action {
 
 }
 
-export default DisperseTribe
+export default DisperseTribe;

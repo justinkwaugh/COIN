@@ -39,7 +39,7 @@ class Game {
                 return;
             }
             this.timerId = _.delay(_.bind(this.nextTurn, this), 100);
-        })
+        });
     }
 
     start() {

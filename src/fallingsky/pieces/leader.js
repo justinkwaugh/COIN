@@ -6,9 +6,18 @@ class Leader extends FactionPiece {
         definition.type = 'leader';
         definition.isMobile = true;
         definition.canRoll = true;
+        
         super(definition);
+
         this.name = definition.name;
         this.isSuccessor = ko.observable(false);
+    }
+
+    toJSON() {
+        return Object.assign(super.toJSON(), {
+            name: this.name,
+            isSuccessor: this.isSuccessor()
+        });
     }
 
     toString() {
@@ -17,6 +26,13 @@ class Leader extends FactionPiece {
             value += '\'s Successor';
         }
         return value;
+    }
+    
+    loadGameState(json) {
+        super.loadGameState(json);
+
+        this.name = json.name;
+        this.isSuccessor(json.isSuccessor);
     }
 }
 

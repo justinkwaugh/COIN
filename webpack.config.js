@@ -61,9 +61,9 @@ const web = {
     }
 };
 
-const headless = {
+const vassalbot = {
     entry: {
-        headless: ['./src/headless.js']
+        vassalbot: ['./src/vassalbot.js']
     },
 
     target: 'node',
@@ -77,5 +77,5 @@ const headless = {
 
 module.exports = [
     Object.assign({}, common, web),
-    Object.assign({}, common, headless)
+    Object.assign({}, common, vassalbot)
 ];

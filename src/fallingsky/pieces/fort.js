@@ -6,6 +6,10 @@ class Fort extends FactionPiece {
         definition.canRoll = true;
         super(definition);
     }
+    
+    loadGameState(json) {
+        super.loadGameState(json);
+    }
 }
 
 export default Fort;

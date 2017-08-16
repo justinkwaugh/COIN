@@ -6,6 +6,10 @@ class FallingSkyPlayer extends Player {
         super(definition);
     }
 
+    toJSON() {
+        return Object.assign(super.toJSON(), {});
+    }
+
     willHarass() {
         return true;
     }
