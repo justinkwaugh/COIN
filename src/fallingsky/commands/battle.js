@@ -129,7 +129,7 @@ class Battle extends Command {
         }
         return new BattleResults(
             {
-                region: region,
+                regionId: region.id,
                 cost: cost,
 
                 attackingFaction: attackingFaction,
@@ -163,7 +163,7 @@ class Battle extends Command {
 
     static doExecute(state, args) {
         const battleResults = args.battleResults || args;
-        const region = battleResults.region;
+        const region = state.regionsById[battleResults.regionId];
         const attackingFaction = battleResults.attackingFaction;
         const defendingFaction = battleResults.defendingFaction;
         const attackingPlayer = state.playersByFaction[attackingFaction.id];
@@ -196,10 +196,10 @@ class Battle extends Command {
         }
 
         // We may have removed some attackers or defenders in balearic slingers or massed gallic archers
-        let attackingPieces = Battle.getAttackingPieces(battleResults);
+        let attackingPieces = Battle.getAttackingPieces(battleResults,region);
 
         if (!battleResults.calculatedDefenderResults) {
-            const defendingPieces = Battle.getDefendingPieces(battleResults);
+            const defendingPieces = Battle.getDefendingPieces(battleResults,region);
 
             let unmodifiedDefenderLosses = Losses.calculateUnmodifiedLosses(state, attackingFaction, attackingPieces, false,
                                                                             battleResults.willApplyGermanicHorse);
@@ -330,10 +330,10 @@ class Battle extends Command {
         console.log('Battle complete');
     }
 
-    static getAttackingPieces(battleResults) {
-        let pieces = battleResults.region.getPiecesForFaction(battleResults.attackingFaction.id);
+    static getAttackingPieces(battleResults,region) {
+        let pieces = region.getPiecesForFaction(battleResults.attackingFaction.id);
         if(battleResults.helpingFactionId) {
-            const helpingFactionPieces = battleResults.region.getPiecesForFaction(battleResults.helpingFactionId);
+            const helpingFactionPieces = region.getPiecesForFaction(battleResults.helpingFactionId);
             pieces = _.concat(pieces,helpingFactionPieces);
         }
         // diviciacus too
@@ -341,8 +341,8 @@ class Battle extends Command {
         return pieces;
     }
 
-    static getDefendingPieces(battleResults) {
-        let pieces = battleResults.region.getPiecesForFaction(battleResults.defendingFaction.id);
+    static getDefendingPieces(battleResults,region) {
+        let pieces = region.getPiecesForFaction(battleResults.defendingFaction.id);
         // diviciacus too
 
         return pieces;
@@ -398,7 +398,7 @@ class Battle extends Command {
                                                  false, battleResults.willApplyGermanicHorse));
             if (attackerLosses > 0) {
                 const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                              interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === attackingFaction.id && interaction.balearicSlingers);
+                                              interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.regionId && interaction.respondingFactionId === attackingFaction.id && interaction.balearicSlingers);
                 if (!existingLosses) {
                     console.log('*** Romans are using their Balearic Slingers *** ');
                     state.playersByFaction[attackingFaction.id].takeLosses(state, battleResults,
@@ -430,7 +430,7 @@ class Battle extends Command {
 
         const targetFaction = attackingFaction.id === FactionIDs.ARVERNI ? defendingFaction : attackingFaction;
         const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                          interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === targetFaction.id && interaction.massedGallicArchers);
+                                          interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.regionId && interaction.respondingFactionId === targetFaction.id && interaction.massedGallicArchers);
 
         if (!existingLosses) {
             console.log('*** Arverni are using their Massed Gallic Archers *** ');
@@ -471,16 +471,16 @@ class Battle extends Command {
 
     static handleLosses(state, battleResults, attackResults, counterattack) {
         const defender = counterattack ? battleResults.attackingFaction : battleResults.defendingFaction;
-
-        if (battleResults.region.getPiecesForFaction(defender.id).length === 0) {
+        const region = state.regionsById[battleResults.regionId];
+        if (region.getPiecesForFaction(defender.id).length === 0) {
             return;
         }
 
         const existingLosses = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                      interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defender.id);
+                                      interaction => interaction.type === 'Losses' && interaction.regionId === battleResults.regionId && interaction.respondingFactionId === defender.id);
         if (existingLosses) {
             attackResults.removed = existingLosses.removed;
-            attackResults.remaining = battleResults.region.getPiecesForFaction(defender.id);
+            attackResults.remaining = region.getPiecesForFaction(defender.id);
             attackResults.counterattackPossible = !counterattack && (!battleResults.willAmbush || existingLosses.caesarCanCounterattack);
         }
         else {
@@ -492,7 +492,7 @@ class Battle extends Command {
         const defender = battleResults.defendingFaction;
 
         const existingRetreat = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
-                                       interaction => interaction.type === 'Retreat' && interaction.regionId === battleResults.region.id && interaction.respondingFactionId === defender.id);
+                                       interaction => interaction.type === 'Retreat' && interaction.regionId === battleResults.regionId && interaction.respondingFactionId === defender.id);
         if (!existingRetreat) {
             state.playersByFaction[defender.id].retreatFromBattle(state, battleResults, attackResults);
         }

@@ -17,12 +17,10 @@ class GermanicBattle {
         turn.startSpecialAbility(SpecialAbilityIDs.AMBUSH);
         turn.commitSpecialAbility();
         _.each(effectiveBattles, (battle) => {
+            battle.willAmbush = true;
                 Battle.execute(
                     state, {
-                        region: battle.region,
-                        attackingFaction: battle.attackingFaction,
-                        defendingFaction: battle.defendingFaction,
-                        ambush: true
+                        battleResults: battle
                     });
             });
         turn.commitCommand();

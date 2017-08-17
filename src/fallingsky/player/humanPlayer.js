@@ -85,7 +85,7 @@ class HumanPlayer extends FallingSkyPlayer {
                                                new Retreat({
                                                                requestingFactionId: battleResults.attackingFaction.id,
                                                                respondingFactionId: this.factionId,
-                                                               regionId: battleResults.region.id
+                                                               regionId: battleResults.regionId
                                                            }));
     }
 
@@ -98,7 +98,7 @@ class HumanPlayer extends FallingSkyPlayer {
                            ambush: !counterattack && battleResults.willAmbush,
                            retreated: !counterattack && battleResults.willRetreat,
                            counterattack: counterattack,
-                           regionId: battleResults.region.id,
+                           regionId: battleResults.regionId,
                            legiones: battleResults.legiones,
                            losses: attackResults.losses
                        }));

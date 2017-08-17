@@ -268,10 +268,10 @@ class ArverniBattle {
                 if (potentialBattle.defendingFaction.id !== FactionIDs.ROMANS) {
                     return false;
                 }
-
-                const leader = battleground.region.getLeaderForFaction(FactionIDs.ROMANS);
+                const battleRegion = state.regionsById[battleground.regionId];
+                const leader = battleRegion.getLeaderForFaction(FactionIDs.ROMANS);
                 const caesar = leader && !leader.isSuccessor();
-                const numRomanMobile = battleground.region.getMobilePiecesForFaction(FactionIDs.ROMANS).length;
+                const numRomanMobile = battleRegion.getMobilePiecesForFaction(FactionIDs.ROMANS).length;
                 return !caesar || ((numRomanMobile * 2) < battleground.warbands.length + 1);
             });
     }

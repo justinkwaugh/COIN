@@ -11,12 +11,10 @@ class BelgaeGermanicBattle {
         const effectiveBattle = this.findEffectiveBattle(state, validRegions);
         if (effectiveBattle) {
             console.log('*** Belgae Enlisted Germanic Battle ***');
+            effectiveBattle.willAmbush = true;
             Battle.execute(
                 state, {
-                    region: effectiveBattle.region,
-                    attackingFaction: effectiveBattle.attackingFaction,
-                    defendingFaction: effectiveBattle.defendingFaction,
-                    ambush: true
+                    battleResults: effectiveBattle
                 });
             effective = true;
         }

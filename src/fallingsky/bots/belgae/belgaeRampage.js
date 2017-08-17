@@ -46,7 +46,7 @@ class BelgaeRampage {
 
         const battles = modifiers.context.battles;
         const isBattling = _.find(battles, function (battleResult) {
-            return battleResult.region.id === region.id && battleResult.defendingFaction.id === factionId;
+            return battleResult.regionId === region.id && battleResult.defendingFaction.id === factionId;
         });
         const mobileEnemyPieces = region.getMobilePiecesForFaction(factionId);
 

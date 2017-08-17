@@ -212,7 +212,7 @@ class Bot extends FallingSkyPlayer {
     }
 
     takeLosses(state, battleResults, attackResults, counterattack, causedByCapability) {
-        const region = battleResults.region;
+        const region = state.regionsById[battleResults.regionId];
         const attackingFaction = counterattack ? battleResults.defendingFaction : battleResults.attackingFaction;
         const ambush = battleResults.willAmbush && !causedByCapability;
 
@@ -236,7 +236,7 @@ class Bot extends FallingSkyPlayer {
 
 
         const amAttacker = battleResults.attackingFaction.id === this.factionId;
-        const myPieces = amAttacker ? Battle.getAttackingPieces(battleResults) : Battle.getDefendingPieces(battleResults);
+        const myPieces = amAttacker ? Battle.getAttackingPieces(battleResults,region) : Battle.getDefendingPieces(battleResults, region);
         const helpingFactionId = (amAttacker && battleResults.willEnlistGermans) ? FactionIDs.GERMANIC_TRIBES : null;
 
         const targets = _.clone(Losses.orderPiecesForRemoval(state, myPieces, battleResults.willRetreat, helpingFactionId));
@@ -294,7 +294,7 @@ class Bot extends FallingSkyPlayer {
 
 
     retreatFromBattle(state, battleResults, attackResults) {
-        const region = battleResults.region;
+        const region = state.regionsById[battleResults.regionId];
         const attackingFaction = battleResults.attackingFaction;
         const canRetreatInPlace = attackingFaction.id === FactionIDs.ROMANS &&
                                   this.factionId !== FactionIDs.GERMANIC_TRIBES;

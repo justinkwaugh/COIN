@@ -51,11 +51,11 @@ class BelgaeEnlist {
 
     static checkAndUpdateBattleResult(state, modifiers, enlistResults, battleResults) {
         const enlistResultForBattleRegion = _.find(enlistResults,
-                                                   result => result.region.id === battleResults.region.id);
+                                                   result => result.region.id === battleResults.regionId);
         if (enlistResultForBattleRegion) {
             const enlistedBattleResults = Battle.test(
                 state, {
-                    region: battleResults.region,
+                    region: state.regionsById[battleResults.regionId],
                     attackingFaction: battleResults.attackingFaction,
                     defendingFaction: battleResults.defendingFaction,
                     enlistingGermans: true

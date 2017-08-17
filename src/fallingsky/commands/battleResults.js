@@ -7,7 +7,7 @@ class BattleResults extends COINObject {
     constructor(definition) {
         super(definition);
 
-        this.region = definition.region;
+        this.regionId = definition.regionId;
         this.cost = definition.cost;
 
         this.attackingFaction = definition.attackingFaction;

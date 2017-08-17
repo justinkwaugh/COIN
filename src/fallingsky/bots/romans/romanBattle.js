@@ -225,7 +225,7 @@ class RomanBattle {
                     priority += 'b' + (99 - enemyData.numAlliesAndCitadels) + '-';
                 }
 
-                priority += 'c' + (99 - potentialBattle.region.getWarbandsOrAuxiliaForFaction(
+                priority += 'c' + (99 - state.regionsById[potentialBattle.regionId].getWarbandsOrAuxiliaForFaction(
                         potentialBattle.defendingFaction.id).length);
 
                 const faction = state.factionsById[potentialBattle.defendingFaction.id];

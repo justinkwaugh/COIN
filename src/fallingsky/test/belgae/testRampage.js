@@ -69,8 +69,8 @@ class TestRampage {
             state, new CommandModifier(
                 {
                     commandSpecific: {
-                        battles: [new BattleResult({region: mandubiiRegion, defendingFaction: aedui}),
-                            new BattleResult({region: arverniRegion, defendingFaction: romans})]
+                        battles: [new BattleResult({regionId: mandubiiRegion.id, defendingFaction: aedui}),
+                            new BattleResult({regionId: arverniRegion.id, defendingFaction: romans})]
                     }
                 }));
     }
