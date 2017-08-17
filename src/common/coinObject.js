@@ -14,8 +14,8 @@ class COINObject {
     }
 
 
-    static deserialize(json) {
-        let objDefinition = JSON.parse(json);
+    static deserialize(definition) {
+        let objDefinition = _.isString(definition) ? JSON.parse(definition) : definition;
         let objClass = this;
 
         if(this.prototype.constructor.name === 'COINObject') {
@@ -29,6 +29,19 @@ class COINObject {
 
     static registerClass() {
         classRegistry[this.prototype.constructor.name] = this;
+    }
+
+    static deserializeCOINObjects(obj) {
+        _.each(obj, (value, keyOrIndex) => {
+            if (_.isPlainObject(value) && value.className) {
+                obj[keyOrIndex] = this.deserialize(value);
+            }
+            else if (_.isArray(value)) {
+                this.deserializeCOINObjects(value);
+            }
+        });
+
+        return obj;
     }
 }
 

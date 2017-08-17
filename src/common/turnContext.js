@@ -1,9 +1,12 @@
+import COINObject from 'common/coinObject'
 import _ from 'lib/lodash';
 import CommandIDs from 'fallingsky/config/commandIds';
 import RegionIDs from 'fallingsky/config/regionIds';
 
-class TurnContext {
+class TurnContext extends COINObject {
     constructor(definition = {}) {
+        super(definition);
+
         this.id = definition.id || '' + Math.random(); // need to make uuid
         this.limited = definition.limited;
         this.allowLimitedSpecial = definition.allowLimitedSpecial;
@@ -12,7 +15,7 @@ class TurnContext {
         this.outOfSequence = definition.outOfSequence;
         this.free = definition.free;
         this.winter = definition.winter;
-        this.context = definition.context || {};
+        this.context = COINObject.deserializeCOINObjects(definition.context) || {};
         this.currentFactionId = definition.currentFactionId;
         this.allowedRegions = _(RegionIDs).values().filter(function(regionId) {
             return !definition.allowedRegions || _.indexOf(definition.allowedRegions , regionId) >= 0;
@@ -49,5 +52,7 @@ class TurnContext {
         return testVersion;
     }
 }
+
+TurnContext.registerClass();
 
 export default TurnContext;

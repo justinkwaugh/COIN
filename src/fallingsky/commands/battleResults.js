@@ -1,9 +1,12 @@
+import COINObject from 'common/coinObject';
 import _ from '../../lib/lodash';
 import FactionIDs from 'fallingsky/config/factionIds'
 import Logging from '../util/logging';
 
-class BattleResults {
+class BattleResults extends COINObject {
     constructor(definition) {
+        super(definition);
+
         this.region = definition.region;
         this.cost = definition.cost;
 
@@ -227,5 +230,7 @@ class BattleResults {
         }
     }
 }
+
+BattleResults.registerClass();
 
 export default BattleResults;
