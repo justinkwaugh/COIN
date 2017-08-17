@@ -105,7 +105,7 @@ class Bot extends FallingSkyPlayer {
         const retreatRemoved = _.take(retreatOrderedPieces, retreatLosses);
         const retreatRemaining = _.drop(retreatOrderedPieces, retreatLosses);
 
-        const worstCaseAttackerLosses = Math.floor(Losses.calculateUnmodifiedLosses(state, noRetreatRemaining, true));
+        const worstCaseAttackerLosses = Math.floor(Losses.calculateUnmodifiedLosses(state, attackingFaction, noRetreatRemaining, true));
 
         // 8.4.3 - When needed to ensure the survival off their last Defending piece.
         if (noRetreatRemaining.length === 0 && retreatRemaining.length > 0) {
@@ -213,7 +213,7 @@ class Bot extends FallingSkyPlayer {
 
     takeLosses(state, battleResults, attackResults, counterattack, causedByCapability) {
         const region = state.regionsById[battleResults.regionId];
-        const attackingFaction = counterattack ? battleResults.defendingFaction : battleResults.attackingFaction;
+        const attackingFaction = state.factionsById[counterattack ? battleResults.defendingFactionId : battleResults.attackingFactionId];
         const ambush = battleResults.willAmbush && !causedByCapability;
 
         const ballistae = state.hasUnshadedCapability(CapabilityIDs.BALLISTAE) && this.factionId === FactionIDs.ROMANS;
@@ -235,7 +235,7 @@ class Bot extends FallingSkyPlayer {
         }
 
 
-        const amAttacker = battleResults.attackingFaction.id === this.factionId;
+        const amAttacker = battleResults.attackingFactionId === this.factionId;
         const myPieces = amAttacker ? Battle.getAttackingPieces(battleResults,region) : Battle.getDefendingPieces(battleResults, region);
         const helpingFactionId = (amAttacker && battleResults.willEnlistGermans) ? FactionIDs.GERMANIC_TRIBES : null;
 
@@ -295,7 +295,7 @@ class Bot extends FallingSkyPlayer {
 
     retreatFromBattle(state, battleResults, attackResults) {
         const region = state.regionsById[battleResults.regionId];
-        const attackingFaction = battleResults.attackingFaction;
+        const attackingFaction = state.factionsById[battleResults.attackingFactionId];
         const canRetreatInPlace = attackingFaction.id === FactionIDs.ROMANS &&
                                   this.factionId !== FactionIDs.GERMANIC_TRIBES;
 

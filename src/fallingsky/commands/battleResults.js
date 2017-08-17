@@ -10,8 +10,8 @@ class BattleResults extends COINObject {
         this.regionId = definition.regionId;
         this.cost = definition.cost;
 
-        this.attackingFaction = definition.attackingFaction;
-        this.defendingFaction = definition.defendingFaction;
+        this.attackingFactionId = definition.attackingFactionId;
+        this.defendingFactionId = definition.defendingFactionId;
         this.attackingPieces = definition.attackingPieces;
         this.defendingPieces = definition.defendingPieces;
 
@@ -208,24 +208,24 @@ class BattleResults extends COINObject {
 
     logResults() {
         console.log(
-            '*** Battle - ' + this.attackingFaction.name + ' attacks ' + this.defendingFaction.name + ' in region ' + this.region.name);
+            '*** Battle - ' + this.attackingFactionId + ' attacks ' + this.defendingFactionId + ' in region ' + this.regionId);
         console.log('    *** Normal Possibilities ***');
         console.log(
-            '    With retreat ' + this.defendingFaction.name + ' will lose the following ' + this.worstCaseRetreatDefenderResults.targets.length + ' pieces');
+            '    With retreat ' + this.defendingFactionId + ' will lose the following ' + this.worstCaseRetreatDefenderResults.targets.length + ' pieces');
         Logging.logPieces(this.worstCaseRetreatDefenderResults.targets);
         console.log(
-            '    Without retreat ' + this.defendingFaction.name + ' will lose the following ' + this.worstCaseNoRetreatDefenderResults.normal.targets.length + ' pieces');
+            '    Without retreat ' + this.defendingFactionId + ' will lose the following ' + this.worstCaseNoRetreatDefenderResults.normal.targets.length + ' pieces');
         Logging.logPieces(this.worstCaseNoRetreatDefenderResults.normal.targets);
         console.log(
-            '    If counterattacked ' + this.attackingFaction.name + ' will lose the following ' + this.worstCaseAttackerLosses.normal + ' pieces');
+            '    If counterattacked ' + this.attackingFactionId + ' will lose the following ' + this.worstCaseAttackerLosses.normal + ' pieces');
         Logging.logPieces(this.worstCaseCounterattackResults.normal.targets);
         if (this.canAmbush) {
             console.log('    *** Ambush Possibilities ***');
             console.log(
-                '    ' + this.defendingFaction.name + ' will lose the following ' + this.worstCaseNoRetreatDefenderResults.ambush.targets.length + ' pieces');
+                '    ' + this.defendingFactionId + ' will lose the following ' + this.worstCaseNoRetreatDefenderResults.ambush.targets.length + ' pieces');
             Logging.logPieces(this.worstCaseNoRetreatDefenderResults.ambush.targets);
             console.log(
-                '    If counterattacked ' + this.attackingFaction.name + ' will lose the following ' + this.worstCaseAttackerLosses.ambush + ' pieces');
+                '    If counterattacked ' + this.attackingFactionId + ' will lose the following ' + this.worstCaseAttackerLosses.ambush + ' pieces');
             Logging.logPieces(this.worstCaseCounterattackResults.ambush.targets);
         }
     }

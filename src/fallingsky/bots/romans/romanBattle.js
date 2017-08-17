@@ -215,7 +215,7 @@ class RomanBattle {
         return _(battleground.potentialBattles).map(
             (potentialBattle) => {
                 let priority;
-                const enemyData = battleground.importantEnemyData[potentialBattle.defendingFaction.id];
+                const enemyData = battleground.importantEnemyData[potentialBattle.defendingFactionId];
 
                 if (enemyData.hasLeader) {
                     priority = 'a-';
@@ -226,10 +226,10 @@ class RomanBattle {
                 }
 
                 priority += 'c' + (99 - state.regionsById[potentialBattle.regionId].getWarbandsOrAuxiliaForFaction(
-                        potentialBattle.defendingFaction.id).length);
+                        potentialBattle.defendingFactionId).length);
 
-                const faction = state.factionsById[potentialBattle.defendingFaction.id];
-                const player = state.playersByFaction[potentialBattle.defendingFaction.id];
+                const faction = state.factionsById[potentialBattle.defendingFactionId];
+                const player = state.playersByFaction[potentialBattle.defendingFactionId];
                 priority += '-' + (50 - faction.victoryMargin(state)) + '-' + (player.isNonPlayer ? 'b' : 'a');
                 return {
                     battle: potentialBattle,

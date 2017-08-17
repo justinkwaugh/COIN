@@ -81,9 +81,9 @@ class HumanPlayer extends FallingSkyPlayer {
     }
 
     retreatFromBattle(state, battleResults, attackResults) {
-        throw new PlayerInteractionNeededError('Retreat from battle with ' + battleResults.attackingFaction.id,
+        throw new PlayerInteractionNeededError('Retreat from battle with ' + battleResults.attackingFactionId,
                                                new Retreat({
-                                                               requestingFactionId: battleResults.attackingFaction.id,
+                                                               requestingFactionId: battleResults.attackingFactionId,
                                                                respondingFactionId: this.factionId,
                                                                regionId: battleResults.regionId
                                                            }));
@@ -91,9 +91,9 @@ class HumanPlayer extends FallingSkyPlayer {
 
     takeLosses(state, battleResults, attackResults, counterattack) {
         throw new PlayerInteractionNeededError(
-            'Losses must be taken from battle with ' + battleResults.attackingFaction.id,
+            'Losses must be taken from battle with ' + battleResults.attackingFactionId,
             new Losses({
-                           requestingFactionId: battleResults.attackingFaction.id,
+                           requestingFactionId: battleResults.attackingFactionId,
                            respondingFactionId: this.factionId,
                            ambush: !counterattack && battleResults.willAmbush,
                            retreated: !counterattack && battleResults.willRetreat,

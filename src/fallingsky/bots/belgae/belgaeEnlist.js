@@ -56,8 +56,8 @@ class BelgaeEnlist {
             const enlistedBattleResults = Battle.test(
                 state, {
                     region: state.regionsById[battleResults.regionId],
-                    attackingFaction: battleResults.attackingFaction,
-                    defendingFaction: battleResults.defendingFaction,
+                    attackingFaction: state.factionsById[battleResults.attackingFactionId],
+                    defendingFaction: state.factionsById[battleResults.defendingFactionId],
                     enlistingGermans: true
                 });
 

@@ -218,7 +218,7 @@ class AeduiBattle {
     }
 
     static getBattlePriority(battleResult) {
-        const enemyPriority = EnemyFactionPriority[battleResult.defendingFaction.id];
+        const enemyPriority = EnemyFactionPriority[battleResult.defendingFactionId];
         if (battleResult.willCauseLeaderRemoval(battleResult.canAmbush)) {
             return 'a' + enemyPriority;
         }

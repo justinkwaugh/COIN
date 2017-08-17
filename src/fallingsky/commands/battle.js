@@ -132,8 +132,8 @@ class Battle extends Command {
                 regionId: region.id,
                 cost: cost,
 
-                attackingFaction: attackingFaction,
-                defendingFaction: defendingFaction,
+                attackingFactionId: attackingFaction.id,
+                defendingFactionId: defendingFaction.id,
 
                 attackingPieces: attackingPieces,
                 defendingPieces: defendingPieces,
@@ -164,8 +164,8 @@ class Battle extends Command {
     static doExecute(state, args) {
         const battleResults = args.battleResults || args;
         const region = state.regionsById[battleResults.regionId];
-        const attackingFaction = battleResults.attackingFaction;
-        const defendingFaction = battleResults.defendingFaction;
+        const attackingFaction = state.factionsById[battleResults.attackingFactionId];
+        const defendingFaction = state.factionsById[battleResults.defendingFactionId];
         const attackingPlayer = state.playersByFaction[attackingFaction.id];
         const defendingPlayer = state.playersByFaction[defendingFaction.id];
         const enlistingGermans = battleResults.willEnlistGermans;
@@ -331,7 +331,7 @@ class Battle extends Command {
     }
 
     static getAttackingPieces(battleResults,region) {
-        let pieces = region.getPiecesForFaction(battleResults.attackingFaction.id);
+        let pieces = region.getPiecesForFaction(battleResults.attackingFactionId);
         if(battleResults.helpingFactionId) {
             const helpingFactionPieces = region.getPiecesForFaction(battleResults.helpingFactionId);
             pieces = _.concat(pieces,helpingFactionPieces);
@@ -342,7 +342,7 @@ class Battle extends Command {
     }
 
     static getDefendingPieces(battleResults,region) {
-        let pieces = region.getPiecesForFaction(battleResults.defendingFaction.id);
+        let pieces = region.getPiecesForFaction(battleResults.defendingFactionId);
         // diviciacus too
 
         return pieces;
@@ -470,7 +470,7 @@ class Battle extends Command {
     }
 
     static handleLosses(state, battleResults, attackResults, counterattack) {
-        const defender = counterattack ? battleResults.attackingFaction : battleResults.defendingFaction;
+        const defender = state.factionsById[counterattack ? battleResults.attackingFactionId : battleResults.defendingFactionId];
         const region = state.regionsById[battleResults.regionId];
         if (region.getPiecesForFaction(defender.id).length === 0) {
             return;
@@ -489,7 +489,7 @@ class Battle extends Command {
     }
 
     static handleRetreat(state, battleResults, attackResults) {
-        const defender = battleResults.defendingFaction;
+        const defender = state.factionsById[battleResults.defendingFactionId];
 
         const existingRetreat = _.find(state.turnHistory.getCurrentTurn().getCurrentInteractions(),
                                        interaction => interaction.type === 'Retreat' && interaction.regionId === battleResults.regionId && interaction.respondingFactionId === defender.id);

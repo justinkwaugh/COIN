@@ -228,7 +228,7 @@ class ArverniBattle {
                 if (battleground.hasVercingetorix) {
                     priority = 'a';
                 }
-                else if (_.indexOf(battleground.importantEnemies, bestBattle.defendingFaction.id) >= 0) {
+                else if (_.indexOf(battleground.importantEnemies, bestBattle.defendingFactionId) >= 0) {
                     priority = 'b';
                 }
 
@@ -249,14 +249,14 @@ class ArverniBattle {
             if (!bestBattle) {
                 // Should find the one that meets condition?
                 bestBattle = _.find(battleground.potentialBattles,
-                                    potentialBattle => potentialBattle.defendingFaction.id === FactionIDs.AEDUI);
+                                    potentialBattle => potentialBattle.defendingFactionId === FactionIDs.AEDUI);
             }
         }
         else {
             bestBattle = _(battleground.potentialBattles).sortBy(
                 potentialBattle => (_.indexOf(
-                    battleground.importantEnemies, potentialBattle.defendingFaction.id) >= 0 ? 'a' : 'b') +
-                                   EnemyFactionPriority[potentialBattle.defendingFaction.id]).first();
+                    battleground.importantEnemies, potentialBattle.defendingFactionId) >= 0 ? 'a' : 'b') +
+                                   EnemyFactionPriority[potentialBattle.defendingFactionId]).first();
         }
 
         return bestBattle;
@@ -265,7 +265,7 @@ class ArverniBattle {
     static getVercingetorixBattleWithRomans(battleground) {
         return _.find(
             battleground.potentialBattles, function (potentialBattle) {
-                if (potentialBattle.defendingFaction.id !== FactionIDs.ROMANS) {
+                if (potentialBattle.defendingFactionId !== FactionIDs.ROMANS) {
                     return false;
                 }
                 const battleRegion = battleground.region;
@@ -279,7 +279,7 @@ class ArverniBattle {
     static willVercingetorixBattleAedui(state, battleground) {
         const romansPresent = battleground.region.piecesByFaction()[FactionIDs.ROMANS];
         const aeduiBattle = _.find(battleground.potentialBattles,
-                                   potentialBattle => potentialBattle.defendingFaction.id === FactionIDs.AEDUI);
+                                   potentialBattle => potentialBattle.defendingFactionId === FactionIDs.AEDUI);
         return !romansPresent && aeduiBattle;
     }
 

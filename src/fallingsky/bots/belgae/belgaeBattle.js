@@ -230,7 +230,7 @@ class BelgaeBattle {
                 if (battleground.hasAmbiorix) {
                     priority = 'a';
                 }
-                else if (_.indexOf(battleground.importantEnemies, bestBattle.defendingFaction.id) >= 0) {
+                else if (_.indexOf(battleground.importantEnemies, bestBattle.defendingFactionId) >= 0) {
                     priority = 'b';
                 }
 
@@ -250,14 +250,14 @@ class BelgaeBattle {
             bestBattle = this.getAmbiorixBattleWithRomans(battleground);
             if (!bestBattle) {
                 // Should find the one that meets condition?
-                bestBattle = _.find(battleground.potentialBattles, potentialBattle => potentialBattle.defendingFaction.id !== FactionIDs.ROMANS);
+                bestBattle = _.find(battleground.potentialBattles, potentialBattle => potentialBattle.defendingFactionId !== FactionIDs.ROMANS);
             }
         }
         else {
             bestBattle = _(battleground.potentialBattles).sortBy(
                 potentialBattle => (_.indexOf(
-                    battleground.importantEnemies, potentialBattle.defendingFaction.id) >= 0 ? 'a' : 'b') +
-                                   EnemyFactionPriority[potentialBattle.defendingFaction.id]).first();
+                    battleground.importantEnemies, potentialBattle.defendingFactionId) >= 0 ? 'a' : 'b') +
+                                   EnemyFactionPriority[potentialBattle.defendingFactionId]).first();
         }
 
         return bestBattle;
@@ -266,7 +266,7 @@ class BelgaeBattle {
     static getAmbiorixBattleWithRomans(battleground) {
         return _.find(
             battleground.potentialBattles, function (potentialBattle) {
-                if (potentialBattle.defendingFaction.id !== FactionIDs.ROMANS) {
+                if (potentialBattle.defendingFactionId !== FactionIDs.ROMANS) {
                     return false;
                 }
                 const numRomanMobile = battleground.region.getMobilePiecesForFaction(FactionIDs.ROMANS).length;
@@ -276,7 +276,7 @@ class BelgaeBattle {
 
     static willAmbiorixBattleGallicFaction(state, battleground) {
         const romansPresent = battleground.region.piecesByFaction()[FactionIDs.ROMANS];
-        const gallicBattle = _.find(battleground.potentialBattles, potentialBattle => potentialBattle.defendingFaction.id !== FactionIDs.ROMANS);
+        const gallicBattle = _.find(battleground.potentialBattles, potentialBattle => potentialBattle.defendingFactionId !== FactionIDs.ROMANS);
         return !romansPresent && gallicBattle;
     }
 
