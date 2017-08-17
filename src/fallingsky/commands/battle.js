@@ -127,7 +127,7 @@ class Battle extends Command {
         if(attackingFaction.id === FactionIDs.AEDUI && state.hasShadedCapability(CapabilityIDs.CONVICTOLITAVIS)) {
             cost *= 2;
         }
-        debugger;
+
         return new BattleResults(
             {
                 regionId: region.id,
