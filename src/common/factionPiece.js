@@ -1,6 +1,9 @@
+import COINObject from 'common/coinObject';
 
-class FactionPiece {
+class FactionPiece extends COINObject {
     constructor(definition) {
+        super(definition);
+
         this.factionId = definition.factionId;
         this.type = definition.type;
         this.isMobile = definition.isMobile;
@@ -11,5 +14,7 @@ class FactionPiece {
         return this.factionId + '|' + this.type;
     }
 }
+
+FactionPiece.registerClass();
 
 export default FactionPiece;
