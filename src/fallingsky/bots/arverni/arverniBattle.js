@@ -268,7 +268,7 @@ class ArverniBattle {
                 if (potentialBattle.defendingFaction.id !== FactionIDs.ROMANS) {
                     return false;
                 }
-                const battleRegion = state.regionsById[battleground.regionId];
+                const battleRegion = battleground.region;
                 const leader = battleRegion.getLeaderForFaction(FactionIDs.ROMANS);
                 const caesar = leader && !leader.isSuccessor();
                 const numRomanMobile = battleRegion.getMobilePiecesForFaction(FactionIDs.ROMANS).length;
