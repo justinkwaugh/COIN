@@ -127,6 +127,7 @@ class Battle extends Command {
         if(attackingFaction.id === FactionIDs.AEDUI && state.hasShadedCapability(CapabilityIDs.CONVICTOLITAVIS)) {
             cost *= 2;
         }
+        debugger;
         return new BattleResults(
             {
                 regionId: region.id,
@@ -135,8 +136,8 @@ class Battle extends Command {
                 attackingFactionId: attackingFaction.id,
                 defendingFactionId: defendingFaction.id,
 
-                attackingPieces: attackingPieces,
-                defendingPieces: defendingPieces,
+                attackingPieces: _.invokeMap(attackingPieces, 'clone'),
+                defendingPieces: _.invokeMap(defendingPieces, 'clone'),
 
                 canAmbush: canAmbush,
                 enlistingGermans: enlistingGermans,
@@ -256,8 +257,10 @@ class Battle extends Command {
         }
 
         if (battleResults.willBesiege && !battleResults.besieged) {
-            const pieceToRemove = _.find(battleResults.defendingPieces, {type: 'citadel'}) ||
-                                  _.find(battleResults.defendingPieces, {type: 'alliedtribe'});
+            const defendingPieces = Battle.getDefendingPieces(battleResults,region);
+
+            const pieceToRemove = _.find(defendingPieces, {type: 'citadel'}) ||
+                                  _.find(defendingPieces, {type: 'alliedtribe'});
             if (pieceToRemove) {
                 console.log('*** Attacker is Besieging ***');
                 RemovePieces.execute(state,
@@ -277,7 +280,7 @@ class Battle extends Command {
 
 
         if (battleResults.committedDefenderResults.counterattackPossible && !battleResults.willRetreat) {
-            const defendingPieces = region.piecesByFaction()[defendingFaction.id];
+            const defendingPieces = Battle.getDefendingPieces(battleResults,region);
             let attackerLosses = Losses.calculateUnmodifiedLosses(state, defendingFaction,
                                                                   battleResults.committedDefenderResults.remaining,
                                                                   true, battleResults.willApplyGermanicHorse);

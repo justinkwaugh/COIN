@@ -8,7 +8,7 @@ class Leader extends FactionPiece {
         definition.canRoll = true;
         super(definition);
         this.name = definition.name;
-        this.isSuccessor = ko.observable(false);
+        this.isSuccessor = ko.observable(definition.isSuccessor);
     }
 
     toString() {
@@ -19,5 +19,7 @@ class Leader extends FactionPiece {
         return value;
     }
 }
+
+Leader.registerClass();
 
 export default Leader;

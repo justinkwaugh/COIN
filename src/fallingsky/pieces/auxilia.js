@@ -8,8 +8,8 @@ class Auxilia extends FactionPiece {
 
         super(definition);
 
-        this.revealed = ko.observable();
-        this.scouted = ko.observable();
+        this.revealed = ko.observable(definition.revealed);
+        this.scouted = ko.observable(definition.scouted);
         this.status = ko.pureComputed(() => {
             return this.revealed() ? 'revealed' : 'hidden';
         });
@@ -19,5 +19,7 @@ class Auxilia extends FactionPiece {
         return super.identifier() + '|' + this.status();
     }
 }
+
+Auxilia.registerClass();
 
 export default Auxilia;

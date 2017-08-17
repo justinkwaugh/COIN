@@ -13,6 +13,10 @@ class COINObject {
         return plainObject;
     }
 
+    clone() {
+        return COINObject.deserialize(this.serialize());
+    }
+
 
     static deserialize(definition) {
         let objDefinition = _.isString(definition) ? JSON.parse(definition) : definition;

@@ -1,6 +1,8 @@
-import FallingSkyGameState from 'fallingsky/state/fallingSkyGameState'
+import FallingSkyGameState from 'fallingsky/state/fallingSkyGameState';
+import RegionIDs from 'fallingsky/config/regionIds';
 
 import TurnContext from 'common/turnContext';
+import BattleResults from 'fallingsky/commands/battleResults';
 
 describe("TurnContext", function () {
     let state;
@@ -21,9 +23,16 @@ describe("TurnContext", function () {
 
     it('serializes / deserializes', function () {
         const turnContext = new TurnContext();
+        const battle = new BattleResults({
+                                              regionId: RegionIDs.MANDUBII,
+                                              attackingPieces: belgae.removeWarbands(4)
+                                          });
+
+
         turnContext.context.warbands = belgae.removeWarbands(2);
+        turnContext.context.battles = [battle];
         turnContext.context.alliedTribe = belgae.removeAlliedTribe();
-        turnContext.context.plainObject = { a: 'b'};
+        turnContext.context.plainObject = {a: 'b'};
         turnContext.context.stringVal = 'abc';
         const id = turnContext.id;
         const json = turnContext.serialize();
@@ -34,6 +43,10 @@ describe("TurnContext", function () {
         expect(restoredTurnContext.context.alliedTribe.factionId).to.equal(belgae.id);
         expect(restoredTurnContext.context.plainObject.a).to.equal('b');
         expect(restoredTurnContext.context.stringVal).to.equal('abc');
+        expect(restoredTurnContext.context.battles.length).to.equal(1);
+        expect(restoredTurnContext.context.battles[0].regionId).to.equal(RegionIDs.MANDUBII);
+        expect(restoredTurnContext.context.battles[0].attackingPieces.length).to.equal(4);
+        expect(restoredTurnContext.context.battles[0].attackingPieces[0].status()).to.equal('hidden');
     });
 
 });

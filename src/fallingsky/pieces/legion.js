@@ -10,4 +10,6 @@ class Legion extends FactionPiece {
     }
 }
 
+Legion.registerClass();
+
 export default Legion;

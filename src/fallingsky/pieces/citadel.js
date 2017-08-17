@@ -7,12 +7,14 @@ class Citadel extends FactionPiece {
         definition.canRoll = true;
         super(definition);
 
-        this.tribeId = null;
+        this.tribeId = definition.tribeId;
     }
 
     identifier() {
         return super.identifier() + '|' + (this.tribeId || '');
     }
 }
+
+Citadel.registerClass();
 
 export default Citadel;

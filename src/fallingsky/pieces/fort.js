@@ -8,4 +8,6 @@ class Fort extends FactionPiece {
     }
 }
 
+Fort.registerClass();
+
 export default Fort;

@@ -12,8 +12,8 @@ class BattleResults extends COINObject {
 
         this.attackingFactionId = definition.attackingFactionId;
         this.defendingFactionId = definition.defendingFactionId;
-        this.attackingPieces = definition.attackingPieces;
-        this.defendingPieces = definition.defendingPieces;
+        this.attackingPieces = COINObject.deserializeCOINObjects(definition.attackingPieces);
+        this.defendingPieces = COINObject.deserializeCOINObjects(definition.defendingPieces);
 
         this.canAmbush = definition.canAmbush;
         this.defenderCanRetreat = definition.defenderCanRetreat;

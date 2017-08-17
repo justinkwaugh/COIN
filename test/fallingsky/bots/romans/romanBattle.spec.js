@@ -320,6 +320,7 @@ describe("Roman Battle", function () {
         PlaceCitadel.execute(state, {factionId: arverni.id, regionId: mandubiiRegion.id, tribeId: TribeIDs.MANDUBII});
 
         const context = turn.getContext();
+        debugger;
         const command = RomanBattle.battle(state, context);
         expect(command).to.equal(FactionActions.COMMAND_AND_SPECIAL);
         expect(mandubiiRegion.getCitadelForFaction(FactionIDs.ARVERNI)).to.be.null;
