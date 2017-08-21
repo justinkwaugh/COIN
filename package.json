@@ -42,9 +42,11 @@
     "node-sass": "^4.5.3",
     "resolve-url-loader": "^2.1.0",
     "sass-loader": "^6.0.6",
+    "short-uuid": "^2.3.4",
     "sinon": "^2.3.5",
     "style-loader": "^0.18.2",
-    "url-loader": "^0.5.9"
+    "url-loader": "^0.5.9",
+    "uuid": "^3.1.0"
   },
   "scripts": {
     "start": "./node_modules/.bin/webpack-dev-server --open --inline --hot",

@@ -7,6 +7,7 @@ import RevealPieces from '../actions/revealPieces';
 import RemovePieces  from '../actions/removePieces';
 import {CapabilityIDs} from '../config/capabilities';
 import Losses from 'fallingsky/util/losses';
+import Logging from 'fallingsky/util/logging';
 
 class Battle extends Command {
 
@@ -182,6 +183,10 @@ class Battle extends Command {
             console.log(attackingFaction.name + ' is ambushing!');
         }
 
+        let attackingPieces = Battle.getAttackingPieces(battleResults,region);
+        console.log(attackingFaction.name + ' is attacking with:');
+        Logging.logPieces(attackingPieces);
+
         this.handleGermanicHorse(state, battleResults, region, attackingFaction, defendingFaction);
 
         if (!battleResults.handledBalearicSlingers) {
@@ -197,7 +202,7 @@ class Battle extends Command {
         }
 
         // We may have removed some attackers or defenders in balearic slingers or massed gallic archers
-        let attackingPieces = Battle.getAttackingPieces(battleResults,region);
+        attackingPieces = Battle.getAttackingPieces(battleResults,region);
 
         if (!battleResults.calculatedDefenderResults) {
             const defendingPieces = Battle.getDefendingPieces(battleResults,region);
@@ -334,7 +339,7 @@ class Battle extends Command {
     }
 
     static getAttackingPieces(battleResults,region) {
-        let pieces = region.getPiecesForFaction(battleResults.attackingFactionId);
+        let pieces = battleResults.attackingWithPieceIds ? region.getPiecesById(battleResults.attackingWithPieceIds) : region.getPiecesForFaction(battleResults.attackingFactionId);
         if(battleResults.helpingFactionId) {
             const helpingFactionPieces = region.getPiecesForFaction(battleResults.helpingFactionId);
             pieces = _.concat(pieces,helpingFactionPieces);

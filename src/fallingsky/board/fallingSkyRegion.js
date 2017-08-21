@@ -187,6 +187,10 @@ class FallingSkyRegion extends Region {
         return this.piecesByFaction()[factionId] || [];
     }
 
+    getPiecesById(ids) {
+        return _.filter(this.pieces(), piece => _.indexOf(ids, piece.id) >= 0);
+    }
+
     getHiddenPiecesForFaction(factionId) {
         return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && !piece.revealed());
     }

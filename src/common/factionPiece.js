@@ -1,9 +1,11 @@
 import COINObject from 'common/coinObject';
+import short from 'short-uuid';
 
 class FactionPiece extends COINObject {
     constructor(definition) {
         super(definition);
 
+        this.id = short().new();
         this.factionId = definition.factionId;
         this.type = definition.type;
         this.isMobile = definition.isMobile;

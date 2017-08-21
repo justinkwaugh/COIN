@@ -28,6 +28,7 @@ class BattleResults extends COINObject {
         this.worstCaseAttackerLosses = definition.worstCaseAttackerLosses;
         this.worstCaseCounterattackResults = definition.worstCaseCounterattackResults;
 
+        this.attackingWithPieceIds = definition.attackingWithPieceIds;
         this.helpingFactionId = definition.helpingFactionId;
         this.willAmbush = definition.willAmbush;
         this.willEnlistGermans = definition.willEnlistGermans;

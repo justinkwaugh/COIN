@@ -6,30 +6,44 @@ import RegionGroups from 'fallingsky/config/regionGroups';
 import TurnContext from 'common/turnContext';
 import MovePieces from 'fallingsky/actions/movePieces';
 
+const Checkpoints = {
+    FIND_TARGET_CHECK: 1
+
+};
+
 class Event72 {
     static handleEvent(state) {
-        const winningPlayers = _(state.playersByFaction).reject(player => player.isNonPlayer).map(player => {
-            return {
-                player,
-                priority: 50 - player.victoryMargin(state)
+        const turn = state.turnHistory.currentTurn;
+        let target = null;
+
+        if (!turn.getCheckpoint(Checkpoints.FIND_TARGET_CHECK)) {
+            const winningPlayers = _(state.playersByFaction).reject(player => player.isNonPlayer).map(player => {
+                return {
+                    player,
+                    priority: 50 - state.factionsById[player.factionId].victoryMargin(state)
+                }
+            }).sortBy('priority').groupBy('priority').map(_.shuffle).first();
+
+            target = _(winningPlayers).map('player').map(
+                player => this.findTargetRegionForPlayer(state, player)).compact().sortBy(
+                'priority').first();
+
+            if (!target) {
+                return false;
             }
-        }).sortBy('priority').groupBy('priority').map(_.shuffle).first();
 
-        const target = _(winningPlayers).map(player => this.findTargetRegionForPlayer(state, player)).sortBy(
-            'priority').first();
-
-        if (!target) {
-            return false;
+            this.marchToTarget(state, target);
+            turn.markCheckpoint(Checkpoints.FIND_TARGET_CHECK);
         }
 
-        this.marchToTarget(state, target);
         this.battlePlayer(state, target);
 
         return true;
     }
 
     static findTargetRegionForPlayer(state, player) {
-        return _(state.regions).shuffle().filter(region => region.getPiecesForFaction(player.factionId)).map(region => {
+        return _(state.regions).shuffle().filter(region => region.getPiecesForFaction(player.factionId).length > 0).map(region => {
+
             const bestAdjacent = _.reduce(region.adjacent, (accumulator, adjacent) => {
                 const numCanMove = adjacent.getHiddenWarbandsOrAuxiliaForFaction(FactionIDs.BELGAE).length;
                 if (numCanMove > accumulator.max) {
@@ -70,7 +84,8 @@ class Event72 {
                 pieces,
                 priority: (99 - mostToMove) + '-' + controlPriority
             }
-        }).compact().sortBy('priority').groupBy('priority').flatten().first();
+        }).compact().sortBy('priority').groupBy('priority').map(_.shuffle).flatten().first();
+
     }
 
     static marchToTarget(state, target) {
@@ -103,16 +118,24 @@ class Event72 {
                                          }));
 
         turn.startCommand(CommandIDs.BATTLE);
-        const battleResults = Battle.test(state, {
-            region: target.region,
-            attackingFactionId: FactionIDs.BELGAE,
-            defendingFactionId: target.factionId,
-            attackingPieces: target.pieces
-        });
+        const context = turn.getContext();
+
+        if(!context.context.battle) {
+            const battleResults = Battle.test(state, {
+                region: target.region,
+                attackingFactionId: FactionIDs.BELGAE,
+                defendingFactionId: target.factionId
+            });
+
+            battleResults.attackingWithPieceIds = _.map(target.pieces, 'id');
+            context.context.battle = battleResults;
+        }
 
         Battle.execute(state, {
-            battleResults
+            battleResults: context.context.battle
         });
+
+        context.context.battle = null;
 
         turn.commitCommand();
         turn.popContext();
