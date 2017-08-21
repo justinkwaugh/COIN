@@ -29,7 +29,7 @@ class TurnContext extends COINObject {
         }).reject(function(commandId) {
             return definition.restrictedCommands && _.indexOf(definition.restrictedCommands, commandId) >= 0;
         }).value();
-        
+
     }
 
     canDoSpecial() {

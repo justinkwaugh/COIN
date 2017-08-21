@@ -19,13 +19,13 @@ class Event22 {
                 group: region.group
             };
 
-        }).compact().sortBy({group: RegionGroups.BELGICA}).reverse().value();
+        }).compact().value();
 
         if (subduedTribeData.length === 0) {
             return false;
         }
 
-        if (!state.belgae.hasAvailableAlliedTribe() || state.belgae.availableWarbands().length === 0) {
+        if (!state.arverni.hasAvailableAlliedTribe() || state.arverni.availableWarbands().length === 0) {
             return false;
         }
 
@@ -34,28 +34,28 @@ class Event22 {
             let alliesPlacedInRegion = 0;
             _.each(tribeData.tribes, tribe => {
                 PlaceAlliedTribe.execute(state, {
-                    factionId: FactionIDs.BELGAE,
+                    factionId: FactionIDs.ARVERNI,
                     regionId: tribeData.region.id,
                     tribeId: tribe.id
                 });
 
                 alliesPlacedInRegion += 1;
                 numAdded += 1;
-                if (numAdded === 2 || (numAdded === 1 && state.belgae.availableWarbands().length === 1)) {
+                if (numAdded === 2 || (numAdded === 1 && state.arverni.availableWarbands().length === 1)) {
                     return false;
                 }
             });
 
-            if (state.belgae.availableWarbands().length > 0) {
-                const numWarbandsToPlace = Math.min(state.belgae.availableWarbands().length, alliesPlacedInRegion);
+            if (state.arverni.availableWarbands().length > 0) {
+                const numWarbandsToPlace = Math.min(state.arverni.availableWarbands().length, alliesPlacedInRegion);
                 PlaceWarbands.execute(state, {
-                                          factionId: FactionIDs.BELGAE,
+                                          factionId: FactionIDs.ARVERNI,
                                           regionId: tribeData.region.id,
                                           count: numWarbandsToPlace
                                       });
             }
 
-            if (numAdded === 2 || state.belgae.availableWarbands().length === 0) {
+            if (numAdded === 2 || state.arverni.availableWarbands().length === 0) {
                 return false;
             }
         });
