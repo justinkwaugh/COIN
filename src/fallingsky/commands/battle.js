@@ -22,7 +22,7 @@ class Battle extends Command {
         const shadedMorasses = args.shadedMorasses;
         const ignoreSARegionCondition = args.ignoreSARegionCondition;
 
-        let attackingPieces = region.getPiecesForFaction(attackingFaction.id);
+        let attackingPieces = args.attackingPieces || region.getPiecesForFaction(attackingFaction.id);
         if(helpingFactionId) {
             const helpingPieces = region.getPiecesForFaction(helpingFactionId);
             attackingPieces = _.concat(attackingPieces, helpingPieces)
