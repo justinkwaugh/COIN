@@ -2,12 +2,13 @@ import COINObject from 'common/coinObject'
 import _ from 'lib/lodash';
 import CommandIDs from 'fallingsky/config/commandIds';
 import RegionIDs from 'fallingsky/config/regionIds';
+import short from 'short-uuid';
 
 class TurnContext extends COINObject {
     constructor(definition = {}) {
         super(definition);
 
-        this.id = definition.id || '' + Math.random(); // need to make uuid
+        this.id = definition.id || short().new();
         this.limited = definition.limited;
         this.allowLimitedSpecial = definition.allowLimitedSpecial;
         this.noSpecial = definition.noSpecial;
@@ -28,6 +29,7 @@ class TurnContext extends COINObject {
         }).reject(function(commandId) {
             return definition.restrictedCommands && _.indexOf(definition.restrictedCommands, commandId) >= 0;
         }).value();
+        
     }
 
     canDoSpecial() {
