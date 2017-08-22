@@ -41,7 +41,7 @@ class Event22 {
 
                 alliesPlacedInRegion += 1;
                 numAdded += 1;
-                if (numAdded === 2 || (numAdded === 1 && state.belgae.availableWarbands().length === 1)) {
+                if (numAdded === 2 || (numAdded === 1 && state.belgae.availableWarbands().length === 1) || state.belgae.availableAlliedTribes().length ===0) {
                     return false;
                 }
             });
@@ -55,7 +55,7 @@ class Event22 {
                                       });
             }
 
-            if (numAdded === 2 || state.belgae.availableWarbands().length === 0) {
+            if (numAdded === 2 || state.belgae.availableWarbands().length === 0 || state.belgae.availableAlliedTribes().length ===0) {
                 return false;
             }
         });

@@ -41,7 +41,7 @@ class Event22 {
 
                 alliesPlacedInRegion += 1;
                 numAdded += 1;
-                if (numAdded === 2 || (numAdded === 1 && state.arverni.availableWarbands().length === 1)) {
+                if (numAdded === 2 || (numAdded === 1 && state.arverni.availableWarbands().length === 1) || state.arverni.availableAlliedTribes().length ===0) {
                     return false;
                 }
             });
@@ -55,7 +55,7 @@ class Event22 {
                                       });
             }
 
-            if (numAdded === 2 || state.arverni.availableWarbands().length === 0) {
+            if (numAdded === 2 || state.arverni.availableWarbands().length === 0 || state.arverni.availableAlliedTribes() === 0) {
                 return false;
             }
         });

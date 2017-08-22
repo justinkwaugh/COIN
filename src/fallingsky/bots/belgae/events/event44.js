@@ -61,7 +61,7 @@ class Event44 {
         // Otherwise forced to place other faction warbands to satisfy card.
         if(state.belgae.availableWarbands().length < replacements.length && (state.romans.hasAvailableWarbands(1) ||
                                                                              state.aedui.hasAvailableWarbands(1) ||
-                                                                             state.romans.arverni.hasAvailableWarbands(1) ||
+                                                                             state.arverni.hasAvailableWarbands(1) ||
                                                                              state.germanic.hasAvailableWarbands(1))) {
             return false;
         }

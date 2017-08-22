@@ -12,6 +12,7 @@ import {CapabilityIDs} from 'fallingsky/config/capabilities';
 import FactionActions from '../../../common/factionActions';
 import MovePieces from 'fallingsky/actions/movePieces';
 import RemovePieces from 'fallingsky/actions/removePieces';
+import ReturnLegions from 'fallingsky/actions/returnLegions';
 import RemoveResources from 'fallingsky/actions/removeResources';
 import Losses from 'fallingsky/util/losses';
 import Pass from '../../commands/pass';
@@ -251,11 +252,59 @@ class RomanBot extends Bot {
     }
 
     takePompeyLosses(state) {
-        throw Error('Need to implement');
+        let numRemaining = 2;
+        _(state.regions).shuffle().filter(region => region.getLegions().length > 0).each(region => {
+            const legionsToRemove = _.take(region.getLegions(), numRemaining);
+            ReturnLegions.execute(state, {
+                regionId: region.id,
+                count: legionsToRemove.length
+            });
+
+            numRemaining -= legionsToRemove.length;
+            if (numRemaining === 0) {
+                return false;
+            }
+        });
     }
 
     takeGalliaTogataLosses(state) {
-        throw Error('Need to implement');
+        let numAuxiliaRemaining = 2;
+        const regionWithLegion = _.find(_.shuffle(state.regions), region => region.getLegions().length > 0);
+        if (regionWithLegion) {
+            ReturnLegions.execute(state, {
+                regionId: regionWithLegion.id,
+                count: 1
+            });
+
+            const auxilia = _.take(regionWithLegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS), numAuxiliaRemaining);
+            if (auxilia.length > 0) {
+                RemovePieces.execute(state, {
+                    factionId: FactionIDs.ROMANS,
+                    regionId: regionWithLegion.id,
+                    pieces: auxilia
+                });
+                numAuxiliaRemaining -= auxilia.length;
+            }
+        }
+
+        if (numAuxiliaRemaining > 0) {
+            _(state.regions).shuffle().filter(
+                region => region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS).length > 0).each(region => {
+                const auxilia = _.take(region.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS), numAuxiliaRemaining);
+
+                RemovePieces.execute(state, {
+                    factionId: FactionIDs.ROMANS,
+                    regionId: regionWithLegion.id,
+                    pieces: auxilia
+                });
+                numAuxiliaRemaining -= auxilia.length;
+
+
+                if (numAuxiliaRemaining === 0) {
+                    return false;
+                }
+            });
+        }
     }
 
 }

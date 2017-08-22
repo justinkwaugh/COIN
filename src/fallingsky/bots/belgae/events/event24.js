@@ -21,7 +21,7 @@ class Event24 {
                 priority
             };
 
-        }).compact().sortBy('priority').first();
+        }).compact().sortBy('priority').map('region').first();
 
         if(!targetRegion) {
             return false;
