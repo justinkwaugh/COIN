@@ -10,9 +10,9 @@ class FallingSkyFaction extends Faction {
     constructor(definition) {
         super(definition);
         this.resources = ko.observable(0);
-        this.numStartingWarbands = definition.numWarbands || 0;
-        this.numStartingAlliedTribes = definition.numAlliedTribes || 0;
-        this.numStartingCitadels = definition.numCitadels || 0;
+        this.numWarbands = definition.numWarbands || 0;
+        this.numAlliedTribes = definition.numAlliedTribes || 0;
+        this.numCitadels = definition.numCitadels || 0;
         this.hasLeader = definition.hasLeader || false;
         this.passResources = definition.passResources || 1;
 
@@ -39,7 +39,7 @@ class FallingSkyFaction extends Faction {
 
         this.numAlliedTribesAndCitadelsPlaced = ko.pureComputed(
             () => {
-                return (this.numStartingAlliedTribes + this.numStartingCitadels) -
+                return (this.numAlliedTribes + this.numCitadels) -
                        (this.availableAlliedTribes().length + this.availableCitadels().length);
             });
     }
@@ -97,6 +97,10 @@ class FallingSkyFaction extends Faction {
         return count <= this.availableWarbands().length;
     }
 
+    numPlacedWarbands() {
+        return this.numWarbands - this.availableWarbands().length;
+    }
+
     removeWarbands(count) {
         return this.availableWarbands.splice(0, count);
     }
@@ -143,7 +147,7 @@ class FallingSkyFaction extends Faction {
     }
 
     hasPlacedCitadel() {
-        return this.numStartingCitadels - this.availableCitadels().length;
+        return this.numCitadels - this.availableCitadels().length;
     }
 
     logState(state) {

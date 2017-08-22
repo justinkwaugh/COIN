@@ -275,16 +275,24 @@ class RomanBot extends Bot {
                 regionId: regionWithLegion.id,
                 count: 1
             });
+        }
 
-            const auxilia = _.take(regionWithLegion.getWarbandsOrAuxiliaForFaction(FactionIDs.ROMANS), numAuxiliaRemaining);
-            if (auxilia.length > 0) {
+        // Lazy
+        if (numAuxiliaRemaining > 0) {
+            _(state.regions).shuffle().filter(
+                region => region.getRevealedPiecesForFaction(FactionIDs.ROMANS).length > 0).each(region => {
+                const auxilia = _.take(region.getRevealedPiecesForFaction(FactionIDs.ROMANS), numAuxiliaRemaining);
+
                 RemovePieces.execute(state, {
                     factionId: FactionIDs.ROMANS,
                     regionId: regionWithLegion.id,
                     pieces: auxilia
                 });
                 numAuxiliaRemaining -= auxilia.length;
-            }
+                if (numAuxiliaRemaining === 0) {
+                    return false;
+                }
+            });
         }
 
         if (numAuxiliaRemaining > 0) {
@@ -298,8 +306,6 @@ class RomanBot extends Bot {
                     pieces: auxilia
                 });
                 numAuxiliaRemaining -= auxilia.length;
-
-
                 if (numAuxiliaRemaining === 0) {
                     return false;
                 }

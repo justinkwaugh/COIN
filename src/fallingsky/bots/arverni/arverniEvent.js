@@ -4,13 +4,17 @@ import FactionIDs from '../../config/factionIds';
 import Event1 from './events/event1';
 import Event3 from './events/event3';
 import Event5 from './events/event5';
+import Event6 from './events/event6';
 import Event7 from './events/event7';
 import Event8 from './events/event8';
 import Event9 from './events/event9';
+import Event11 from './events/event11';
 import Event12 from './events/event12';
 import Event13 from './events/event13';
 import Event14 from './events/event14';
 import Event15 from './events/event15';
+import Event16 from './events/event16';
+import Event17 from './events/event17';
 import Event18 from './events/event18';
 import Event19 from './events/event19';
 import Event22 from './events/event22';
@@ -30,13 +34,17 @@ import Event40 from './events/event40';
 import Event41 from './events/event41';
 import Event42 from './events/event42';
 import Event43 from './events/event43';
+import Event44 from './events/event44';
 import Event46 from './events/event46';
 import Event48 from './events/event48';
 import Event49 from './events/event49';
+import Event50 from './events/event50';
 import Event56 from './events/event56';
+import Event57 from './events/event57';
 import Event58 from './events/event58';
 import Event59 from './events/event59';
 import Event63 from './events/event63';
+import Event65 from './events/event65';
 import Event70 from './events/event70';
 import Event71 from './events/event71';
 
@@ -48,13 +56,17 @@ const EventHandlers = {
     1: Event1,
     3: Event3,
     5: Event5,
+    6: Event6,
     7: Event7,
     8: Event8,
     9: Event9,
+    11: Event11,
     12: Event12,
     13: Event13,
     14: Event14,
     15: Event15,
+    16: Event16,
+    17: Event17,
     18: Event18,
     19: Event19,
     22: Event22,
@@ -74,13 +86,17 @@ const EventHandlers = {
     41: Event41,
     42: Event42,
     43: Event43,
+    44: Event44,
     46: Event46,
     48: Event48,
     49: Event49,
+    50: Event50,
     56: Event56,
+    57: Event57,
     58: Event58,
     59: Event59,
     63: Event63,
+    65: Event65,
     70: Event70,
     71: Event71
 };

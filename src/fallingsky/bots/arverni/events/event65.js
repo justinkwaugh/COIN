@@ -8,13 +8,9 @@ import RemovePieces from 'fallingsky/actions/removePieces';
 
 class Event65 {
     static handleEvent(state) {
-        if (!state.belgae.hasAvailableAlliedTribe()) {
-            return false;
-        }
-
         let effective = false;
         const allyToReplace = _(state.regions).shuffle().filter(
-            region => region.controllingFactionId() === FactionIDs.BELGAE).map(region => {
+            region => region.controllingFactionId() === FactionIDs.ARVERNI).map(region => {
             const germanicAllies = _.shuffle(region.getAlliesForFaction(FactionIDs.GERMANIC_TRIBES));
             if (germanicAllies.length === 0) {
                 return;
@@ -27,10 +23,6 @@ class Event65 {
 
         }).compact().value().first();
 
-        if (!allyToReplace) {
-            return false;
-        }
-
         if (allyToReplace.length > 0) {
             const tribeId = allyToReplace.ally.tribeId;
             RemovePieces.execute(state, {
@@ -39,17 +31,19 @@ class Event65 {
                 pieces: [allyToReplace.ally]
             });
 
-            PlaceAlliedTribe.execute(state, {
-                factionId: FactionIDs.BELGAE,
-                regionId: allyToReplace.regionId,
-                tribeId
-            });
+            if (state.arverni.availableAlliedTribes().length > 0) {
+                PlaceAlliedTribe.execute(state, {
+                    factionId: FactionIDs.ARVERNI,
+                    regionId: allyToReplace.regionId,
+                    tribeId
+                });
+            }
 
             effective = true;
         }
 
         let numToReplace = 5;
-        _(state.regions).shuffle().filter(region => region.controllingFactionId() === FactionIDs.BELGAE).each(
+        _(state.regions).shuffle().filter(region => region.controllingFactionId() === FactionIDs.ARVERNI).each(
             region => {
 
                 const germanWarbandsToReplace = _.take(
@@ -61,11 +55,11 @@ class Event65 {
                         pieces: germanWarbandsToReplace
                     });
 
-                    const numToPlace = Math.min(state.belgae.availableWarbands().length,
+                    const numToPlace = Math.min(state.arverni.availableWarbands().length,
                                                 germanWarbandsToReplace.length);
                     if (numToPlace > 0) {
                         PlaceWarbands.execute(state, {
-                            factionId: FactionIDs.BELGAE,
+                            factionId: FactionIDs.ARVERNI,
                             regionId: region.id,
                             count: numToPlace
                         });

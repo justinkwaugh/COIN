@@ -4,6 +4,7 @@ import RegionIDs from 'fallingsky/config/regionIds';
 
 import UndisperseTribe from 'fallingsky/actions/undisperseTribe';
 import PlaceAlliedTribe from 'fallingsky/actions/placeAlliedTribe';
+import PlaceWarbands from 'fallingsky/actions/placeWarbands';
 import RemovePieces from 'fallingsky/actions/removePieces';
 
 
@@ -39,6 +40,13 @@ class Event57 {
             tribeId: catuvellauni.id
         });
 
+        if (state.belgae.availableWarbands().length > 0) {
+            PlaceWarbands.execute(state, {
+                factionId: FactionIDs.BELGAE,
+                regionId: RegionIDs.BRITANNIA,
+                count: Math.min(4, state.belgae.availableWarbands().length)
+            });
+        }
         return true;
     }
 }

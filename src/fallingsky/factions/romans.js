@@ -99,6 +99,10 @@ class Romans extends FallingSkyFaction {
         return count <= this.availableAuxilia().length;
     }
 
+    numPlacedAuxilia() {
+        return 20 - this.availableAuxilia().length;
+    }
+
     removeAuxilia(count) {
         return this.availableAuxilia.splice(0, count);
     }
