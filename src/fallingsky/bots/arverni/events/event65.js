@@ -21,7 +21,7 @@ class Event65 {
                 regionId: region.id
             };
 
-        }).compact().value().first();
+        }).compact().first();
 
         if (allyToReplace.length > 0) {
             const tribeId = allyToReplace.ally.tribeId;
@@ -48,7 +48,7 @@ class Event65 {
 
                 const germanWarbandsToReplace = _.take(
                     region.getWarbandsOrAuxiliaForFaction(FactionIDs.GERMANIC_TRIBES), numToReplace);
-                if (germanWarbandsToReplace) {
+                if (germanWarbandsToReplace.length > 0) {
                     RemovePieces.execute(state, {
                         factionId: FactionIDs.GERMANIC_TRIBES,
                         regionId: region.id,
