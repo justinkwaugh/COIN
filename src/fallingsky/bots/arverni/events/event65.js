@@ -23,7 +23,7 @@ class Event65 {
 
         }).compact().first();
 
-        if (allyToReplace.length > 0) {
+        if (allyToReplace) {
             const tribeId = allyToReplace.ally.tribeId;
             RemovePieces.execute(state, {
                 factionId: allyToReplace.ally.factionId,

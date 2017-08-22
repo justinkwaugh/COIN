@@ -31,22 +31,21 @@ class Event65 {
             return false;
         }
 
-        if (allyToReplace.length > 0) {
-            const tribeId = allyToReplace.ally.tribeId;
-            RemovePieces.execute(state, {
-                factionId: allyToReplace.ally.factionId,
-                regionId: allyToReplace.regionId,
-                pieces: [allyToReplace.ally]
-            });
+        const tribeId = allyToReplace.ally.tribeId;
+        RemovePieces.execute(state, {
+            factionId: allyToReplace.ally.factionId,
+            regionId: allyToReplace.regionId,
+            pieces: [allyToReplace.ally]
+        });
 
-            PlaceAlliedTribe.execute(state, {
-                factionId: FactionIDs.BELGAE,
-                regionId: allyToReplace.regionId,
-                tribeId
-            });
+        PlaceAlliedTribe.execute(state, {
+            factionId: FactionIDs.BELGAE,
+            regionId: allyToReplace.regionId,
+            tribeId
+        });
 
-            effective = true;
-        }
+        effective = true;
+
 
         let numToReplace = 5;
         _(state.regions).shuffle().filter(region => region.controllingFactionId() === FactionIDs.BELGAE).each(
