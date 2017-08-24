@@ -39,7 +39,7 @@ class Event26 {
             }
         });
 
-        const vercingetorixRegion = _.findVercingetorixRegion(state);
+        const vercingetorixRegion = this.findVercingetorixRegion(state);
         if (vercingetorixRegion) {
             const regions = _([vercingetorixRegion]).concat(vercingetorixRegion.adjacent).map('id').value();
 
