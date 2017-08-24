@@ -5,7 +5,7 @@ import MovePieces from 'fallingsky/actions/movePieces';
 class Event14 {
     static handleEvent(state) {
         const leaderRegion = _.find(state.regions, region=>region.getLeaderForFaction(FactionIDs.ROMANS));
-        if(leaderRegion) {
+        if(leaderRegion && leaderRegion.id !== RegionIDs.PROVINCIA ) {
             const leader = leaderRegion.getLeaderForFaction(FactionIDs.ROMANS);
             MovePieces.execute(state, {
                sourceRegionId: leaderRegion.id,

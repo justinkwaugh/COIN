@@ -8,7 +8,7 @@ class GermanicBattle {
 
     static battle(state, modifiers) {
         console.log('*** Germanic Battle ***');
-        const effectiveBattles = this.findEffectiveBattles(state);
+        const effectiveBattles = this.findEffectiveBattles(state,modifiers);
         if(effectiveBattles.length === 0) {
             return false;
         }
@@ -31,7 +31,7 @@ class GermanicBattle {
         return _(state.factions).reject({id: FactionIDs.GERMANIC_TRIBES}).partition('isNonPlayer').map(_.shuffle).flatten().sortBy('isNonPlayer').value();
     }
 
-    static findEffectiveBattles(state) {
+    static findEffectiveBattles(state,modifiers) {
         return _(state.regions).map(
             (region) => {
                 const enemyFactionOrder = this.getEnemyFactionOrder(state);
@@ -40,7 +40,8 @@ class GermanicBattle {
                         state, {
                             region: region,
                             attackingFactionId: FactionIDs.GERMANIC_TRIBES,
-                            defendingFactionId: faction.id
+                            defendingFactionId: faction.id,
+                            consuetudine: modifiers.context.consuetudine
                         });
                 }).filter(this.isEffectiveBattle).first();
             }).compact().value();
