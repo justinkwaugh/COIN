@@ -1,7 +1,3 @@
-import _ from 'lib/lodash';
-import FactionIDs from 'fallingsky/config/factionIds';
-import CommandIDs from 'fallingsky/config/commandIds';
-import SpecialAbilityIDs from 'fallingsky/config/specialAbilityIds';
 import TurnContext from 'common/turnContext';
 import ArverniBattle from 'fallingsky/bots/arverni/arverniBattle';
 
