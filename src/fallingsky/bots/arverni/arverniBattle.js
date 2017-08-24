@@ -98,7 +98,7 @@ class ArverniBattle {
                 battles = _.take(battles, 1);
             }
 
-            if (modifiers.canDoSpecial() && this.needAmbush(battles[0])) {
+            if (modifiers.canDoSpecial() && (this.needAmbush(battles[0]) || modifiers.context.litaviccus)) {
                 _.each(battles, (battle) => {
                     battle.willAmbush = true;
                 });
@@ -113,7 +113,11 @@ class ArverniBattle {
             (region) => {
                 const piecesByType = _.groupBy(region.piecesByFaction()[FactionIDs.ARVERNI], 'type');
                 const hasVercingetorix = piecesByType.leader && !piecesByType.leader[0].isSuccessor();
-                const numWarbands = (piecesByType.warband || []).length;
+                let numWarbands = (piecesByType.warband || []).length;
+                if(modifiers.context.litaviccus) {
+                    numWarbands += region.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI).length;
+                }
+
                 if (!hasVercingetorix && numWarbands <= 7) {
                     return;
                 }
@@ -122,6 +126,10 @@ class ArverniBattle {
                     function (factionId) {
                         const enemyPieces = region.piecesByFaction()[factionId] || [];
                         const enemyPiecesByType = _.groupBy(enemyPieces, 'type');
+
+                        if(modifiers.context.litaviccus && factionId !== FactionIDs.ROMANS) {
+                            return false;
+                        }
 
                         return factionId !== FactionIDs.GERMANIC_TRIBES && factionId !== FactionIDs.BELGAE && (enemyPieces.length > 3 || enemyPiecesByType.alliedtribe || enemyPiecesByType.citadel || enemyPiecesByType.legion);
                     }).value();
@@ -141,7 +149,11 @@ class ArverniBattle {
             (region) => {
                 const piecesByType = _.groupBy(region.piecesByFaction()[FactionIDs.ARVERNI], 'type');
                 const hasVercingetorix = piecesByType.leader && !piecesByType.leader[0].isSuccessor();
-                const warbands = piecesByType.warband || [];
+                let warbands = piecesByType.warband || [];
+                if(modifiers.context.litaviccus) {
+                    warbands = _.concat(warbands, region.getWarbandsOrAuxiliaForFaction(FactionIDs.AEDUI));
+                }
+
                 if (!piecesByType.leader && warbands.length <= 7) {
                     return;
                 }
@@ -151,6 +163,11 @@ class ArverniBattle {
                         if (factionId === FactionIDs.GERMANIC_TRIBES || factionId === FactionIDs.BELGAE) {
                             return;
                         }
+
+                        if(modifiers.context.litaviccus && factionId !== FactionIDs.ROMANS) {
+                            return;
+                        }
+
                         const enemyPieces = region.piecesByFaction()[factionId] || [];
                         if (enemyPieces.length === 0) {
                             return;
@@ -159,7 +176,8 @@ class ArverniBattle {
                             state, {
                                 region: region,
                                 attackingFactionId: FactionIDs.ARVERNI,
-                                defendingFactionId: factionId
+                                defendingFactionId: factionId,
+                                helpingFactionId: modifiers.context.litaviccus ? FactionIDs.AEDUI : null
                             });
 
                         if (!this.isEffectiveBattle(battleResult)) {
