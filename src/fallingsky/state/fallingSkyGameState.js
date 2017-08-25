@@ -62,6 +62,7 @@ class FallingSkyGameState extends GameState {
         this.currentCard = ko.observable();
         this.upcomingCard = ko.observable();
         this.frost = ko.observable();
+        this.optimates = ko.observable();
 
         this.year = ko.observable(0);
         this.yearsRemaining = ko.observable();

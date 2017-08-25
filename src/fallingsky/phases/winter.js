@@ -7,14 +7,29 @@ import UndisperseTribe from '../actions/undisperseTribe';
 import AddResources from '../actions/addResources';
 import HidePieces from '../actions/hidePieces';
 import UndevastateRegion from '../actions/undevastateRegion';
+import ReturnLegions from 'fallingsky/actions/returnLegions';
 
 class Winter {
 
     static executeWinter(state) {
         console.log('*** Winter ***');
         state.turnHistory.startTurn(FactionIDs.GERMANIC_TRIBES);
+        if(state.optimates()) {
+            debugger;
+        }
+        if (state.optimates() && state.year() > 1 && state.romans.victoryScore(state) > 12) {
+            _.each(state.regions, region => {
+                const legions = region.getLegions();
+                if (legions.length > 0) {
+                    ReturnLegions.execute(state, {
+                        regionId: region.id,
+                        count: legions.length
+                    });
+                }
+            });
+        }
         const victor = this.victoryCheck(state);
-        if(victor) {
+        if (victor) {
             state.victor(victor.id);
             state.gameEnded(true);
         }
@@ -31,7 +46,8 @@ class Winter {
 
     static victoryCheck(state) {
         console.log('*** Checking victory ***');
-        const factionsByVictoryMargin = _(state.factions).reject(faction=>faction.id === FactionIDs.GERMANIC_TRIBES).sortBy(
+        const factionsByVictoryMargin = _(state.factions).reject(
+            faction => faction.id === FactionIDs.GERMANIC_TRIBES).sortBy(
             (faction) => {
                 let priority = '' + (50 - faction.victoryMargin(state));
                 if (state.playersByFaction[faction.id].isNonPlayer) {
@@ -57,7 +73,7 @@ class Winter {
         });
 
         const best = _.first(factionsByVictoryMargin);
-        if(state.isLastYear() || (best.victoryMargin(state) > 0 && state.playersByFaction[best.id].isNonPlayer)) {
+        if (state.isLastYear() || (best.victoryMargin(state) > 0 && state.playersByFaction[best.id].isNonPlayer)) {
             return best;
         }
     }
@@ -115,25 +131,29 @@ class Winter {
     static winterCampaign(state) {
         const turn = state.turnHistory.currentTurn;
         turn.startPhase('Winter Campaign');
-        if(state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.ARVERNI)) {
+        if (state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.ARVERNI)) {
             const arverni = state.playersByFaction[FactionIDs.ARVERNI];
-            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.ARVERNI, noEvent: true, outOfSequence: true }));
+            turn.pushContext(
+                new TurnContext({currentFactionId: FactionIDs.ARVERNI, noEvent: true, outOfSequence: true}));
             arverni.takeTurn(state);
             turn.popContext();
-            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.ARVERNI, noEvent: true, outOfSequence: true }));
+            turn.pushContext(
+                new TurnContext({currentFactionId: FactionIDs.ARVERNI, noEvent: true, outOfSequence: true}));
             arverni.takeTurn(state);
             turn.popContext();
         }
-        else if(state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.BELGAE)) {
+        else if (state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.BELGAE)) {
             const belgae = state.playersByFaction[FactionIDs.BELGAE];
-            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.BELGAE, noEvent: true, outOfSequence: true}));
+            turn.pushContext(
+                new TurnContext({currentFactionId: FactionIDs.BELGAE, noEvent: true, outOfSequence: true}));
             belgae.takeTurn(state);
             turn.popContext();
-            turn.pushContext(new TurnContext({currentFactionId: FactionIDs.BELGAE, noEvent: true, outOfSequence: true}));
+            turn.pushContext(
+                new TurnContext({currentFactionId: FactionIDs.BELGAE, noEvent: true, outOfSequence: true}));
             belgae.takeTurn(state);
             turn.popContext();
         }
-        else if(state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.AEDUI)) {
+        else if (state.hasShadedCapability(CapabilityIDs.WINTER_CAMPAIGN, FactionIDs.AEDUI)) {
             const aedui = state.playersByFaction[FactionIDs.AEDUI];
             turn.pushContext(new TurnContext({currentFactionId: FactionIDs.AEDUI, noEvent: true, outOfSequence: true}));
             aedui.takeTurn(state);

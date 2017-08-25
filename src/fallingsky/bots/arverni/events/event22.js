@@ -55,7 +55,7 @@ class Event22 {
                                       });
             }
 
-            if (numAdded === 2 || state.arverni.availableWarbands().length === 0 || state.arverni.availableAlliedTribes() === 0) {
+            if (numAdded === 2 || state.arverni.availableWarbands().length === 0 || state.arverni.availableAlliedTribes().length === 0) {
                 return false;
             }
         });
