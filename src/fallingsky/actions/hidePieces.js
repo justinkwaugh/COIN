@@ -24,6 +24,7 @@ class HidePieces extends Action {
             if (piece.scouted()) {
                 this.numHiddenFromScouted += 1;
                 piece.scouted(false);
+                piece.revealed(true);
             }
             else if (piece.revealed()) {
                 this.numHiddenFromRevealed += 1;
@@ -57,6 +58,7 @@ class HidePieces extends Action {
             }
             else if (piece.revealed()) {
                 piece.scouted(true);
+                piece.revealed(false);
             }
         });
 

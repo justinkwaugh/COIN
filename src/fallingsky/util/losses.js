@@ -3,7 +3,7 @@ import FactionIDs from 'fallingsky/config/factionIds';
 import {CapabilityIDs} from 'fallingsky/config/capabilities';
 class Losses {
 
-    static calculateUnmodifiedLosses(state, attackingFaction, attackingPieces, counterattack=false, germanicHorse=false) {
+    static calculateUnmodifiedLosses(state, attackingFaction, attackingPieces, counterattack = false, germanicHorse = false) {
         let losses = 0;
         const leader = _.find(attackingPieces, {type: 'leader'});
         let usedLegioXLegion = false;
@@ -23,7 +23,7 @@ class Losses {
                 else if (piece.type === 'legion') {
                     if (!counterattack && leader && !leader.isSuccessor() && piece.factionId === FactionIDs.ROMANS && !usedLegioXLegion) {
                         losses += 2;
-                        if(state.hasShadedCapability(CapabilityIDs.LEGIO_X)) {
+                        if (state.hasShadedCapability(CapabilityIDs.LEGIO_X)) {
                             usedLegioXLegion = true;
                         }
                     }
@@ -53,7 +53,7 @@ class Losses {
             }).sortBy(
             function (piece) {
                 if (piece.type === 'alliedtribe') {
-                    if(piece.factionId === helpingFactionId) {
+                    if (piece.factionId === helpingFactionId) {
                         return 'a'
                     }
 
@@ -79,7 +79,7 @@ class Losses {
             }).sortBy(
             function (piece) {
                 if (piece.type === 'warband' || piece.type === 'auxilia') {
-                    if(piece.factionId === helpingFactionId) {
+                    if (piece.factionId === helpingFactionId) {
                         return 'a'
                     }
                     if (piece.scouted()) {
@@ -146,6 +146,27 @@ class Losses {
             piecesForRemoval = _.concat(warbandsAuxiliaLegionsAndLeader, alliesFortsAndCitadels);
         }
         return piecesForRemoval;
+    }
+
+    static getHarassmentLossesForRegion(state, factionId, region) {
+        return _(state.factionsById).keys().reject(id => id === factionId).reduce((sum, enemyFactionId) => {
+            let losses = 0;
+            const numHiddenEnemies = region.getHiddenPiecesForFaction(enemyFactionId).length;
+            if (numHiddenEnemies >= 3) {
+                const player = state.playersByFaction[enemyFactionId];
+                const existingHarassmentDeclaration = _.find(
+                    state.turnHistory.getCurrentTurn().getCurrentInteractions(),
+                    interaction => interaction.type === 'Harassment' && interaction.regionId === region.id && interaction.respondingFactionId === enemyFactionId);
+
+                const willHarass = existingHarassmentDeclaration ? existingHarassmentDeclaration.status === 'agreed' : player.willHarass(
+                    factionId, region);
+
+                if (willHarass) {
+                    losses = Math.floor(numHiddenEnemies / 3);
+                }
+            }
+            return sum + losses;
+        }, 0);
     }
 }
 

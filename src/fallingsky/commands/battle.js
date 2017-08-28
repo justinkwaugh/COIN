@@ -1,6 +1,7 @@
 import _ from '../../lib/lodash';
 import Command from './command';
 import FactionIDs from '../config/factionIds';
+import RegionIDs from 'fallingsky/config/regionIds';
 import BattleResults from './battleResults';
 
 import RevealPieces from '../actions/revealPieces';
@@ -8,6 +9,7 @@ import RemovePieces  from '../actions/removePieces';
 import {CapabilityIDs} from '../config/capabilities';
 import Losses from 'fallingsky/util/losses';
 import Logging from 'fallingsky/util/logging';
+
 
 class Battle extends Command {
 
@@ -22,6 +24,7 @@ class Battle extends Command {
         const aduataca = args.aduataca;
         const consuetudine = args.consuetudine;
         const shadedMorasses = args.shadedMorasses;
+        const theProvince = args.theProvince;
         const ignoreSARegionCondition = args.ignoreSARegionCondition;
 
         let attackingPieces = args.attackingPieces || region.getPiecesForFaction(attackingFaction.id);
@@ -58,10 +61,10 @@ class Battle extends Command {
 
         // No Retreat
         let noRetreatDefenderLosses = unmodifiedDefenderLosses;
-        if (!aduataca && this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id))) {
+        if (!aduataca && this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id), theProvince)) {
             noRetreatDefenderLosses /= 2;
         }
-        else if (withGermanicHorse && state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE, attackingFaction.id) && !this.defenderHasCitadelOrFort(state, defendingPieces)) {
+        else if (withGermanicHorse && state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE, attackingFaction.id) && !this.defenderHasCitadelOrFort(state, defendingPieces, false, theProvince)) {
             noRetreatDefenderLosses *= 2;
         }
         noRetreatDefenderLosses = Math.floor(noRetreatDefenderLosses);
@@ -101,7 +104,7 @@ class Battle extends Command {
         let worstCaseAttackerLosses = Losses.calculateUnmodifiedLosses(state, defendingFaction,
                                                                        worstCaseNoRetreatDefenderResults.remaining,
                                                                        true, romansUseGermanicHorseOnDefense);
-        if (gallicUseGermanicHorseOnDefense && !this.defenderHasCitadelOrFort(state, defendingPieces)) {
+        if (gallicUseGermanicHorseOnDefense && !this.defenderHasCitadelOrFort(state, defendingPieces, false, theProvince)) {
             worstCaseAttackerLosses *= 2;
         }
         worstCaseAttackerLosses = Math.floor(worstCaseAttackerLosses);
@@ -216,7 +219,7 @@ class Battle extends Command {
             }
             // No Retreat
             let noRetreatDefenderLosses = unmodifiedDefenderLosses;
-            if (!battleResults.aduataca && this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id))) {
+            if (!battleResults.aduataca && this.defenderHasCitadelOrFort(state, defendingPieces, state.hasUnshadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id), battleResults.theProvince)) {
                 noRetreatDefenderLosses /= 2;
             }
             else if (battleResults.willApplyGermanicHorse && attackingFaction.id !== FactionIDs.ROMANS && state.hasShadedCapability(
@@ -292,7 +295,7 @@ class Battle extends Command {
                                                                   true, battleResults.willApplyGermanicHorse);
             if (battleResults.willApplyGermanicHorse && defendingFaction.id !== FactionIDs.ROMANS &&
                 state.hasShadedCapability(CapabilityIDs.GERMANIC_HORSE, defendingFaction.id) &&
-                !this.defenderHasCitadelOrFort(state, defendingPieces)) {
+                !this.defenderHasCitadelOrFort(state, defendingPieces, battleResults.theProvince)) {
                 attackerLosses *= 2;
             }
             attackerLosses = Math.floor(attackerLosses);
@@ -322,7 +325,7 @@ class Battle extends Command {
             RevealPieces.execute(state, {factionId: defendingFaction.id, regionId: region.id});
         }
 
-        if (ambush && state.hasShadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id)) {
+        if (ambush && state.hasShadedCapability(CapabilityIDs.BALLISTAE, attackingFaction.id) && region.id !== RegionIDs.PROVINCIA) {
             const citadelOrFort = _.find(region.getPiecesForFaction(defendingFaction.id),
                                          (piece) => piece.type === 'citadel' || piece.type === 'fort');
             if (citadelOrFort) {
@@ -585,10 +588,10 @@ class Battle extends Command {
         return _.indexOf(typesForRolls, piece.type) >= 0;
     }
 
-    static defenderHasCitadelOrFort(state, defendingPieces, ballistae) {
+    static defenderHasCitadelOrFort(state, defendingPieces, ignoreCitadel, ignoreFort) {
         return _.find(
             defendingPieces, function (piece) {
-                return (piece.type === 'citadel' && !ballistae) || piece.type === 'fort';
+                return (piece.type === 'citadel' && !ignoreCitadel) || (piece.type === 'fort' && !ignoreFort);
             });
     }
 

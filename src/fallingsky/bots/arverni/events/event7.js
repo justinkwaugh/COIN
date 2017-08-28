@@ -4,7 +4,7 @@ import ReturnLegions from 'fallingsky/actions/returnLegions';
 import RemovePieces from 'fallingsky/actions/removePieces';
 class Event7 {
     static handleEvent(state) {
-
+        let effective = false;
         if (state.romans.numLegionsInTrack() > 7) {
             return false;
         }
@@ -15,6 +15,7 @@ class Event7 {
                 regionId: regionWithLegion.id,
                 count: 1
             });
+            effective = true;
         }
 
         const auxiliaToRemove = _(state.regions).shuffle().map(region => {
@@ -40,13 +41,16 @@ class Event7 {
 
         }).compact().sortBy('priority').first();
 
-        RemovePieces.execute(state, {
-            factionId: FactionIDs.ROMANS,
-            regionId: auxiliaToRemove.regionId,
-            pieces: auxiliaToRemove.auxilia
-        });
+        if(auxiliaToRemove) {
+            RemovePieces.execute(state, {
+                factionId: FactionIDs.ROMANS,
+                regionId: auxiliaToRemove.regionId,
+                pieces: auxiliaToRemove.auxilia
+            });
+            effective = true;
+        }
 
-        return true;
+        return effective;
     }
 }
 

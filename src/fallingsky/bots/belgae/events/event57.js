@@ -19,7 +19,7 @@ class Event57 {
             return false;
         }
 
-        if (catuvellauni.isDispersed()) {
+        if (catuvellauni.isDispersed() || catuvellauni.isDispersedGathering()) {
             UndisperseTribe.execute(state, {
                 tribeId: catuvellauni.id,
                 fully: true

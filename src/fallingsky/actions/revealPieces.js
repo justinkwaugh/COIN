@@ -24,6 +24,7 @@ class RevealPieces extends Action {
         }
 
         if (this.count && revealable.length < this.count) {
+            debugger;
             throw 'Invalid RevealPieces Action';
         }
 

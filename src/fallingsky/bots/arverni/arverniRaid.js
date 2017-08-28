@@ -15,7 +15,7 @@ class ArverniRaid {
     static raid(state, modifiers) {
 
         const effectiveRaidRegions = this.getEffectiveRaidRegions(state, modifiers);
-        if(effectiveRaidRegions.length === 0) {
+        if (effectiveRaidRegions.length === 0) {
             return;
         }
 
@@ -36,7 +36,7 @@ class ArverniRaid {
                     (factionId) => {
                         const faction = state.factionsById[factionId];
                         const stolen = Math.min(numResourcesToSteal, faction.resources());
-                        RemoveResources.execute(state, { factionId: faction.id, count: stolen});
+                        RemoveResources.execute(state, {factionId: faction.id, count: stolen});
                         numResourcesToSteal -= stolen;
 
                         if (numResourcesToSteal === 0) {
@@ -44,15 +44,20 @@ class ArverniRaid {
                         }
                     });
 
-                AddResources.execute(state, { factionId: FactionIDs.ARVERNI, count: raidResult.resourcesGained});
+                AddResources.execute(state, {factionId: FactionIDs.ARVERNI, count: raidResult.resourcesGained});
             });
         state.turnHistory.getCurrentTurn().commitCommand();
-        const usedSpecialAbility = modifiers.canDoSpecial() && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state, modifiers));
+        const usedSpecialAbility = modifiers.canDoSpecial() && (ArverniDevastate.devastate(state,
+                                                                                           modifiers) || ArverniEntreat.entreat(
+                state, modifiers));
         return usedSpecialAbility ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
     }
 
     static getEffectiveRaidRegions(state, modifiers) {
-        const raidResults = Raid.test(state, {factionId: FactionIDs.ARVERNI});
+        const raidResults = Raid.test(state, {
+            factionId: FactionIDs.ARVERNI,
+            ignoreFort: modifiers.context.theProvince
+        });
         const hasBaggageTrain = state.hasShadedCapability(CapabilityIDs.BAGGAGE_TRAINS, FactionIDs.ARVERNI);
 
         _.each(
@@ -72,7 +77,7 @@ class ArverniRaid {
                 else {
                     const stealableResources = _.reduce(
                         result.raidableFactions, function (sum, factionId) {
-                            if(factionId === FactionIDs.ROMANS || factionId === FactionIDs.AEDUI || factionId === FactionIDs.BELGAE) {
+                            if (factionId === FactionIDs.ROMANS || factionId === FactionIDs.AEDUI || factionId === FactionIDs.BELGAE) {
                                 const faction = state.factionsById[factionId];
                                 return sum + faction.resources();
                             }

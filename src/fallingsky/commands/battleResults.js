@@ -37,6 +37,7 @@ class BattleResults extends COINObject {
         this.willApplyBalearicSlingers = definition.willApplyBalearicSlingers;
         this.aduataca = definition.aduataca;
         this.legiones = definition.legiones;
+        this.theProvince = definition.theProvince;
 
         this.paid = definition.paid;
         this.handledBalearicSlingers = definition.handledBalearicSlingers;

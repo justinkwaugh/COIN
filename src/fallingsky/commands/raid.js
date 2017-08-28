@@ -8,10 +8,10 @@ import {CapabilityIDs} from '../config/capabilities';
 class Raid extends Command {
     static doTest(state, args) {
         const faction = args.faction;
-        return this.generateResultsForRegions(state, faction, state.regions);
+        return this.generateResultsForRegions(state, faction, state.regions, args.ignoreFort);
     }
 
-    static generateResultsForRegions(state, faction, regions) {
+    static generateResultsForRegions(state, faction, regions, ignoreFort) {
         const isGermanic = faction.id === FactionIDs.GERMANIC_TRIBES;
         return _(regions).map(
             function (region) {
@@ -36,7 +36,7 @@ class Raid extends Command {
 
                         const hasCitadelOrFort = _.find(
                             pieces, function (piece) {
-                                return piece.type === 'citadel' || piece.type === 'fort';
+                                return piece.type === 'citadel' || (piece.type === 'fort' && !ignoreFort);
                             });
 
                         if (hasCitadelOrFort && !hasBaggageTrain) {

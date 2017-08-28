@@ -105,6 +105,10 @@ class ArverniBattle {
                     battle.willAmbush = true;
                 });
             }
+
+            _.each(battles, battle => {
+                battle.theProvince = modifiers.context.theProvince;
+            });
         }
 
         return battles;
@@ -179,7 +183,8 @@ class ArverniBattle {
                                 region: region,
                                 attackingFactionId: FactionIDs.ARVERNI,
                                 defendingFactionId: factionId,
-                                helpingFactionId: modifiers.context.litaviccus ? FactionIDs.AEDUI : null
+                                helpingFactionId: modifiers.context.litaviccus ? FactionIDs.AEDUI : null,
+                                theProvince: modifiers.context.theProvince
                             });
 
                         if (!this.isEffectiveBattle(battleResult)) {

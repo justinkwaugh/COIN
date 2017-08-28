@@ -19,11 +19,12 @@ class HumanPlayer extends FallingSkyPlayer {
         super(definition);
     }
 
-    willHarass(factionId, context) {
+    willHarass(factionId, region) {
         throw new PlayerInteractionNeededError('Harassment possible for ' + factionId,
                                                new Harassment({
                                                                   requestingFactionId: factionId,
-                                                                  respondingFactionId: this.factionId
+                                                                  respondingFactionId: this.factionId,
+                                                                  regionId: region.id
                                                               }));
     }
 
@@ -119,9 +120,9 @@ class HumanPlayer extends FallingSkyPlayer {
     removePieces(state, region, numPieces) {
         throw new PlayerInteractionNeededError(
             'Please remove ' + numPieces + ' pieces from region ' + region.name, new RemovePieces({
-                                                                                                            regionId: region.id,
-                                                                                                            count: numPieces
-                                                                                                        }));
+                                                                                                      regionId: region.id,
+                                                                                                      count: numPieces
+                                                                                                  }));
     }
 }
 

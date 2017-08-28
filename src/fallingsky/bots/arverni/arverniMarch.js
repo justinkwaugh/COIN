@@ -13,6 +13,7 @@ import HidePieces from '../../actions/hidePieces';
 import EnemyFactionPriority from './enemyFactionPriority';
 import FactionActions from '../../../common/factionActions';
 import Map from '../../util/map';
+import Losses from 'fallingsky/util/losses';
 
 class ArverniMarch {
 
@@ -394,10 +395,7 @@ class ArverniMarch {
                 const bestPath = _(Map.findPathsToRegion(state, startRegion.id, destination.id, 2)).map(
                     (path) => {
                         const middleRegion = state.regionsById[path[1]];
-                        const harassmentLosses = this.harassmentLosses(state, FactionIDs.ROMANS, middleRegion) +
-                                                 this.harassmentLosses(state, FactionIDs.BELGAE, middleRegion) +
-                                                 this.harassmentLosses(state, FactionIDs.AEDUI, middleRegion) +
-                                                 this.harassmentLosses(state, FactionIDs.GERMANIC_TRIBES, middleRegion);
+                        const harassmentLosses = Losses.getHarassmentLossesForRegion(state, FactionIDs.ARVERNI, middleRegion);
 
                         if (harassmentLosses > 3 || harassmentLosses >= numMobile) {
                             return;
@@ -421,18 +419,6 @@ class ArverniMarch {
                 }
 
             }).compact().value();
-    }
-
-    static harassmentLosses(state, factionId, region) {
-        let losses = 0;
-        const numHiddenEnemies = region.getHiddenPiecesForFaction(factionId).length;
-        if (numHiddenEnemies >= 3) {
-            const player = state.playersByFaction[factionId];
-            if (player.willHarass(FactionIDs.ARVERNI)) {
-                losses = Math.floor(numHiddenEnemies / 3);
-            }
-        }
-        return losses;
     }
 
     static massMarch(state, modifiers) {
