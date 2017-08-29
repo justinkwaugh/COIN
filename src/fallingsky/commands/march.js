@@ -23,7 +23,7 @@ class March extends Command {
 
                 const mobileFactionPieces = _.filter(region.piecesByFaction()[faction.id], {isMobile: true});
 
-                if (mobileFactionPieces.length === 0 || (state.frost() && !isGermanic)) {
+                if (mobileFactionPieces.length === 0) {
                     return;
                 }
 

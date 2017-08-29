@@ -285,7 +285,7 @@ class RomanBot extends Bot {
 
                 RemovePieces.execute(state, {
                     factionId: FactionIDs.ROMANS,
-                    regionId: regionWithLegion.id,
+                    regionId: region.id,
                     pieces: auxilia
                 });
                 numAuxiliaRemaining -= auxilia.length;
@@ -302,7 +302,7 @@ class RomanBot extends Bot {
 
                 RemovePieces.execute(state, {
                     factionId: FactionIDs.ROMANS,
-                    regionId: regionWithLegion.id,
+                    regionId: region.id,
                     pieces: auxilia
                 });
                 numAuxiliaRemaining -= auxilia.length;

@@ -103,7 +103,10 @@ class FallingSkyRegion extends Region {
         if(!pieces || pieces.length === 0) {
             throw 'Trying to remove nothing from region';
         }
-        this.pieces.removeAll(pieces);
+        const removed = this.pieces.removeAll(pieces);
+        if(removed.length !== pieces.length) {
+            throw Error('Not all pieces specified were removed!');
+        }
     }
 
     hasValidSupplyLine(requestingFactionId, agreeingFactionIds, invalidRegions=[], validRegions = []) {

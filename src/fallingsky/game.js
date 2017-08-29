@@ -4,6 +4,7 @@ import FallingSkyGameState from '../fallingsky/state/fallingSkyGameState.js';
 import Winter from './phases/winter';
 import Events from 'fallingsky/util/events';
 import FactionIDs from 'fallingsky/config/factionIds';
+import Debug from 'fallingsky/util/debug';
 
 
 class Game {
@@ -93,6 +94,7 @@ class Game {
     }
 
     nextTurn() {
+
         try {
             if (this.endOfCard()) {
                 this.state().sequenceOfPlay.updateEligibility();
@@ -121,6 +123,7 @@ class Game {
             const player = this.state().playersByFaction[nextFaction];
             this.state().turnHistory.startTurn(nextFaction);
             try {
+                Debug.checkForPiecesInTwoRegions(this.state());
                 player.takeTurn(this.state(), this.state().turnHistory.currentTurn);
                 this.lastTurn(this.state().turnHistory.lastTurn());
             }
