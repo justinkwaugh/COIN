@@ -409,6 +409,11 @@ class Romans extends FallingSkyFaction {
         console.log('    Adulation Legions: ' + this.adulationLegions().length);
         console.log('    Fallen Legions: ' + this.fallenLegions().length);
     }
+
+    getAllPieces() {
+        return _.concat(super.getAllPieces(), this.availableForts(), this.availableAuxilia(), this.uproarLegions(), this.intrigueLegions(), this.adulationLegions(), this.fallenLegions());
+
+    }
 }
 
 export default Romans;

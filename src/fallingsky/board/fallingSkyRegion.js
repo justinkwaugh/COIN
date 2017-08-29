@@ -105,7 +105,7 @@ class FallingSkyRegion extends Region {
         }
         const removed = this.pieces.removeAll(pieces);
         if(removed.length !== pieces.length) {
-            throw Error('Not all pieces specified were removed!');
+            throw Error('Not all pieces specified were removed!: \nSpecified: ' +  JSON.stringify(pieces) + '\nRemoved: ' + JSON.stringify(removed));
         }
     }
 

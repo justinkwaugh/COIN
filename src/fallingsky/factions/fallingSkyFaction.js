@@ -163,6 +163,15 @@ class FallingSkyFaction extends Faction {
         console.log('    Available Allies: ' + this.availableAlliedTribes().length);
         console.log('    Available Warbands: ' + this.availableWarbands().length);
     }
+
+    getAllPieces() {
+        const pieces = _.concat(this.availableWarbands(), this.availableAlliedTribes(), this.availableCitadels());
+        const leader = this.availableLeader();
+        if(leader) {
+            pieces.push(leader);
+        }
+        return pieces;
+    }
 }
 
 export default FallingSkyFaction;
