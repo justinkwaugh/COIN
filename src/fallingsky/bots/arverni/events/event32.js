@@ -35,7 +35,7 @@ class Event20 {
         HidePieces.execute(state, {
             factionId: FactionIDs.ARVERNI,
             regionId: moveData.region.id,
-            pieces: movedPieces,
+            pieces: _.reject(movedPieces, {type : 'leader'}),
             fully: true
         });
 
@@ -59,7 +59,7 @@ class Event20 {
                 return false;
             }
         }).map(region => {
-            const moves = _(state.regions).reject({id: RegionIDs.BRITANNIA}).map(sourceRegion => {
+            const moves = _(state.regions).reject(sourceRegion=> sourceRegion.id === RegionIDs.BRITANNIA || sourceRegion.id === region.id).map(sourceRegion => {
                 const pieces = sourceRegion.getMobilePiecesForFaction(FactionIDs.ARVERNI);
                 if (pieces.length === 0) {
                     return;
@@ -104,7 +104,7 @@ class Event20 {
 
             return _.find(destination.adjacent, adjacent => adjacent.getLegions().length > 0);
         }).map(region => {
-            const moves = _(state.regions).reject({id: RegionIDs.BRITANNIA}).map(sourceRegion => {
+            const moves = _(state.regions).reject(sourceRegion=> sourceRegion.id === RegionIDs.BRITANNIA || sourceRegion.id === region.id).map(sourceRegion => {
                 const pieces = sourceRegion.getMobilePiecesForFaction(FactionIDs.ARVERNI);
                 if (pieces.length === 0) {
                     return;
