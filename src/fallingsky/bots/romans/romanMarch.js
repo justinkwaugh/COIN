@@ -18,8 +18,8 @@ import RomanScout from 'fallingsky/bots/romans/romanScout';
 
 class RomanMarch {
 
-    static march(state, modifiers, skipCondition = false) {
-        if (state.frost()) {
+    static march(state, modifiers) {
+        if (state.frost() && !modifiers.outOfSequence) {
             return false;
         }
 

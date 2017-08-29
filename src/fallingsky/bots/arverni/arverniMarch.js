@@ -18,7 +18,7 @@ import Losses from 'fallingsky/util/losses';
 class ArverniMarch {
 
     static march(state, modifiers, marchType, skipCondition = false) {
-        if (state.frost()) {
+        if (state.frost() && !modifiers.outOfSequence) {
             return false;
         }
 

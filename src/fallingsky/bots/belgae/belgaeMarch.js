@@ -16,7 +16,7 @@ class BelgaeMarch {
 
     static march(state, modifiers) {
 
-        if (state.frost()) {
+        if (state.frost() && !modifiers.outOfSequence) {
             return false;
         }
 

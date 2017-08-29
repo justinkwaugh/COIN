@@ -25,7 +25,7 @@ class Event67 {
             if (!firstData) {
                 return;
             }
-            const marchedRegions = _(firstData.marches).map('regionId').concat([region.id]).value();
+            const marchedRegions = _(firstData.marches).map('regionId').concat([firstRegion.id]).value();
             const secondData = this.getDataForRegion(state, secondRegion, marchedRegions);
 
             return {
@@ -162,7 +162,7 @@ class Event67 {
             attackingPieces: battlingPieces
         });
 
-        const numLegionLosses = battleResults.getNumLossesAgainstPiecesOfType('legion', false, true);
+        const numLegionLosses = _.sumBy(battleResults.getNumLossesAgainstPiecesOfType('legion', false, true), 'numLosses');
 
         if (numLegionLosses === 0) {
             return;
@@ -171,7 +171,7 @@ class Event67 {
         return {
             regionId: region.id,
             marches,
-            priority: 99 - numLegionLosses
+            numLegionLosses
         }
     }
 }

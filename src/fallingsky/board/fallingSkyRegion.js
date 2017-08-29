@@ -192,7 +192,7 @@ class FallingSkyRegion extends Region {
     }
 
     getHiddenPiecesForFaction(factionId) {
-        return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && !piece.revealed());
+        return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && !piece.revealed() && !piece.scouted());
     }
 
     getRevealedPiecesForFaction(factionId) {
@@ -232,7 +232,7 @@ class FallingSkyRegion extends Region {
     }
 
     getHiddenWarbandsOrAuxiliaForFaction(factionId) {
-        return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && !piece.revealed());
+        return _.filter(this.piecesByFaction()[factionId], piece => (piece.type === 'warband' || piece.type === 'auxilia') && !piece.revealed() && !piece.scouted());
     }
 
     getLeaderForFaction(factionId) {

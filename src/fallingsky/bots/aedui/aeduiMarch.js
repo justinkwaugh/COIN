@@ -22,7 +22,7 @@ class AeduiMarch {
         const turn = state.turnHistory.getCurrentTurn();
 
         if(!turn.getCheckpoint(Checkpoints.MARCH_COMPLETE_CHECK)) {
-            if (state.frost()) {
+            if (state.frost() && !modifiers.outOfSequence) {
                 return false;
             }
 
