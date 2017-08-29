@@ -364,7 +364,7 @@ describe("Arverni march", function () {
 
         const treveriRegion = state.regionsById[RegionIDs.TREVERI];
         PlaceLegions.execute(state, {factionId: romans.id, regionId: treveriRegion.id, count: 2});
-        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: treveriRegion.id, count: 2});
+        PlaceAuxilia.execute(state, {factionId: romans.id, regionId: treveriRegion.id, count: 16});
         PlaceLeader.execute(state, {factionId: romans.id, regionId: treveriRegion.id});
 
         const mandubiiRegion = state.regionsById[RegionIDs.MANDUBII];

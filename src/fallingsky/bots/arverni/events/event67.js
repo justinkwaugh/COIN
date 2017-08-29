@@ -7,6 +7,7 @@ import HidePieces from 'fallingsky/actions/hidePieces';
 import Losses from 'fallingsky/util/losses';
 import Battle from 'fallingsky/commands/battle';
 import MovePieces from 'fallingsky/actions/movePieces';
+import Map from 'fallingsky/util/map';
 
 
 class Event67 {
@@ -18,7 +19,7 @@ class Event67 {
         if (treveri.getLegions().length === 0 && nervii.getLegions().length === 0) {
             return false;
         }
-        debugger;
+
         const chosenMarches = _([treveri, nervii], [nervii, treveri]).filter(
             (firstRegion, secondRegion) => firstRegion.getLegions().length > 0).map((firstRegion, secondRegion) => {
             const firstData = this.getDataForRegion(state, firstRegion);
