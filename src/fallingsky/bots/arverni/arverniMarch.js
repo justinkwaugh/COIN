@@ -187,6 +187,10 @@ class ArverniMarch {
         return march && (march.region.id === RegionIDs.BRITANNIA || march.controlDestination.id === RegionIDs.BRITANNIA);
     }
 
+    static wasBritanniaMassMarch(marches) {
+        return _.find(marches, march => (march.region.id === RegionIDs.BRITANNIA || march.massDestination === RegionIDs.BRITANNIA));
+    }
+
     static doSpreadMarches(state, modifiers, marches, alreadyMarchedById) {
         let effective = false;
         const arverni = state.arverni;
@@ -417,7 +421,7 @@ class ArverniMarch {
         }
 
         state.turnHistory.getCurrentTurn().commitCommand();
-        let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaControlMarch(legionControlMarch);
+        let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaMassMarch(massMarches);
         const didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(
                 state, modifiers));
         return didSpecial ? FactionActions.COMMAND_AND_SPECIAL : FactionActions.COMMAND;
