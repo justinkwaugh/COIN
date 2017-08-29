@@ -53,24 +53,45 @@ class ArverniMarch {
 
         const marches = _.concat([leaderMarch], remainingMarches);
         let canDoSpecial = modifiers.canDoSpecial() && !this.wasBritanniaMarch(marches);
-        let didSpecial = canDoSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(state,
-                                                                                                                 modifiers));
+        let didSpecial = canDoSpecial;
 
         state.turnHistory.getCurrentTurn().startCommand(CommandIDs.MARCH);
         console.log('*** Arverni Marching to Escape Threat ***');
         const alreadyMarched = {};
+
         _.each(
-            marches, (march) => {
+            marches, (march, index) => {
+
+
+                let piecesToMove = march.march.mobilePieces;
+                if(index > 0) {
+                    // Some pieces of secondary marches might have been removed by devastate
+                    const existingRegionPieces = _.keyBy(march.region.getMobilePiecesForFaction(FactionIDs.ARVERNI), 'id');
+                    piecesToMove = _.filter(piecesToMove, piece => existingRegionPieces[piece.id]);
+                }
+
+                if(piecesToMove.length === 0) {
+                    return;
+                }
 
                 if (!this.payForMarchAndHide(state, modifiers, march.march, alreadyMarched)) {
                     return false;
+                }
+
+                // We devastate after costs are paid
+                if (index === 0) {
+                    didSpecial = didSpecial && (ArverniDevastate.devastate(state, modifiers) || ArverniEntreat.entreat(
+                            state, modifiers));
+                    // Some pieces of primary marches might have been removed by devastate
+                    const existingRegionPieces = _.keyBy(march.region.getMobilePiecesForFaction(FactionIDs.ARVERNI), 'id');
+                    piecesToMove = _.filter(piecesToMove, piece => existingRegionPieces[piece.id]);
                 }
 
                 MovePieces.execute(
                     state, {
                         sourceRegionId: march.region.id,
                         destRegionId: march.targetDestination.id,
-                        pieces: march.march.mobilePieces
+                        pieces: piecesToMove
                     });
                 effective = true;
             });
@@ -188,7 +209,8 @@ class ArverniMarch {
     }
 
     static wasBritanniaMassMarch(marches) {
-        return _.find(marches, march => (march.region.id === RegionIDs.BRITANNIA || march.massDestination === RegionIDs.BRITANNIA));
+        return _.find(marches,
+                      march => (march.region.id === RegionIDs.BRITANNIA || march.massDestination === RegionIDs.BRITANNIA));
     }
 
     static doSpreadMarches(state, modifiers, marches, alreadyMarchedById) {
@@ -217,7 +239,6 @@ class ArverniMarch {
             });
         return effective;
     }
-
 
 
     static payForMarchAndHide(state, modifiers, march, alreadyMarchedById) {
@@ -411,8 +432,7 @@ class ArverniMarch {
         let massMarches = this.getLegionControlMarches(state, modifiers, leaderMarch, marchResults) ||
                           this.getMassMarches(state, modifiers, leaderMarch, marchResults);
 
-        if(massMarches) {
-                        // effective = this.doControlMarch(state, modifiers, legionControlMarch, {});
+        if (massMarches) {
             effective = this.doMassMarches(state, modifiers, massMarches);
         }
         if (!effective) {
@@ -475,7 +495,7 @@ class ArverniMarch {
                 }
                 const leader = march.region.getLeaderForFaction(FactionIDs.ARVERNI);
                 const pieces = _(warbands).take(march.numMassWarbands - march.harassmentLosses).value();
-                if(leader) {
+                if (leader) {
                     pieces.unshift(leader);
                 }
                 MovePieces.execute(
