@@ -355,9 +355,9 @@
                                     </div>
                                     <div style="padding:8px 4px 6px 4px;text-align:center">
                                         <div style="display:flex;flex-direction: column;justify-content:flex-end;min-height:54px;">
-                                            <!-- ko if: $data.tribes.length > 0 -->
+                                            <!-- ko if: $data.tribes().length > 0 -->
                                             <ul class="list-inline">
-                                                <!-- ko foreach: $data.tribes -->
+                                                <!-- ko foreach: $data.tribes() -->
                                                 <li>
                                                     <!-- ko if: $data.isSubdued() -->
                                                     <img style="width:35px"

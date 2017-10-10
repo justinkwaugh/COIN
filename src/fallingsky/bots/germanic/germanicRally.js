@@ -37,7 +37,7 @@ class GermanicRally {
 
         const germanicFaction = state.factionsById[FactionIDs.GERMANIC_TRIBES];
 
-        while (germanicFaction.availableAlliedTribes() && allyRallies.length > 0) {
+        while (germanicFaction.availableAlliedTribes().length > 0 && allyRallies.length > 0) {
             const nextRally = allyRallies.shift();
             PlaceAlliedTribe.execute(
                 state, {
